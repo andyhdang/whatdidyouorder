@@ -1,4 +1,5 @@
 import Card from "../components/Card/Card";
+import Button from "../components/Button/Button";
 
 function Summary({
   people = [],
@@ -18,11 +19,12 @@ function Summary({
 
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
+  let personSubtotals = Array(people.length).fill(0);
   if (tipCalc === "even" && people.length > 0) {
     tipPerPerson = tipPerPerson.map(() => tip / people.length);
   } else if (tipCalc === "proportional" && people.length > 0) {
-    // Proportional to item cost assigned
-    const itemTotals = people.map((_, pIdx) => {
+    // Proportional to subtotal assigned (not per item)
+    personSubtotals = people.map((_, pIdx) => {
       return items.reduce((sum, item, iIdx) => {
         if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
           return sum + (parseFloat(item.price) || 0) / assignments[iIdx].length;
@@ -30,8 +32,8 @@ function Summary({
         return sum;
       }, 0);
     });
-    const totalAssigned = itemTotals.reduce((a, b) => a + b, 0);
-    tipPerPerson = itemTotals.map((val) =>
+    const totalAssigned = personSubtotals.reduce((a, b) => a + b, 0);
+    tipPerPerson = personSubtotals.map((val) =>
       totalAssigned ? (val / totalAssigned) * tip : 0
     );
   }
@@ -40,11 +42,19 @@ function Summary({
   const personTotals = people.map((person, pIdx) => {
     let itemsOwed = [];
     let total = 0;
+    let subtotal = 0;
+    items.forEach((item, iIdx) => {
+      if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
+        const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
+        subtotal += base;
+      }
+    });
+    // Use correct tip share for proportional
+    let tipShare = tipPerPerson[pIdx] || 0;
     items.forEach((item, iIdx) => {
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
         const tax = base * (taxRate / 100);
-        const tipShare = tipPerPerson[pIdx] || 0;
         const itemTotal = base + tax + tipShare;
         itemsOwed.push({
           name: item.name,
@@ -52,11 +62,12 @@ function Summary({
           tax,
           tip: tipShare,
           total: itemTotal,
+          splitWith: assignments[iIdx].length,
         });
         total += itemTotal;
       }
     });
-    return { person, itemsOwed, total };
+    return { person, itemsOwed, total, tip: tipShare };
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
@@ -64,61 +75,76 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
-      {personTotals.map(({ person, itemsOwed, total }, idx) => (
-        <Card key={idx} heading={person}>
-          <ul style={{ paddingLeft: 0, listStyle: "none" }}>
-            {itemsOwed.map((item, i) => (
-              <li key={i} style={{ marginBottom: "0.5em" }}>
-                <strong>{item.name}</strong>: ${item.base.toFixed(2)} + Tax $
-                {item.tax.toFixed(2)} + Tip ${item.tip.toFixed(2)} ={" "}
-                <strong>${item.total.toFixed(2)}</strong>
-              </li>
-            ))}
-          </ul>
-          <div style={{ fontWeight: 600, marginTop: "1em" }}>
-            Total Owed: ${total.toFixed(2)}
-          </div>
-        </Card>
-      ))}
+      {personTotals.map(({ person, itemsOwed, total, tip }, idx) => {
+        const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
+        return (
+          <Card key={idx} heading={person}>
+            <ul style={{ paddingLeft: 0, listStyle: "none" }}>
+              {itemsOwed.map((item, i) => (
+                <li key={i} style={{ marginBottom: "0.5em" }}>
+                  {item.name}: ${item.base.toFixed(2)} (split with {item.splitWith || 1} people)
+                </li>
+              ))}
+            </ul>
+            <div style={{ fontWeight: 600, marginTop: "1em" }}>
+              Subtotal: ${itemsOwed.reduce((sum, item) => sum + item.base, 0).toFixed(2)}
+              <br />
+              Total Tax ({taxRate}%): ${personTax.toFixed(2)}
+              <br />
+              Total Tip: ${tip.toFixed(2)}
+              <br />
+              Total Owed: ${total.toFixed(2)}
+            </div>
+          </Card>
+        );
+      })}
       <div style={{ fontWeight: 700, fontSize: "1.2em", marginTop: "2em" }}>
         Subtotal: ${subtotal.toFixed(2)}
         <br />
-        Total Tax: ${taxAmount.toFixed(2)}
+        Total Tax ({taxRate}%): ${taxAmount.toFixed(2)}
         <br />
         Total Tip: ${tip.toFixed(2)}
         <br />
         Grand Total: ${grandTotal.toFixed(2)}
       </div>
-      <button
-        style={{
-          marginTop: "2em",
-          padding: "0.7em 1.5em",
-          fontSize: "1em",
-          fontWeight: 500,
-          borderRadius: "6px",
-          border: "none",
-          background: "#646cff",
-          color: "#fff",
-          cursor: "pointer",
-        }}
+      <Button
+        label="Copy Summary"
         onClick={() => {
-          const summaryData = {
-            people,
-            items,
-            assignments,
-            taxRate,
-            tip,
-            tipCalc,
-          };
-          const url = `${window.location.origin}${
-            window.location.pathname
-          }?summary=${encodeURIComponent(JSON.stringify(summaryData))}`;
-          navigator.clipboard.writeText(url);
-          alert("Summary URL copied to clipboard!");
+          let text = `Bill Splitter Summary\n`;
+          text += `People involved: ${people.length}\n`;
+          personTotals.forEach(({ person, itemsOwed, total }, idx) => {
+            const personTax = itemsOwed.reduce(
+              (sum, item) => sum + item.tax,
+              0
+            );
+            const personTip = itemsOwed.reduce(
+              (sum, item) => sum + item.tip,
+              0
+            );
+            const personSubtotal = itemsOwed.reduce(
+              (sum, item) => sum + item.base,
+              0
+            );
+            text += `\n${person}:\n`;
+            itemsOwed.forEach((item) => {
+              text += `  - ${item.name}: $${item.base.toFixed(2)} (split with ${
+                item.splitWith || 1
+              } people)\n`;
+            });
+            text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
+            text += `  Total Tax (${taxRate}%): $${personTax.toFixed(2)}\n`;
+            text += `  Total Tip: $${personTip.toFixed(2)}\n`;
+            text += `  Total Owed: $${total.toFixed(2)}\n`;
+          });
+          text += `\n---\n`;
+          text += `Subtotal: $${subtotal.toFixed(2)}\n`;
+          text += `Total Tax (${taxRate}%): $${taxAmount.toFixed(2)}\n`;
+          text += `Total Tip: $${tip.toFixed(2)}\n`;
+          text += `Grand Total: $${grandTotal.toFixed(2)}\n`;
+          navigator.clipboard.writeText(text);
+          alert("Summary copied to clipboard!");
         }}
-      >
-        Copy Summary URL
-      </button>
+      />
     </main>
   );
 }

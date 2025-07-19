@@ -63,7 +63,6 @@ function People({ people, setPeople }) {
                 }
                 onClick={() => handleRemove(idx)}
                 aria-label={`Remove ${person}`}
-                fullWidth
               />
             }
           >

@@ -30,11 +30,11 @@ function Summary({
         }
         return sum;
       }, 0);
-      const totalAssigned = personSubtotals.reduce((a, b) => a + b, 0);
-      tipPerPerson = personSubtotals.map((val) =>
-        totalAssigned ? (val / totalAssigned) * tip : 0
-      );
     });
+    const totalAssigned = personSubtotals.reduce((a, b) => a + b, 0);
+    tipPerPerson = personSubtotals.map((val) =>
+      totalAssigned ? (val / totalAssigned) * tip : 0
+    );
   }
 
   // Calculate what each person owes

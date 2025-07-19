@@ -14,6 +14,9 @@ function Items({ items, setItems }) {
       setItems([...items, { name: itemName.trim(), price: itemPrice.trim() }]);
       setItemName("");
       setItemPrice("");
+      setTimeout(() => {
+        document.getElementById("itemName")?.focus();
+      }, 0);
     }
   };
 
@@ -28,8 +31,12 @@ function Items({ items, setItems }) {
         label="Item Name"
         placeholder="Enter item name"
         name="itemName"
+        id="itemName"
         value={itemName}
         onChange={(e) => setItemName(e.target.value)}
+        onEnter={() => {
+          document.getElementById("itemPrice")?.focus();
+        }}
       />
       <InputField
         label="Price"
@@ -38,6 +45,7 @@ function Items({ items, setItems }) {
         type="number"
         value={itemPrice}
         onChange={(e) => setItemPrice(e.target.value)}
+        onEnter={handleAddItem}
       />
       <Button
         label="Add Item"

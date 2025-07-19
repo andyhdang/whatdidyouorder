@@ -87,6 +87,9 @@ function Assign({
         type="number"
         value={taxRate}
         onChange={(e) => setTaxRate(e.target.value)}
+        onEnter={() => {
+          document.getElementById("tip")?.focus();
+        }}
       />
       <InputField
         label="Tip ($)"
@@ -110,6 +113,15 @@ function Assign({
           selected={tipCalc === "proportional"}
           onClick={() => setTipCalc("proportional")}
         />
+        {tipCalc === "proportional" && (
+          <span
+            style={{
+              marginLeft: "1em",
+              color: "#646cff",
+              fontWeight: 500,
+            }}
+          ></span>
+        )}
       </div>
     </main>
   );

@@ -26,3 +26,13 @@
   display: flex;
   justify-content: flex-end;
 }
+
+@media (prefers-color-scheme: dark) {
+  .custom-card {
+    background: #232323;
+    color: #fff;
+  }
+  .card-heading {
+    color: #fff;
+  }
+}

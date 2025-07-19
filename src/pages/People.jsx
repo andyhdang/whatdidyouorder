@@ -28,6 +28,7 @@ function People({ people, setPeople }) {
         name="personName"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onEnter={handleAdd}
       />
       <Button
         label="Add"

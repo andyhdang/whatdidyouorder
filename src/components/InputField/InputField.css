@@ -36,3 +36,35 @@
   border-color: #213547;
   background: #dde6ff;
 }
+
+.input-field.error .input-label {
+  color: #d32f2f;
+}
+
+.input-box.input-error {
+  border-color: #d32f2f;
+  background: #fff0f0;
+  color: #d32f2f;
+}
+
+.input-error-message {
+  color: #d32f2f;
+  font-size: 0.95em;
+  margin-top: 0.3em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .input-box.input-error {
+    background: #2a1a1a;
+    color: #ffbdbd;
+    border-color: #d32f2f;
+  }
+
+  .input-error-message {
+    color: #ffbdbd;
+  }
+
+  .input-field.error .input-label {
+    color: #ffbdbd;
+  }
+}

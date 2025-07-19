@@ -7,9 +7,16 @@ function InputField({
   onChange,
   type = "text",
   name,
+  onEnter,
+  error,
 }) {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && typeof onEnter === "function") {
+      onEnter(e);
+    }
+  };
   return (
-    <div className="input-field">
+    <div className={`input-field${error ? " error" : ""}`}>
       <label htmlFor={name} className="input-label">
         {label}
       </label>
@@ -17,11 +24,19 @@ function InputField({
         id={name}
         name={name}
         type={type}
-        className="input-box"
+        className={`input-box${error ? " input-error" : ""}`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onKeyDown={handleKeyDown}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${name}-error` : undefined}
       />
+      {error && (
+        <div className="input-error-message" id={`${name}-error`}>
+          {error}
+        </div>
+      )}
     </div>
   );
 }

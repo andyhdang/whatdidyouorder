@@ -1,0 +1,38 @@
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.input-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.input-box {
+  padding: 0.75em 1em;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  background: #fafafa;
+  color: #222;
+}
+
+.input-box:hover {
+  border-color: #646cff;
+  background: #f0f4ff;
+}
+
+.input-box:focus {
+  border-color: #535bf2;
+  box-shadow: 0 0 0 2px #c3d0ff;
+  background: #eaf0ff;
+}
+
+.input-box:active {
+  border-color: #213547;
+  background: #dde6ff;
+}

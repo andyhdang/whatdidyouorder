@@ -1,0 +1,23 @@
+.pill {
+  display: inline-block;
+  padding: 0.4em 1.2em;
+  border-radius: 999px;
+  border: 1.5px solid #646cff;
+  background: #fff;
+  color: #646cff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  margin: 0.2em;
+}
+
+.pill.selected {
+  background: #646cff;
+  color: #fff;
+  border-color: #535bf2;
+}
+
+.pill:focus {
+  outline: 2px solid #c3d0ff;
+}

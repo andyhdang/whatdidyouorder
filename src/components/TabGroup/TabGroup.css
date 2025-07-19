@@ -1,0 +1,22 @@
+.tab-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  padding: 0.5em 1.5em;
+  border: none;
+  background: #eee;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: background 0.2s;
+}
+
+.tab.active {
+  background: #646cff;
+  color: #fff;
+}

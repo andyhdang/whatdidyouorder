@@ -19,12 +19,11 @@ function Summary({
 
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
-  let personSubtotals = Array(people.length).fill(0);
   if (tipCalc === "even" && people.length > 0) {
     tipPerPerson = tipPerPerson.map(() => tip / people.length);
   } else if (tipCalc === "proportional" && people.length > 0) {
     // Proportional to subtotal assigned (not per item)
-    personSubtotals = people.map((_, pIdx) => {
+    const personSubtotals = people.map((_, pIdx) => {
       return items.reduce((sum, item, iIdx) => {
         if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
           return sum + (parseFloat(item.price) || 0) / assignments[iIdx].length;
@@ -49,8 +48,11 @@ function Summary({
         subtotal += base;
       }
     });
-    // Use correct tip share for proportional
-    let tipShare = tipPerPerson[pIdx] || 0;
+    // Calculate tip share for proportional
+    let tipShare =
+      tipCalc === "proportional" && subtotal > 0 && totalWithTax > 0
+        ? (subtotal / totalWithTax) * tip
+        : tipPerPerson[pIdx] || 0;
     items.forEach((item, iIdx) => {
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
@@ -67,7 +69,7 @@ function Summary({
         total += itemTotal;
       }
     });
-    return { person, itemsOwed, total, tip: tipShare };
+    return { person, itemsOwed, total };
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
@@ -75,23 +77,26 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
-      {personTotals.map(({ person, itemsOwed, total, tip }, idx) => {
+      {personTotals.map(({ person, itemsOwed, total }, idx) => {
         const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
+        const personTip = itemsOwed.reduce((sum, item) => sum + item.tip, 0);
         return (
           <Card key={idx} heading={person}>
             <ul style={{ paddingLeft: 0, listStyle: "none" }}>
               {itemsOwed.map((item, i) => (
                 <li key={i} style={{ marginBottom: "0.5em" }}>
-                  {item.name}: ${item.base.toFixed(2)} (split with {item.splitWith || 1} people)
+                  {item.name}: ${item.base.toFixed(2)} (split with{" "}
+                  {item.splitWith || 1} people)
                 </li>
               ))}
             </ul>
             <div style={{ fontWeight: 600, marginTop: "1em" }}>
-              Subtotal: ${itemsOwed.reduce((sum, item) => sum + item.base, 0).toFixed(2)}
+              Subtotal: $
+              {itemsOwed.reduce((sum, item) => sum + item.base, 0).toFixed(2)}
               <br />
               Total Tax ({taxRate}%): ${personTax.toFixed(2)}
               <br />
-              Total Tip: ${tip.toFixed(2)}
+              Total Tip: ${personTip.toFixed(2)}
               <br />
               Total Owed: ${total.toFixed(2)}
             </div>

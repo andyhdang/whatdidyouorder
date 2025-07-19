@@ -111,13 +111,11 @@ function Assign({
         <Pill
           label="Proportionally"
           selected={tipCalc === "proportional"}
-          variant={tipCalc === "proportional" ? "filled" : "outline"}
           onClick={() => setTipCalc("proportional")}
         />
         <Pill
           label="Evenly"
           selected={tipCalc === "even"}
-          variant={tipCalc === "even" ? "filled" : "outline"}
           onClick={() => setTipCalc("even")}
         />
         {tipCalc === "proportional" && (

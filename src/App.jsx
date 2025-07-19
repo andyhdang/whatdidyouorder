@@ -1,4 +1,3 @@
-import "./App.css";
 import { useState } from "react";
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
@@ -6,6 +5,7 @@ import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
+import "./App.css";
 
 const tabs = ["People", "Items", "Assign", "Summary"];
 

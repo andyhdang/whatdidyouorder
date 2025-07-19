@@ -50,8 +50,8 @@ function Summary({
     });
     // Calculate tip share for proportional
     let tipShare =
-      tipCalc === "proportional" && subtotal > 0 && subtotal <= subtotal
-        ? (subtotal / subtotal) * tip
+      tipCalc === "proportional" && subtotal > 0 && totalWithTax > 0
+        ? (subtotal / totalWithTax) * tip
         : tipPerPerson[pIdx] || 0;
     items.forEach((item, iIdx) => {
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {

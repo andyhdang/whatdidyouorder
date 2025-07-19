@@ -53,10 +53,15 @@ function Items({ items, setItems }) {
           <img
             src={ShoppingCartAddIcon}
             alt="Add Item"
-            style={{ width: 20, height: 20 }}
+            style={{
+              width: 20,
+              height: 20,
+              filter: "brightness(0) invert(1)",
+            }}
           />
         }
         onClick={handleAddItem}
+        fullWidth
       />
       <div>
         {items.map((item, idx) => (
@@ -70,7 +75,11 @@ function Items({ items, setItems }) {
                   <img
                     src={DeleteIcon}
                     alt="Delete"
-                    style={{ width: 20, height: 20 }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      filter: "brightness(0) invert(1)",
+                    }}
                   />
                 }
                 onClick={() => handleDeleteItem(idx)}

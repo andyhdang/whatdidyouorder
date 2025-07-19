@@ -5,6 +5,7 @@ import People from "./pages/People";
 import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
+import Card from "./components/Card/Card";
 
 const tabs = ["People", "Items", "Assign", "Summary"];
 
@@ -28,9 +29,9 @@ function App() {
 
   return (
     <main>
-      <h1>Bill Splitter</h1>
+      <h1>splitmytab.app</h1>
       <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="card">
+      <Card>
         {activeTab === 0 && <People people={people} setPeople={setPeople} />}
         {activeTab === 1 && <Items items={items} setItems={setItems} />}
         {activeTab === 2 && (
@@ -57,7 +58,7 @@ function App() {
             tipCalc={tipCalc}
           />
         )}
-      </div>
+      </Card>
     </main>
   );
 }

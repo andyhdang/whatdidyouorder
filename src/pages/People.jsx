@@ -36,10 +36,11 @@ function People({ people, setPeople }) {
           <img
             src={PersonAddIcon}
             alt="Add"
-            style={{ width: 20, height: 20 }}
+            style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }}
           />
         }
         onClick={handleAdd}
+        fullWidth
       />
       <div>
         {people.map((person, idx) => (
@@ -53,11 +54,16 @@ function People({ people, setPeople }) {
                   <img
                     src={DeleteIcon}
                     alt="Delete"
-                    style={{ width: 20, height: 20 }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      filter: "brightness(0) invert(1)",
+                    }}
                   />
                 }
                 onClick={() => handleRemove(idx)}
                 aria-label={`Remove ${person}`}
+                fullWidth
               />
             }
           >

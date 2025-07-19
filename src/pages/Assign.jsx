@@ -20,6 +20,11 @@ function Assign({
     setAssignments(items.map((_, idx) => assignments[idx] || []));
   }
 
+  // Set proportionally as default if not set
+  if (!tipCalc || tipCalc === "") {
+    setTipCalc("proportional");
+  }
+
   const handleTogglePerson = (itemIdx, personIdx) => {
     setAssignments((sel) =>
       sel.map((arr, idx) =>
@@ -104,14 +109,16 @@ function Assign({
           Tip Calculation:
         </label>
         <Pill
-          label="Evenly"
-          selected={tipCalc === "even"}
-          onClick={() => setTipCalc("even")}
-        />
-        <Pill
           label="Proportionally"
           selected={tipCalc === "proportional"}
+          variant={tipCalc === "proportional" ? "filled" : "outline"}
           onClick={() => setTipCalc("proportional")}
+        />
+        <Pill
+          label="Evenly"
+          selected={tipCalc === "even"}
+          variant={tipCalc === "even" ? "filled" : "outline"}
+          onClick={() => setTipCalc("even")}
         />
         {tipCalc === "proportional" && (
           <span

@@ -34,49 +34,61 @@ function App() {
 
   return (
     <main>
-      <h1>splitmytab.app</h1>
+      <h1>Split my tab</h1>
+      <p style={{ marginBottom: "2.5rem" }}>
+        Split your tab with friends and family
+      </p>
       <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-      <Card>
-        {activeTab === 0 && (
-          <People
-            people={people}
-            setPeople={setPeople}
-            emojis={emojis}
-            setEmojis={setEmojis}
-          />
-        )}
-        {activeTab === 1 && <Items items={items} setItems={setItems} />}
-        {activeTab === 2 && (
-          <Assign
-            people={people}
-            items={items}
-            assignments={assignments}
-            setAssignments={setAssignments}
-            taxRate={taxRate}
-            setTaxRate={setTaxRate}
-            tip={tip}
-            setTip={setTip}
-            tipCalc={tipCalc}
-            setTipCalc={setTipCalc}
-            tipMode={tipMode}
-            setTipMode={setTipMode}
-            tipPreset={tipPreset}
-            setTipPreset={setTipPreset}
-            customTipPercent={customTipPercent}
-            setCustomTipPercent={setCustomTipPercent}
-          />
-        )}
-        {activeTab === 3 && (
-          <Summary
-            people={people}
-            items={items}
-            assignments={assignments}
-            taxRate={taxRateNum}
-            tip={tipNum}
-            tipCalc={tipCalc}
-          />
-        )}
-      </Card>
+      <div
+        style={{
+          maxWidth: "700px",
+          minWidth: "300px",
+          width: "90vw",
+          margin: "0 auto",
+        }}
+      >
+        <Card>
+          {activeTab === 0 && (
+            <People
+              people={people}
+              setPeople={setPeople}
+              emojis={emojis}
+              setEmojis={setEmojis}
+            />
+          )}
+          {activeTab === 1 && <Items items={items} setItems={setItems} />}
+          {activeTab === 2 && (
+            <Assign
+              people={people}
+              items={items}
+              assignments={assignments}
+              setAssignments={setAssignments}
+              taxRate={taxRate}
+              setTaxRate={setTaxRate}
+              tip={tip}
+              setTip={setTip}
+              tipCalc={tipCalc}
+              setTipCalc={setTipCalc}
+              tipMode={tipMode}
+              setTipMode={setTipMode}
+              tipPreset={tipPreset}
+              setTipPreset={setTipPreset}
+              customTipPercent={customTipPercent}
+              setCustomTipPercent={setCustomTipPercent}
+            />
+          )}
+          {activeTab === 3 && (
+            <Summary
+              people={people}
+              items={items}
+              assignments={assignments}
+              taxRate={taxRateNum}
+              tip={tipNum}
+              tipCalc={tipCalc}
+            />
+          )}
+        </Card>
+      </div>
     </main>
   );
 }

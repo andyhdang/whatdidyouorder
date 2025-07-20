@@ -54,6 +54,9 @@ function People({ people, setPeople, emojis, setEmojis }) {
   return (
     <main>
       <h2>People</h2>
+      <div style={{ color: "#555", fontSize: "1em", marginBottom: "1em" }}>
+        Who are you splitting the bill with?
+      </div>
       <InputField
         label="Name"
         placeholder="e.g. Alice, Bob, Charlie"

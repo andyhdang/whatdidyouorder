@@ -3,6 +3,8 @@ import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
 import InputField from "../components/InputField/InputField";
 
+const TIP_PRESETS = [15, 18, 20];
+
 function Assign({
   items = [],
   people = [],
@@ -14,6 +16,12 @@ function Assign({
   setTip,
   tipCalc,
   setTipCalc,
+  tipMode,
+  setTipMode,
+  tipPreset,
+  setTipPreset,
+  customTipPercent,
+  setCustomTipPercent,
 }) {
   // Keep assignments array in sync with items
   if (assignments.length !== items.length) {
@@ -36,6 +44,43 @@ function Assign({
       )
     );
   };
+
+  const handleTipChange = (mode, value) => {
+    setTipMode(mode);
+    if (mode === "percent") {
+      setTipPreset(value);
+      setCustomTipPercent("");
+      // Calculate tip based on subtotal
+      const subtotal = items.reduce(
+        (sum, item) => sum + (parseFloat(item.price) || 0),
+        0
+      );
+      setTip(((subtotal * value) / 100).toFixed(2));
+    } else if (mode === "customPercent") {
+      setTipPreset("");
+      setCustomTipPercent(value);
+      const subtotal = items.reduce(
+        (sum, item) => sum + (parseFloat(item.price) || 0),
+        0
+      );
+      setTip(((subtotal * value) / 100).toFixed(2));
+    } else if (mode === "amount") {
+      setTip(value);
+    }
+  };
+
+  // Calculate tip based on subtotal, default to 15%
+  const subtotal = items.reduce(
+    (sum, item) => sum + (parseFloat(item.price) || 0),
+    0
+  );
+  const defaultTipPercent = 15;
+  const calculatedTip =
+    tipMode === "percent"
+      ? ((subtotal * (tipPreset || defaultTipPercent)) / 100).toFixed(2)
+      : tipMode === "customPercent"
+      ? ((subtotal * (customTipPercent || defaultTipPercent)) / 100).toFixed(2)
+      : tip || ((subtotal * defaultTipPercent) / 100).toFixed(2);
 
   return (
     <main>
@@ -164,14 +209,56 @@ function Assign({
           document.getElementById("tip")?.focus();
         }}
       />
-      <InputField
-        label="Tip ($)"
-        placeholder="Enter tip amount"
-        name="tip"
-        type="number"
-        value={tip}
-        onChange={(e) => setTip(e.target.value)}
-      />
+      <div style={{ height: "2em" }}></div>
+      <div style={{ marginBottom: "1em" }}>
+        <label style={{ fontWeight: 500, marginRight: "1em" }}>Tip:</label>
+        {TIP_PRESETS.map((preset) => (
+          <Pill
+            key={preset}
+            label={`${preset}%`}
+            selected={tipMode === "percent" && tipPreset === preset}
+            onClick={() => handleTipChange("percent", preset)}
+          />
+        ))}
+        <Pill
+          label="Custom %"
+          selected={tipMode === "customPercent"}
+          onClick={() => setTipMode("customPercent")}
+        />
+        <Pill
+          label="$ Amount"
+          selected={tipMode === "amount"}
+          onClick={() => setTipMode("amount")}
+        />
+        {/* Add extra space below the tip pills */}
+        <div style={{ height: "1em" }}></div>
+        {tipMode === "customPercent" && (
+          <InputField
+            label="Custom Tip (%)"
+            placeholder="Enter tip %"
+            name="customTipPercent"
+            type="number"
+            value={customTipPercent}
+            onChange={(e) => handleTipChange("customPercent", e.target.value)}
+            style={{ marginTop: "0.5em", maxWidth: 120 }}
+          />
+        )}
+        {tipMode === "amount" && (
+          <InputField
+            label="Tip ($)"
+            placeholder="Enter tip amount"
+            name="tip"
+            type="number"
+            value={tip}
+            onChange={(e) => handleTipChange("amount", e.target.value)}
+            style={{ marginTop: "0.5em", maxWidth: 120 }}
+          />
+        )}
+        {/* Show total tip amount under the pills */}
+        <div style={{ marginTop: "0.5em", color: "#646cff", fontWeight: 600 }}>
+          Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
+        </div>
+      </div>
       <div style={{ margin: "1em 0" }}>
         <label style={{ fontWeight: 500, marginRight: "1em" }}>
           Tip Calculation:

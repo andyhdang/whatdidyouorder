@@ -49,10 +49,19 @@
 @media (prefers-color-scheme: dark) {
   .custom-card,
   .custom-card-list {
-    background: #232323;
-    color: #fff;
+    background: #18181c;
+    color: #e0e6ff;
+  }
+  .custom-card-list {
+    border-bottom: 1px solid #23232a;
   }
   .card-heading {
     color: #fff;
+  }
+  .card-body {
+    color: #e0e6ff;
+  }
+  .card-action {
+    color: #b3baf7;
   }
 }

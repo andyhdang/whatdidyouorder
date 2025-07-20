@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
@@ -28,8 +28,20 @@ const EMOJIS = [
   "🍩",
 ];
 
+// Dummy data for development/testing
+const DEFAULT_PEOPLE = ["Alice", "Bob", "Charlie"];
+const DEFAULT_EMOJIS = ["😀", "😎", "🥳"];
+
 function People({ people, setPeople, emojis, setEmojis }) {
   const [name, setName] = useState("");
+
+  // Initialize with default people/emojis if empty
+  useEffect(() => {
+    if (people.length === 0 && setPeople) {
+      setPeople(DEFAULT_PEOPLE);
+      setEmojis(DEFAULT_EMOJIS);
+    }
+  }, [people, setPeople, setEmojis]);
 
   const handleAdd = () => {
     if (name.trim()) {

@@ -21,3 +21,16 @@
 .pill:focus {
   outline: 2px solid #c3d0ff;
 }
+
+@media (prefers-color-scheme: dark) {
+  .pill {
+    background: #23232a;
+    color: #b3baf7;
+    border-color: #646cff;
+  }
+  .pill.selected {
+    background: #646cff;
+    color: #fff;
+    border-color: #535bf2;
+  }
+}

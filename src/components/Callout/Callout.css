@@ -1,0 +1,68 @@
+/* Callout styles for info, warning, success, error */
+.callout {
+  border: 1px solid #e3e6ef;
+  background: #f6f8ff;
+  color: #213547;
+  padding: 1rem 1.25rem;
+  margin: 1rem auto;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px rgba(60, 60, 100, 0.04);
+  max-width: 400px;
+  text-align: center;
+}
+
+.callout-info {
+  border-color: #d1d6fa;
+  background: #f6f8ff;
+  color: #213547;
+}
+
+.callout-warning {
+  border-color: #f7e6b2;
+  background: #fffbe6;
+  color: #7a5c00;
+}
+
+.callout-success {
+  border-color: #b7eac8;
+  background: #e6fff2;
+  color: #1a7f37;
+}
+
+.callout-error {
+  border-color: #ffd6db;
+  background: #fff1f0;
+  color: #a8071a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .callout {
+    background: #23232a;
+    color: #e0e6ff;
+    border: 1px solid #35354a;
+    max-width: 400px;
+    margin: 1rem auto;
+    text-align: center;
+  }
+  .callout-info {
+    background: #23232a;
+    color: #e0e6ff;
+    border-color: #35354a;
+  }
+  .callout-warning {
+    background: #2a2600;
+    color: #ffe58f;
+    border-color: #4a3f1a;
+  }
+  .callout-success {
+    background: #1a2a1a;
+    color: #b7eb8f;
+    border-color: #234a2a;
+  }
+  .callout-error {
+    background: #2a1a1a;
+    color: #ffa39e;
+    border-color: #4a232a;
+  }
+}

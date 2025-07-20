@@ -2,6 +2,7 @@ import { useState } from "react";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
 import InputField from "../components/InputField/InputField";
+import Callout from "../components/Callout/Callout";
 
 const TIP_PRESETS = [15, 18, 20];
 
@@ -95,7 +96,7 @@ function Assign({
     <main>
       <h2>Assign</h2>
       {items.length === 0 ? (
-        <p>No items to assign.</p>
+        <Callout type="warning">No items have been added to assign.</Callout>
       ) : (
         items.map((item, itemIdx) => {
           const assigned = assignments[itemIdx] || [];
@@ -219,7 +220,7 @@ function Assign({
         }}
       />
       <div style={{ height: "2em" }}></div>
-      <div style={{ marginBottom: "1em" }}>
+      <div style={{ marginBottom: "0.5em" }}>
         <label style={{ fontWeight: 500, marginRight: "1em" }}>Tip:</label>
         {TIP_PRESETS.map((preset) => (
           <Pill
@@ -239,8 +240,8 @@ function Assign({
           selected={tipMode === "amount"}
           onClick={() => setTipMode("amount")}
         />
-        {/* Add extra space below the tip pills */}
-        <div style={{ height: "1em" }}></div>
+        {/* Decreased space below the tip pills */}
+        <div style={{ height: "0.5em" }}></div>
         {tipMode === "customPercent" && (
           <InputField
             label="Custom Tip (%)"
@@ -264,9 +265,17 @@ function Assign({
           />
         )}
         {/* Show total tip amount under the pills */}
-        <div style={{ marginTop: "0.5em", color: "#646cff", fontWeight: 600 }}>
+        <div
+          style={{
+            marginTop: "0.25em",
+            marginBottom: "1.5em",
+            color: "#646cff",
+            fontWeight: 600,
+          }}
+        >
           Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
         </div>
+        <div style={{ height: "1.5em" }}></div>
       </div>
       <div style={{ margin: "1em 0" }}>
         <label style={{ fontWeight: 500, marginRight: "1em" }}>

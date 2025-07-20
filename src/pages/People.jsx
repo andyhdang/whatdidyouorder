@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
@@ -51,9 +51,29 @@ function People({ people, setPeople, emojis, setEmojis }) {
     setEmojis(emojis.filter((_, i) => i !== idx));
   };
 
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.tab === "Items") {
+        // Find tab index for Items and trigger tab change if possible
+        const tabGroup = document.querySelector(".tab-group");
+        if (tabGroup) {
+          const itemsTab = Array.from(tabGroup.querySelectorAll(".tab")).find(
+            (tab) => tab.textContent.trim() === "Items"
+          );
+          if (itemsTab) itemsTab.click();
+        }
+      }
+    };
+    window.addEventListener("changeTab", handler);
+    return () => window.removeEventListener("changeTab", handler);
+  }, []);
+
   return (
     <main>
       <h2>People</h2>
+      <div style={{ color: "#555", fontSize: "1em", marginBottom: "1em" }}>
+        Who are you splitting the bill with?
+      </div>
       <InputField
         label="Name"
         placeholder="e.g. Alice, Bob, Charlie"

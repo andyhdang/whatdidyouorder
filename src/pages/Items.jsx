@@ -27,6 +27,9 @@ function Items({ items, setItems }) {
   return (
     <main>
       <h2>Items</h2>
+      <p style={{ marginBottom: "1em", color: "#555", fontSize: "1em" }}>
+        What was ordered?
+      </p>
       <InputField
         label="Item Name"
         placeholder="e.g. Burger"

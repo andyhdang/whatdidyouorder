@@ -19,9 +19,23 @@ function Summary({
 
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
+  let totalTip = 0;
+  // Determine tip value based on Assign page choices
+  if (typeof tip === "string" && tip.endsWith("%")) {
+    // Tip entered as percent string, e.g. "18%"
+    const percent = parseFloat(tip);
+    const subtotal = items.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0),
+      0
+    );
+    totalTip = (subtotal * percent) / 100;
+  } else {
+    // Tip entered as dollar amount (number or string)
+    totalTip = parseFloat(tip) || 0;
+  }
+
   if (tipCalc === "even" && people.length > 0) {
-    // Split tip evenly among all people (not just assigned)
-    tipPerPerson = tipPerPerson.map(() => tip / people.length);
+    tipPerPerson = tipPerPerson.map(() => totalTip / people.length);
   } else if (tipCalc === "proportional" && people.length > 0) {
     // Proportional to subtotal assigned (not per item)
     const personSubtotals = people.map((_, pIdx) => {
@@ -34,7 +48,7 @@ function Summary({
     });
     const totalAssigned = personSubtotals.reduce((a, b) => a + b, 0);
     tipPerPerson = personSubtotals.map((val) =>
-      totalAssigned ? (val / totalAssigned) * tip : 0
+      totalAssigned ? (val / totalAssigned) * totalTip : 0
     );
   }
 
@@ -132,7 +146,7 @@ function Summary({
         <br />
         Total Tax ({taxRate}%): ${taxAmount.toFixed(2)}
         <br />
-        Total Tip: ${tip.toFixed(2)}
+        Total Tip: ${totalTip.toFixed(2)}
         <br />
         Grand Total: ${grandTotal.toFixed(2)}
       </div>

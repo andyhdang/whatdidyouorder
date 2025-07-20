@@ -18,6 +18,10 @@ function App() {
   const [taxRate, setTaxRate] = useState("");
   const [tip, setTip] = useState("");
   const [tipCalc, setTipCalc] = useState("proportional");
+  // Tip choices state (persisted)
+  const [tipMode, setTipMode] = useState("percent");
+  const [tipPreset, setTipPreset] = useState(15);
+  const [customTipPercent, setCustomTipPercent] = useState("");
 
   // Keep assignments array in sync with items
   if (assignments.length !== items.length) {
@@ -54,6 +58,12 @@ function App() {
             setTip={setTip}
             tipCalc={tipCalc}
             setTipCalc={setTipCalc}
+            tipMode={tipMode}
+            setTipMode={setTipMode}
+            tipPreset={tipPreset}
+            setTipPreset={setTipPreset}
+            customTipPercent={customTipPercent}
+            setCustomTipPercent={setCustomTipPercent}
           />
         )}
         {activeTab === 3 && (

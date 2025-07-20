@@ -6,7 +6,7 @@
   font-size: 1rem;
   font-weight: 500;
   border: none;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #646cff;
   color: #fff;
   cursor: pointer;
@@ -63,4 +63,27 @@
 .custom-btn.secondary:focus {
   outline: 2px solid #c3d0ff;
   box-shadow: 0 0 0 2px #c3d0ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .custom-btn.secondary {
+    background: transparent;
+    color: #b3baf7;
+    border: 2px solid #646cff;
+    box-shadow: none;
+  }
+  .custom-btn.secondary:hover {
+    background: #181824;
+    color: #e0e6ff;
+    border-color: #535bf2;
+  }
+  .custom-btn.secondary:active {
+    background: #23232a;
+    color: #b3baf7;
+    border-color: #213547;
+  }
+  .custom-btn.secondary:focus {
+    outline: 2px solid #646cff;
+    box-shadow: 0 0 0 2px #646cff;
+  }
 }

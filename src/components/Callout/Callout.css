@@ -4,10 +4,12 @@
   background: #f6f8ff;
   color: #213547;
   padding: 1rem 1.25rem;
-  margin: 1rem 0;
+  margin: 1rem auto;
   border-radius: 8px;
   font-size: 1rem;
   box-shadow: 0 1px 4px rgba(60, 60, 100, 0.04);
+  max-width: 400px;
+  text-align: center;
 }
 
 .callout-info {
@@ -39,6 +41,9 @@
     background: #23232a;
     color: #e0e6ff;
     border: 1px solid #35354a;
+    max-width: 400px;
+    margin: 1rem auto;
+    text-align: center;
   }
   .callout-info {
     background: #23232a;

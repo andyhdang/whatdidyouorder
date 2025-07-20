@@ -3,6 +3,7 @@ import "./Button.css";
 function Button({
   label,
   icon,
+  trailingIcon,
   onClick,
   style,
   className = "",
@@ -20,6 +21,11 @@ function Button({
     >
       {icon && <span className="btn-icon">{icon}</span>}
       {label && <span className="btn-label">{label}</span>}
+      {trailingIcon && (
+        <span className="btn-icon" style={{ marginLeft: "0.1em" }}>
+          {trailingIcon}
+        </span>
+      )}
     </button>
   );
 }

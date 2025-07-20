@@ -1,6 +1,7 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import copyIcon from "../assets/icons/copy.svg";
+import Callout from "../components/Callout/Callout";
 
 function Summary({
   people = [],
@@ -89,6 +90,18 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
+      {personTotals.every((p) => p.itemsOwed.length === 0) && (
+        <Callout type="warning">
+          Assign people to items to calculate total owed for each person
+        </Callout>
+      )}
+      {items.length > 0 &&
+        assignments.some((a) => a && a.length > 0) &&
+        assignments.some((a) => !a || a.length === 0) && (
+          <Callout type="warning">
+            Not all items have been assigned to a person
+          </Callout>
+        )}
       {personTotals.map(({ person, itemsOwed, total, tip }, idx) => {
         const personSubtotal = itemsOwed.reduce(
           (sum, item) => sum + item.base,
@@ -149,6 +162,67 @@ function Summary({
         <br />
         Grand Total: ${grandTotal.toFixed(2)}
       </div>
+      {(() => {
+        const sumSubtotals = personTotals.reduce(
+          (sum, p) => sum + p.itemsOwed.reduce((s, i) => s + i.base, 0),
+          0
+        );
+        const sumTax = personTotals.reduce(
+          (sum, p) => sum + p.itemsOwed.reduce((s, i) => s + i.tax, 0),
+          0
+        );
+        const sumTip = personTotals.reduce((sum, p) => sum + p.tip, 0);
+        const sumTotalOwed = personTotals.reduce((sum, p) => sum + p.total, 0);
+        const errors = [];
+        const allAssigned =
+          items.length > 0 && assignments.every((a) => a && a.length > 0);
+        if (Math.abs(sumSubtotals - subtotal) >= 0.01) {
+          errors.push(
+            "Individual subtotals do not add up to the total subtotal."
+          );
+        }
+        if (Math.abs(sumTax - taxAmount) >= 0.01) {
+          errors.push("Individual tax amounts do not add up to the total tax.");
+        }
+        if (Math.abs(sumTip - totalTip) >= 0.01) {
+          errors.push("Individual tips do not add up to the total tip.");
+        }
+        if (Math.abs(sumTotalOwed - grandTotal) >= 0.01) {
+          errors.push(
+            "Individual totals owed do not add up to the grand total."
+          );
+        }
+        if (
+          errors.length > 0 ||
+          people.length === 0 ||
+          items.length === 0 ||
+          !allAssigned
+        ) {
+          if (errors.length > 0) {
+            return (
+              <Callout type="error">
+                {errors.map((err, i) => (
+                  <div key={i}>{err}</div>
+                ))}
+              </Callout>
+            );
+          }
+          return null;
+        }
+        return (
+          <>
+            <Callout type="success">
+              All calculations match! Subtotals, tax, tip, and total owed add
+              up. Copy Summary to share with your group.
+            </Callout>
+            {taxRate === 0 && (
+              <Callout type="warning">
+                Tax rate is at 0%. Add tax rate in Assign tab
+              </Callout>
+            )}
+          </>
+        );
+      })()}
       {/* Increased space before Copy Summary button */}
       <div style={{ height: "2em" }}></div>
       <Button
@@ -167,7 +241,7 @@ function Summary({
           />
         }
         onClick={() => {
-          let text = `Bill Splitter Summary\n`;
+          let text = `Whatdidyouorder.app Summary\n`;
           text += `People involved: ${people.length}\n`;
           personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
             const personSubtotal = itemsOwed.reduce(

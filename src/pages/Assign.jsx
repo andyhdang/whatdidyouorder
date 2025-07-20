@@ -96,9 +96,7 @@ function Assign({
     <main>
       <h2>Assign</h2>
       {items.length === 0 ? (
-        <>
-          <Callout type="info">Add items to assign.</Callout>
-        </>
+        <Callout type="warning">No items have been added to assign.</Callout>
       ) : (
         items.map((item, itemIdx) => {
           const assigned = assignments[itemIdx] || [];

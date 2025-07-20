@@ -1,5 +1,6 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
+import copyIcon from "../assets/icons/copy.svg";
 
 function Summary({
   people = [],
@@ -96,35 +97,26 @@ function Summary({
         const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
         // For even tip, use tip from personTotals, not sum of item tips
         const personTip =
-          tipCalc === "even"
-            ? tip
-            : itemsOwed.reduce((sum, item) => sum + item.tip, 0);
+          tipCalc === "even" ? tipPerPerson[idx] : tipPerPerson[idx];
         const personTotalOwed = personSubtotal + personTax + personTip;
         return (
-          <Card key={idx} heading={person}>
+          <Card key={idx} heading={person} className="custom-card-list">
             <ul style={{ paddingLeft: 0, listStyle: "none" }}>
               {itemsOwed.map((item, i) => (
                 <li key={i} style={{ marginBottom: "0.5em" }}>
-                  {item.name}: ${item.base.toFixed(2)} (split with{" "}
-                  {item.splitWith || 1} people)
+                  {item.name}: ${item.base.toFixed(2)}
+                  {item.splitWith > 1
+                    ? ` (split with ${item.splitWith} people)`
+                    : ""}
                 </li>
               ))}
             </ul>
             <div style={{ fontWeight: 600, marginTop: "1em" }}>
               Subtotal: ${personSubtotal.toFixed(2)}
               <br />
-              Total Tax ({taxRate}%): ${personTax.toFixed(2)}
+              Tax ({taxRate}%): ${personTax.toFixed(2)}
               <br />
-              Total Tip: ${personTip.toFixed(2)}{" "}
-              <span
-                style={{
-                  fontWeight: 400,
-                  fontSize: "0.95em",
-                  color: "#888",
-                }}
-              >
-                ({tipCalc === "even" ? "split evenly" : "split proportionally"})
-              </span>
+              Tip: ${personTip.toFixed(2)}
               <br />
               <span
                 style={{
@@ -141,7 +133,14 @@ function Summary({
           </Card>
         );
       })}
-      <div style={{ fontWeight: 700, fontSize: "1.2em", marginTop: "2em" }}>
+      <div
+        style={{
+          fontWeight: 700,
+          fontSize: "1.2em",
+          marginTop: "2em",
+          marginBottom: "2em",
+        }}
+      >
         Subtotal: ${subtotal.toFixed(2)}
         <br />
         Total Tax ({taxRate}%): ${taxAmount.toFixed(2)}
@@ -150,12 +149,27 @@ function Summary({
         <br />
         Grand Total: ${grandTotal.toFixed(2)}
       </div>
+      {/* Increased space before Copy Summary button */}
+      <div style={{ height: "2em" }}></div>
       <Button
         label="Copy Summary"
+        icon={
+          <img
+            src={copyIcon}
+            alt="Copy"
+            style={{
+              width: 18,
+              height: 18,
+              verticalAlign: "middle",
+              marginRight: 8,
+              filter: "brightness(0) invert(1)",
+            }}
+          />
+        }
         onClick={() => {
           let text = `Bill Splitter Summary\n`;
           text += `People involved: ${people.length}\n`;
-          personTotals.forEach(({ person, itemsOwed }, idx) => {
+          personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
             const personSubtotal = itemsOwed.reduce(
               (sum, item) => sum + item.base,
               0
@@ -164,23 +178,21 @@ function Summary({
               (sum, item) => sum + item.tax,
               0
             );
-            // For even tip, use tipPerPerson from personTotals, for proportional sum item tips
-            const personTip =
-              tipCalc === "even"
-                ? tip / people.length
-                : itemsOwed.reduce((sum, item) => sum + item.tip, 0);
+            const personTip = tip;
             const personTotalOwed = personSubtotal + personTax + personTip;
             text += `\n${person}:\n`;
             itemsOwed.forEach((item) => {
-              text += `  - ${item.name}: $${item.base.toFixed(2)} (split with ${
-                item.splitWith || 1
-              } people)\n`;
+              if (item.splitWith && item.splitWith > 1) {
+                text += `  - ${item.name}: $${item.base.toFixed(
+                  2
+                )} (split with ${item.splitWith} people)\n`;
+              } else {
+                text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
+              }
             });
             text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-            text += `  Total Tax (${taxRate}%): $${personTax.toFixed(2)}\n`;
-            text += `  Total Tip: $${personTip.toFixed(2)} (${
-              tipCalc === "even" ? "split evenly" : "split proportionally"
-            })\n`;
+            text += `  Tax (${taxRate}%): $${personTax.toFixed(2)}\n`;
+            text += `  Tip: $${personTip.toFixed(2)}\n`;
             text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
           });
           text += `\n---\n`;

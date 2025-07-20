@@ -1,27 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import ShoppingCartAddIcon from "../assets/icons/shopping-cart-add.svg";
 import DeleteIcon from "../assets/icons/delete.svg";
 
-// Dummy data for development/testing
-const DEFAULT_ITEMS = [
-  { name: "Burger", price: "12.99" },
-  { name: "Fries", price: "4.50" },
-  { name: "Soda", price: "2.75" },
-];
-
 function Items({ items, setItems }) {
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
-
-  // Initialize with default items if empty
-  useEffect(() => {
-    if (items.length === 0 && setItems) {
-      setItems(DEFAULT_ITEMS);
-    }
-  }, [items, setItems]);
 
   const handleAddItem = () => {
     if (itemName.trim() && itemPrice.trim()) {

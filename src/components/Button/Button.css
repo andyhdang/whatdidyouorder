@@ -40,3 +40,27 @@
   display: flex;
   align-items: center;
 }
+
+.custom-btn.secondary {
+  background: transparent;
+  color: #646cff;
+  border: 2px solid #646cff;
+  box-shadow: none;
+}
+
+.custom-btn.secondary:hover {
+  background: #f3f6ff;
+  color: #535bf2;
+  border-color: #535bf2;
+}
+
+.custom-btn.secondary:active {
+  background: #e0e7ff;
+  color: #213547;
+  border-color: #213547;
+}
+
+.custom-btn.secondary:focus {
+  outline: 2px solid #c3d0ff;
+  box-shadow: 0 0 0 2px #c3d0ff;
+}

@@ -20,6 +20,7 @@ function Summary({
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
   if (tipCalc === "even" && people.length > 0) {
+    // Split tip evenly among all people (not just assigned)
     tipPerPerson = tipPerPerson.map(() => tip / people.length);
   } else if (tipCalc === "proportional" && people.length > 0) {
     // Proportional to subtotal assigned (not per item)
@@ -46,30 +47,26 @@ function Summary({
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
         subtotal += base;
-      }
-    });
-    // Calculate tip share for proportional
-    let tipShare =
-      tipCalc === "proportional" && subtotal > 0 && totalWithTax > 0
-        ? (subtotal / totalWithTax) * tip
-        : tipPerPerson[pIdx] || 0;
-    items.forEach((item, iIdx) => {
-      if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
-        const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
         const tax = base * (taxRate / 100);
-        const itemTotal = base + tax + tipShare;
+        // For even tip, do not add tip to each item
         itemsOwed.push({
           name: item.name,
           base,
           tax,
-          tip: tipShare,
-          total: itemTotal,
+          tip: tipCalc === "proportional" ? tipPerPerson[pIdx] || 0 : 0,
+          total: base + tax,
           splitWith: assignments[iIdx].length,
         });
-        total += itemTotal;
+        total += base + tax;
       }
     });
-    return { person, itemsOwed, total };
+    // Add tip once per person for even tip
+    if (tipCalc === "even") {
+      total += tipPerPerson[pIdx] || 0;
+    } else if (tipCalc === "proportional") {
+      total += tipPerPerson[pIdx] || 0;
+    }
+    return { person, itemsOwed, total, tip: tipPerPerson[pIdx] || 0 };
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
@@ -77,9 +74,18 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
-      {personTotals.map(({ person, itemsOwed, total }, idx) => {
+      {personTotals.map(({ person, itemsOwed, total, tip }, idx) => {
+        const personSubtotal = itemsOwed.reduce(
+          (sum, item) => sum + item.base,
+          0
+        );
         const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
-        const personTip = itemsOwed.reduce((sum, item) => sum + item.tip, 0);
+        // For even tip, use tip from personTotals, not sum of item tips
+        const personTip =
+          tipCalc === "even"
+            ? tip
+            : itemsOwed.reduce((sum, item) => sum + item.tip, 0);
+        const personTotalOwed = personSubtotal + personTax + personTip;
         return (
           <Card key={idx} heading={person}>
             <ul style={{ paddingLeft: 0, listStyle: "none" }}>
@@ -91,14 +97,32 @@ function Summary({
               ))}
             </ul>
             <div style={{ fontWeight: 600, marginTop: "1em" }}>
-              Subtotal: $
-              {itemsOwed.reduce((sum, item) => sum + item.base, 0).toFixed(2)}
+              Subtotal: ${personSubtotal.toFixed(2)}
               <br />
               Total Tax ({taxRate}%): ${personTax.toFixed(2)}
               <br />
-              Total Tip: ${personTip.toFixed(2)}
+              Total Tip: ${personTip.toFixed(2)}{" "}
+              <span
+                style={{
+                  fontWeight: 400,
+                  fontSize: "0.95em",
+                  color: "#888",
+                }}
+              >
+                ({tipCalc === "even" ? "split evenly" : "split proportionally"})
+              </span>
               <br />
-              Total Owed: ${total.toFixed(2)}
+              <span
+                style={{
+                  color: "#646cff",
+                  fontWeight: 700,
+                  fontSize: "1.1em",
+                  display: "inline-block",
+                  marginTop: "0.5em",
+                }}
+              >
+                Total Owed: ${personTotalOwed.toFixed(2)}
+              </span>
             </div>
           </Card>
         );
@@ -117,19 +141,21 @@ function Summary({
         onClick={() => {
           let text = `Bill Splitter Summary\n`;
           text += `People involved: ${people.length}\n`;
-          personTotals.forEach(({ person, itemsOwed, total }, idx) => {
-            const personTax = itemsOwed.reduce(
-              (sum, item) => sum + item.tax,
-              0
-            );
-            const personTip = itemsOwed.reduce(
-              (sum, item) => sum + item.tip,
-              0
-            );
+          personTotals.forEach(({ person, itemsOwed }, idx) => {
             const personSubtotal = itemsOwed.reduce(
               (sum, item) => sum + item.base,
               0
             );
+            const personTax = itemsOwed.reduce(
+              (sum, item) => sum + item.tax,
+              0
+            );
+            // For even tip, use tipPerPerson from personTotals, for proportional sum item tips
+            const personTip =
+              tipCalc === "even"
+                ? tip / people.length
+                : itemsOwed.reduce((sum, item) => sum + item.tip, 0);
+            const personTotalOwed = personSubtotal + personTax + personTip;
             text += `\n${person}:\n`;
             itemsOwed.forEach((item) => {
               text += `  - ${item.name}: $${item.base.toFixed(2)} (split with ${
@@ -138,8 +164,10 @@ function Summary({
             });
             text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
             text += `  Total Tax (${taxRate}%): $${personTax.toFixed(2)}\n`;
-            text += `  Total Tip: $${personTip.toFixed(2)}\n`;
-            text += `  Total Owed: $${total.toFixed(2)}\n`;
+            text += `  Total Tip: $${personTip.toFixed(2)} (${
+              tipCalc === "even" ? "split evenly" : "split proportionally"
+            })\n`;
+            text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
           });
           text += `\n---\n`;
           text += `Subtotal: $${subtotal.toFixed(2)}\n`;

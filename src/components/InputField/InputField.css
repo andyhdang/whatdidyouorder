@@ -8,6 +8,14 @@
 .input-label {
   font-weight: 500;
   color: #333;
+  text-align: left;
+}
+
+.input-description {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 0.2em;
+  text-align: left;
 }
 
 .input-box {

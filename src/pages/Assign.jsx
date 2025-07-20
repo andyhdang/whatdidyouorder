@@ -80,7 +80,16 @@ function Assign({
       ? ((subtotal * (tipPreset || defaultTipPercent)) / 100).toFixed(2)
       : tipMode === "customPercent"
       ? ((subtotal * (customTipPercent || defaultTipPercent)) / 100).toFixed(2)
-      : tip || ((subtotal * defaultTipPercent) / 100).toFixed(2);
+      : tip !== ""
+      ? tip
+      : ((subtotal * defaultTipPercent) / 100).toFixed(2);
+
+  // Ensure tip is set to 15% by default if not selected
+  if (tip === "" && items.length > 0) {
+    setTip(((subtotal * defaultTipPercent) / 100).toFixed(2));
+    setTipPreset(defaultTipPercent);
+    setTipMode("percent");
+  }
 
   return (
     <main>

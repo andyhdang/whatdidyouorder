@@ -12,11 +12,12 @@ const tabs = ["People", "Items", "Assign", "Summary"];
 function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [people, setPeople] = useState([]);
+  const [emojis, setEmojis] = useState([]);
   const [items, setItems] = useState([]);
   const [assignments, setAssignments] = useState(items.map(() => []));
   const [taxRate, setTaxRate] = useState("");
   const [tip, setTip] = useState("");
-  const [tipCalc, setTipCalc] = useState("even");
+  const [tipCalc, setTipCalc] = useState("proportional");
 
   // Keep assignments array in sync with items
   if (assignments.length !== items.length) {
@@ -32,7 +33,14 @@ function App() {
       <h1>splitmytab.app</h1>
       <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       <Card>
-        {activeTab === 0 && <People people={people} setPeople={setPeople} />}
+        {activeTab === 0 && (
+          <People
+            people={people}
+            setPeople={setPeople}
+            emojis={emojis}
+            setEmojis={setEmojis}
+          />
+        )}
         {activeTab === 1 && <Items items={items} setItems={setItems} />}
         {activeTab === 2 && (
           <Assign

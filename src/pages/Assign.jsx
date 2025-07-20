@@ -50,20 +50,86 @@ function Assign({
               ? (parseFloat(item.price) / assigned.length).toFixed(2)
               : "0.00";
           return (
-            <Card key={itemIdx} heading={item.name}>
-              <div style={{ marginBottom: "1em" }}>Price: ${item.price}</div>
-              <div style={{ marginBottom: "1em" }}>
+            <Card key={itemIdx} heading={null} className="custom-card-list">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.95rem",
+                      color: "#888",
+                      marginBottom: "1em",
+                    }}
+                  >
+                    Price: ${item.price}
+                  </span>
+                </div>
+                {/* Pills and assignment info can remain below or be moved as needed */}
+              </div>
+              <div
+                style={{
+                  marginBottom: "1em",
+                }}
+              >
                 {people.length === 0 ? (
                   <span style={{ color: "#888" }}>No people added.</span>
                 ) : (
-                  people.map((person, personIdx) => (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      flexWrap: "wrap",
+                      gap: "0.1em",
+                    }}
+                  >
                     <Pill
-                      key={personIdx}
-                      label={person}
-                      selected={assigned.includes(personIdx)}
-                      onClick={() => handleTogglePerson(itemIdx, personIdx)}
+                      label={
+                        assigned.length === people.length
+                          ? "Unassign All"
+                          : "All"
+                      }
+                      selected={assigned.length === people.length}
+                      onClick={() => {
+                        setAssignments((sel) =>
+                          sel.map((arr, idx) =>
+                            idx === itemIdx
+                              ? assigned.length === people.length
+                                ? []
+                                : people.map((_, i) => i)
+                              : arr
+                          )
+                        );
+                      }}
                     />
-                  ))
+                    {people.map((person, personIdx) => (
+                      <Pill
+                        key={personIdx}
+                        label={person}
+                        selected={assigned.includes(personIdx)}
+                        onClick={() => handleTogglePerson(itemIdx, personIdx)}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
               <div>
@@ -85,6 +151,8 @@ function Assign({
           );
         })
       )}
+      {/* Add extra spacing below the last item card */}
+      <div style={{ height: "2.5em" }}></div>
       <InputField
         label="Tax Rate (%)"
         placeholder="Enter tax rate"
@@ -118,15 +186,30 @@ function Assign({
           selected={tipCalc === "even"}
           onClick={() => setTipCalc("even")}
         />
-        {tipCalc === "proportional" && (
-          <span
-            style={{
-              marginLeft: "1em",
-              color: "#646cff",
-              fontWeight: 500,
-            }}
-          ></span>
-        )}
+        <div style={{ marginTop: "0.5em" }}>
+          {tipCalc === "proportional" && (
+            <span
+              style={{
+                color: "#646cff",
+                fontWeight: 500,
+                fontSize: "0.95em",
+              }}
+            >
+              Tip is split proportionally based on each person's subtotal.
+            </span>
+          )}
+          {tipCalc === "even" && (
+            <span
+              style={{
+                color: "#646cff",
+                fontWeight: 500,
+                fontSize: "0.95em",
+              }}
+            >
+              Tip is split evenly: total tip divided by total number of people.
+            </span>
+          )}
+        </div>
       </div>
     </main>
   );

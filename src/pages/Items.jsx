@@ -29,7 +29,7 @@ function Items({ items, setItems }) {
       <h2>Items</h2>
       <InputField
         label="Item Name"
-        placeholder="Enter item name"
+        placeholder="e.g. Burger"
         name="itemName"
         id="itemName"
         value={itemName}
@@ -40,7 +40,7 @@ function Items({ items, setItems }) {
       />
       <InputField
         label="Price"
-        placeholder="Enter price"
+        placeholder="e.g. 12.99"
         name="itemPrice"
         type="number"
         value={itemPrice}
@@ -53,22 +53,47 @@ function Items({ items, setItems }) {
           <img
             src={ShoppingCartAddIcon}
             alt="Add Item"
-            style={{
-              width: 20,
-              height: 20,
-              filter: "brightness(0) invert(1)",
-            }}
+            style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }}
           />
         }
         onClick={handleAddItem}
         fullWidth
       />
+      <div style={{ height: "2em" }}></div>
       <div>
         {items.map((item, idx) => (
           <Card
             key={idx}
-            heading={item.name}
-            button={
+            heading={null}
+            button={null}
+            className={
+              idx === items.length - 1
+                ? "custom-card-list no-border"
+                : "custom-card-list"
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                  {item.name}
+                </span>
+                <span style={{ fontSize: "0.95rem", color: "#888" }}>
+                  Price: ${item.price}
+                </span>
+              </div>
               <Button
                 label="Delete"
                 icon={
@@ -78,21 +103,27 @@ function Items({ items, setItems }) {
                     style={{
                       width: 20,
                       height: 20,
-                      filter: "brightness(0) invert(1)",
+                      filter:
+                        "invert(34%) sepia(98%) saturate(747%) hue-rotate(210deg) brightness(97%) contrast(101%)",
                     }}
                   />
                 }
                 onClick={() => handleDeleteItem(idx)}
                 aria-label={`Delete ${item.name}`}
+                className="custom-btn secondary"
               />
-            }
-          >
-            <div>Price: ${item.price}</div>
+            </div>
           </Card>
         ))}
       </div>
       {/* Subtotal calculation and display */}
-      <div style={{ marginTop: "2em", fontWeight: 600, fontSize: "1.1em" }}>
+      <div
+        style={{
+          marginTop: "2em",
+          fontWeight: 600,
+          fontSize: "1.1em",
+        }}
+      >
         Subtotal: $
         {items
           .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)

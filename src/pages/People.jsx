@@ -5,18 +5,50 @@ import Card from "../components/Card/Card";
 import DeleteIcon from "../assets/icons/delete.svg";
 import PersonAddIcon from "../assets/icons/person-add.svg";
 
-function People({ people, setPeople }) {
+const EMOJIS = [
+  "😀",
+  "😎",
+  "🥳",
+  "🦄",
+  "🍕",
+  "🌟",
+  "🐱",
+  "🐶",
+  "🍀",
+  "🎉",
+  "🚀",
+  "🍔",
+  "🍣",
+  "🧋",
+  "🍦",
+  "🦕",
+  "🦖",
+  "🦋",
+  "🌈",
+  "🍩",
+];
+
+function People({ people, setPeople, emojis, setEmojis }) {
   const [name, setName] = useState("");
 
   const handleAdd = () => {
     if (name.trim()) {
-      setPeople([...people, name.trim()]);
+      const names = name
+        .split(",")
+        .map((n) => n.trim())
+        .filter((n) => n);
+      const newEmojis = names.map(
+        () => EMOJIS[Math.floor(Math.random() * EMOJIS.length)]
+      );
+      setPeople([...people, ...names]);
+      setEmojis([...emojis, ...newEmojis]);
       setName("");
     }
   };
 
   const handleRemove = (idx) => {
     setPeople(people.filter((_, i) => i !== idx));
+    setEmojis(emojis.filter((_, i) => i !== idx));
   };
 
   return (
@@ -24,11 +56,12 @@ function People({ people, setPeople }) {
       <h2>People</h2>
       <InputField
         label="Name"
-        placeholder="Enter person's name"
+        placeholder="e.g. Alice, Bob, Charlie"
         name="personName"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onEnter={handleAdd}
+        description="You can add multiple people at once by separating names with commas."
       />
       <Button
         label="Add"
@@ -36,18 +69,40 @@ function People({ people, setPeople }) {
           <img
             src={PersonAddIcon}
             alt="Add"
-            style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }}
+            style={{
+              width: 20,
+              height: 20,
+              filter: "brightness(0) invert(1)",
+            }}
           />
         }
         onClick={handleAdd}
         fullWidth
       />
+      <div style={{ height: "2em" }}></div>
       <div>
         {people.map((person, idx) => (
           <Card
             key={idx}
-            heading={person}
-            button={
+            heading={null}
+            className={
+              idx === people.length - 1
+                ? "custom-card-list no-border"
+                : "custom-card-list"
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <span style={{ fontSize: "1.25rem", fontWeight: 600 }}>
+                {emojis[idx] ? emojis[idx] + " " : ""}
+                {person}
+              </span>
               <Button
                 label="Delete"
                 icon={
@@ -57,18 +112,21 @@ function People({ people, setPeople }) {
                     style={{
                       width: 20,
                       height: 20,
-                      filter: "brightness(0) invert(1)",
+                      filter:
+                        "invert(34%) sepia(98%) saturate(747%) hue-rotate(210deg) brightness(97%) contrast(101%)",
                     }}
                   />
                 }
                 onClick={() => handleRemove(idx)}
                 aria-label={`Remove ${person}`}
+                className="custom-btn secondary"
               />
-            }
-          >
-            {/* Optionally add more info here */}
+            </div>
           </Card>
         ))}
+      </div>
+      <div style={{ marginTop: "2em", fontWeight: 600, fontSize: "1.1em" }}>
+        Total people: {people.length}
       </div>
     </main>
   );

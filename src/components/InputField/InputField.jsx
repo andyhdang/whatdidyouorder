@@ -2,6 +2,7 @@ import "./InputField.css";
 
 function InputField({
   label,
+  description,
   placeholder,
   value,
   onChange,
@@ -32,6 +33,7 @@ function InputField({
         aria-invalid={!!error}
         aria-describedby={error ? `${name}-error` : undefined}
       />
+      {description && <div className="input-description">{description}</div>}
       {error && (
         <div className="input-error-message" id={`${name}-error`}>
           {error}

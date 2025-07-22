@@ -23,8 +23,14 @@
 }
 
 .tab.active {
-  background: #646cff;
-  color: #fff;
+  background: #ffecd2; /* light orange */
+  color: #c24a00; /* darker orange */
+}
+
+/* Undo focus border color change */
+.tab:focus {
+  outline: 1px solid #c24a00; /* dark orange for focus in light mode */
+  box-shadow: 0 0 0 2px #c24a00;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,7 +39,11 @@
     background: #18181c;
   }
   .tab.active {
-    background: #646cff;
-    color: #fff;
+    background: #3a2200; /* deep brown/orange for dark mode */
+    color: #ffae5c; /* light orange text for contrast */
+  }
+  .tab:focus {
+    outline: 1px solid #ffae5c; /* light orange for focus in dark mode */
+    box-shadow: 0 0 0 2px #ffae5c;
   }
 }

@@ -33,7 +33,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: #213547;
+  color: #333;
 }
 
 .card-body {
@@ -50,7 +50,7 @@
   .custom-card,
   .custom-card-list {
     background: #18181c;
-    color: #e0e6ff;
+    color: #fff5e8;
   }
   .custom-card-list {
     border-bottom: 1px solid #23232a;
@@ -59,7 +59,7 @@
     color: #fff;
   }
   .card-body {
-    color: #e0e6ff;
+    color: #fff5e8;
   }
   .card-action {
     color: #b3baf7;

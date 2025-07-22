@@ -5,25 +5,26 @@
   justify-content: center;
   min-height: 200px;
   padding: 2rem 1rem;
-  color: #646cff;
+  color: #f56600; /* orange text */
   text-align: center;
-  background: #f5f7ff;
-  border: 2px dashed #b3baff;
+  background: #fff5e8; /* light orange background */
+  border: 2px dashed #f56600; /* orange border */
   border-radius: 16px;
 }
 
 .empty-area__text {
   font-size: 1.2rem;
   margin-bottom: 1.5rem;
+  color: #c24a00; /* dark orange text */
 }
 
 @media (prefers-color-scheme: dark) {
   .empty-area {
-    background: #23243a;
-    color: #b3baff;
-    border-color: #646cff;
+    background: #3a2200; /* deep brown/orange */
+    color: #ffae5c; /* light orange text */
+    border-color: #c24a00; /* dark orange border */
   }
   .empty-area__text {
-    color: #b3baff;
+    color: #ffae5c; /* light orange text */
   }
 }

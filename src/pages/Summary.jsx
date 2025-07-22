@@ -137,7 +137,7 @@ function Summary({
               <br />
               <span
                 style={{
-                  color: "#646cff",
+                  color: "#F56600",
                   fontWeight: 700,
                   fontSize: "1.1em",
                   display: "inline-block",

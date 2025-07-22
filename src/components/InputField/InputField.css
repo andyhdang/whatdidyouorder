@@ -30,19 +30,19 @@
 }
 
 .input-box:hover {
-  border-color: #646cff;
-  background: #f0f4ff;
+  border-color: #f56600;
+  background: #ffecd2;
 }
 
 .input-box:focus {
-  border-color: #535bf2;
-  box-shadow: 0 0 0 2px #c3d0ff;
-  background: #eaf0ff;
+  border-color: #c24a00;
+  box-shadow: 0 0 0 2px #ffecd2;
+  background: #ffecd2;
 }
 
 .input-box:active {
   border-color: #213547;
-  background: #dde6ff;
+  background: #ffecd2;
 }
 
 .input-field.error .input-label {
@@ -64,24 +64,37 @@
 @media (prefers-color-scheme: dark) {
   .input-box {
     background: #23232a;
-    color: #e0e6ff;
-    border-color: #646cff;
+    color: #ffecd2;
+    border-color: #444; /* dark gray border for dark mode */
   }
 
   .input-box:hover {
-    background: #181824;
-    border-color: #646cff;
+    background: #3a2200;
+    border-color: #ffecd2;
+    box-shadow: 0 0 0 2px #f56600;
   }
 
   .input-box:focus {
-    background: #23232a;
-    border-color: #535bf2;
-    box-shadow: 0 0 0 2px #646cff;
+    background: #3a2200;
+    border-color: #ffecd2;
+    box-shadow: 0 0 0 2px #f56600;
   }
 
   .input-box:active {
-    background: #181824;
-    border-color: #213547;
+    background: #23232a;
+    border-color: #666;
+  }
+
+  .input-label {
+    color: #fff;
+  }
+
+  .input-description {
+    color: #fff;
+  }
+
+  .input-field.error .input-label {
+    color: #ffbdbd;
   }
 
   .input-box.input-error {
@@ -92,17 +105,5 @@
 
   .input-error-message {
     color: #ffbdbd;
-  }
-
-  .input-field.error .input-label {
-    color: #ffbdbd;
-  }
-
-  .input-label {
-    color: #e0e6ff;
-  }
-
-  .input-description {
-    color: #b3baf7;
   }
 }

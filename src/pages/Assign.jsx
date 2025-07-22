@@ -97,9 +97,7 @@ function Assign({
   return (
     <main>
       <h2>Assign</h2>
-      <p style={{ marginBottom: "1em", color: "#555", fontSize: "1em" }}>
-        Who ordered what?
-      </p>
+      <p className="description">Who ordered what?</p>
       {items.length === 0 ? (
         <EmptyArea
           text="Add items to assign."
@@ -278,7 +276,7 @@ function Assign({
           style={{
             marginTop: "0.25em",
             marginBottom: "1.5em",
-            color: "#646cff",
+            color: "#F56600",
             fontWeight: 600,
           }}
         >
@@ -304,7 +302,7 @@ function Assign({
           {tipCalc === "proportional" && (
             <span
               style={{
-                color: "#646cff",
+                color: "#F56600",
                 fontWeight: 500,
                 fontSize: "0.95em",
               }}
@@ -315,7 +313,7 @@ function Assign({
           {tipCalc === "even" && (
             <span
               style={{
-                color: "#646cff",
+                color: "#F56600",
                 fontWeight: 500,
                 fontSize: "0.95em",
               }}

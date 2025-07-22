@@ -5,6 +5,7 @@ import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
+import logo from "./assets/logos/logo.png";
 import "./App.css";
 
 const tabs = ["People", "Items", "Assign", "Summary"];
@@ -32,18 +33,26 @@ function App() {
   const taxRateNum = parseFloat(taxRate) || 0;
   const tipNum = parseFloat(tip) || 0;
 
+  // Detect dark mode
+  const isDarkMode =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
   return (
     <main>
-      <h1>Split my tab</h1>
-      <p style={{ marginBottom: "2.5rem" }}>
-        Split your tab with friends and family
-      </p>
+      <img
+        src={logo}
+        alt="Tabby Split Logo"
+        style={{ height: "100px", marginBottom: "0rem" }}
+      />
+      <h1>TabbySplit</h1>
+      <p style={{ marginBottom: "2.5rem" }}>Split the bill, purrfectly.</p>
       <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       <div
         style={{
           maxWidth: "700px",
-          minWidth: "300px",
           width: "90vw",
+          minWidth: "300px",
           margin: "0 auto",
         }}
       >
@@ -75,6 +84,7 @@ function App() {
               setTipPreset={setTipPreset}
               customTipPercent={customTipPercent}
               setCustomTipPercent={setCustomTipPercent}
+              setActiveTab={setActiveTab} // <-- pass down
             />
           )}
           {activeTab === 3 && (
@@ -85,6 +95,7 @@ function App() {
               taxRate={taxRateNum}
               tip={tipNum}
               tipCalc={tipCalc}
+              setActiveTab={setActiveTab} // <-- pass down
             />
           )}
         </Card>

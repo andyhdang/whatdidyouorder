@@ -6,11 +6,11 @@
   max-width: 700px;
   min-width: 300px;
   box-sizing: border-box;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Force single row */
 }
 
 .tab {
-  padding: 0.5em 1em;
+  padding: 0.5em min(3vw, 1em); /* Padding scales with screen width */
   border: none;
   color: #333;
   font-size: 1rem;
@@ -23,6 +23,27 @@
 }
 
 .tab.active {
-  background: #646cff;
-  color: #fff;
+  background: #ffecd2; /* light orange */
+  color: #c24a00; /* darker orange */
+}
+
+/* Undo focus border color change */
+.tab:focus {
+  outline: 1px solid #c24a00; /* dark orange for focus in light mode */
+  box-shadow: 0 0 0 2px #c24a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tab {
+    color: #eee;
+    background: #18181c;
+  }
+  .tab.active {
+    background: #3a2200; /* deep brown/orange for dark mode */
+    color: #ffae5c; /* light orange text for contrast */
+  }
+  .tab:focus {
+    outline: 1px solid #ffae5c; /* light orange for focus in dark mode */
+    box-shadow: 0 0 0 2px #ffae5c;
+  }
 }

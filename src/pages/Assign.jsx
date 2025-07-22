@@ -3,6 +3,7 @@ import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
 import InputField from "../components/InputField/InputField";
 import Callout from "../components/Callout/Callout";
+import EmptyArea from "../components/EmptyArea/EmptyArea";
 
 const TIP_PRESETS = [15, 18, 20];
 
@@ -23,6 +24,7 @@ function Assign({
   setTipPreset,
   customTipPercent,
   setCustomTipPercent,
+  setActiveTab, // <-- add this prop
 }) {
   // Keep assignments array in sync with items
   if (assignments.length !== items.length) {
@@ -95,8 +97,13 @@ function Assign({
   return (
     <main>
       <h2>Assign</h2>
+      <p className="description">Who ordered what?</p>
       {items.length === 0 ? (
-        <Callout type="warning">No items have been added to assign.</Callout>
+        <EmptyArea
+          text="Add items to assign."
+          buttonLabel="Go to Items"
+          onButtonClick={() => setActiveTab && setActiveTab(1)}
+        />
       ) : (
         items.map((item, itemIdx) => {
           const assigned = assignments[itemIdx] || [];
@@ -269,7 +276,7 @@ function Assign({
           style={{
             marginTop: "0.25em",
             marginBottom: "1.5em",
-            color: "#646cff",
+            color: "#F56600",
             fontWeight: 600,
           }}
         >
@@ -295,7 +302,7 @@ function Assign({
           {tipCalc === "proportional" && (
             <span
               style={{
-                color: "#646cff",
+                color: "#F56600",
                 fontWeight: 500,
                 fontSize: "0.95em",
               }}
@@ -306,7 +313,7 @@ function Assign({
           {tipCalc === "even" && (
             <span
               style={{
-                color: "#646cff",
+                color: "#F56600",
                 fontWeight: 500,
                 fontSize: "0.95em",
               }}

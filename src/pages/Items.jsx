@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
-import ShoppingCartAddIcon from "../assets/icons/shopping-cart-add.svg";
-import DeleteIcon from "../assets/icons/delete.svg";
+import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
+import DeleteIcon from "../assets/icons/DeleteIcon";
 
 function Items({ items, setItems }) {
   const [itemName, setItemName] = useState("");
@@ -27,9 +27,7 @@ function Items({ items, setItems }) {
   return (
     <main>
       <h2>Items</h2>
-      <p style={{ marginBottom: "1em", color: "#555", fontSize: "1em" }}>
-        What was ordered?
-      </p>
+      <p className="description">What was ordered?</p>
       <InputField
         label="Item Name"
         placeholder="e.g. Burger"
@@ -53,10 +51,10 @@ function Items({ items, setItems }) {
       <Button
         label="Add Item"
         icon={
-          <img
-            src={ShoppingCartAddIcon}
-            alt="Add Item"
-            style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }}
+          <ShoppingCartAddIcon
+            width={20}
+            height={20}
+            style={{ color: "inherit" }}
           />
         }
         onClick={handleAddItem}
@@ -100,15 +98,10 @@ function Items({ items, setItems }) {
               <Button
                 label="Delete"
                 icon={
-                  <img
-                    src={DeleteIcon}
-                    alt="Delete"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      filter:
-                        "invert(34%) sepia(98%) saturate(747%) hue-rotate(210deg) brightness(97%) contrast(101%)",
-                    }}
+                  <DeleteIcon
+                    width={20}
+                    height={20}
+                    style={{ color: "inherit" }}
                   />
                 }
                 onClick={() => handleDeleteItem(idx)}

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
-import DeleteIcon from "../assets/icons/delete.svg";
-import PersonAddIcon from "../assets/icons/person-add.svg";
+import DeleteIcon from "../assets/icons/DeleteIcon";
+import PersonAddIcon from "../assets/icons/PersonAddIcon";
 
 const EMOJIS = [
   "😀",
@@ -71,9 +71,7 @@ function People({ people, setPeople, emojis, setEmojis }) {
   return (
     <main>
       <h2>People</h2>
-      <div style={{ color: "#555", fontSize: "1em", marginBottom: "1em" }}>
-        Who are you splitting the bill with?
-      </div>
+      <div className="description">Who are you splitting the bill with?</div>
       <InputField
         label="Name"
         placeholder="e.g. Alice, Bob, Charlie"
@@ -86,14 +84,10 @@ function People({ people, setPeople, emojis, setEmojis }) {
       <Button
         label="Add"
         icon={
-          <img
-            src={PersonAddIcon}
-            alt="Add"
-            style={{
-              width: 20,
-              height: 20,
-              filter: "brightness(0) invert(1)",
-            }}
+          <PersonAddIcon
+            width={20}
+            height={20}
+            style={{ color: "inherit", verticalAlign: "middle" }}
           />
         }
         onClick={handleAdd}
@@ -126,15 +120,10 @@ function People({ people, setPeople, emojis, setEmojis }) {
               <Button
                 label="Delete"
                 icon={
-                  <img
-                    src={DeleteIcon}
-                    alt="Delete"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      filter:
-                        "invert(34%) sepia(98%) saturate(747%) hue-rotate(210deg) brightness(97%) contrast(101%)",
-                    }}
+                  <DeleteIcon
+                    width={20}
+                    height={20}
+                    style={{ color: "inherit" }}
                   />
                 }
                 onClick={() => handleRemove(idx)}

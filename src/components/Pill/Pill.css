@@ -2,9 +2,9 @@
   display: inline-block;
   padding: 0.4em 1.2em;
   border-radius: 999px;
-  border: 1.5px solid #646cff;
+  border: 1.5px solid #f56600; /* orange border */
   background: #fff;
-  color: #646cff;
+  color: #f56600; /* orange text */
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -13,24 +13,27 @@
 }
 
 .pill.selected {
-  background: #646cff;
+  background: #f56600; /* orange background */
   color: #fff;
-  border-color: #535bf2;
+  border-color: #c24a00; /* dark orange border */
 }
 
 .pill:focus {
-  outline: 2px solid #c3d0ff;
+  outline: 2px solid #ffae5c; /* light orange focus */
 }
 
 @media (prefers-color-scheme: dark) {
   .pill {
     background: #23232a;
-    color: #b3baf7;
-    border-color: #646cff;
+    color: #ffae5c; /* light orange text */
+    border-color: #c24a00; /* dark orange border */
   }
   .pill.selected {
-    background: #646cff;
+    background: #c24a00; /* dark orange background */
     color: #fff;
-    border-color: #535bf2;
+    border-color: #f56600; /* orange border */
+  }
+  .pill:focus {
+    outline: 2px solid #ffae5c;
   }
 }

@@ -26,3 +26,17 @@
   background: #646cff;
   color: #fff;
 }
+
+@media (prefers-color-scheme: dark) {
+  .tab-group {
+    background: #181818;
+  }
+  .tab {
+    color: #eee;
+    background: #222;
+  }
+  .tab.active {
+    background: #646cff;
+    color: #181818;
+  }
+}

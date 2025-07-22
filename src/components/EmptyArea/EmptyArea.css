@@ -1,0 +1,18 @@
+.empty-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem 1rem;
+  color: #646cff;
+  text-align: center;
+  background: #f5f7ff;
+  border: 2px dashed #b3baff;
+  border-radius: 16px;
+}
+
+.empty-area__text {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}

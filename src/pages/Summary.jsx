@@ -2,6 +2,7 @@ import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import copyIcon from "../assets/icons/copy.svg";
 import Callout from "../components/Callout/Callout";
+import EmptyArea from "../components/EmptyArea/EmptyArea";
 
 function Summary({
   people = [],
@@ -10,6 +11,7 @@ function Summary({
   taxRate = 0,
   tip = 0,
   tipCalc = "even",
+  setActiveTab,
 }) {
   // Calculate subtotal
   const subtotal = items.reduce(
@@ -91,9 +93,11 @@ function Summary({
     <main>
       <h2>Summary</h2>
       {personTotals.every((p) => p.itemsOwed.length === 0) && (
-        <Callout type="warning">
-          Assign people to items to calculate total owed for each person
-        </Callout>
+        <EmptyArea
+          text="Assign people to items to calculate total owed for each person."
+          buttonLabel="Go to Assign"
+          onButtonClick={() => setActiveTab && setActiveTab(2)}
+        />
       )}
       {items.length > 0 &&
         assignments.some((a) => a && a.length > 0) &&
@@ -241,7 +245,7 @@ function Summary({
           />
         }
         onClick={() => {
-          let text = `Whatdidyouorder.app Summary\n`;
+          let text = `TabbySplit.app Summary\n`;
           text += `People involved: ${people.length}\n`;
           personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
             const personSubtotal = itemsOwed.reduce(

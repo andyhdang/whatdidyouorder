@@ -6,11 +6,11 @@
   max-width: 700px;
   min-width: 300px;
   box-sizing: border-box;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Force single row */
 }
 
 .tab {
-  padding: 0.5em 1em;
+  padding: 0.5em min(3vw, 1em); /* Padding scales with screen width */
   border: none;
   color: #333;
   font-size: 1rem;

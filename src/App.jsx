@@ -51,8 +51,8 @@ function App() {
       <div
         style={{
           maxWidth: "700px",
-          minWidth: "250px",
           width: "90vw",
+          minWidth: "300px",
           margin: "0 auto",
         }}
       >

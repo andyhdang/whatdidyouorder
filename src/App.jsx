@@ -5,7 +5,7 @@ import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
-import logoOrange from "./assets/logos/logo-orange.svg";
+import logo from "./assets/logos/logo.png";
 import "./App.css";
 
 const tabs = ["People", "Items", "Assign", "Summary"];
@@ -41,7 +41,7 @@ function App() {
   return (
     <main>
       <img
-        src={logoOrange}
+        src={logo}
         alt="Tabby Split Logo"
         style={{ height: "100px", marginBottom: "0rem" }}
       />

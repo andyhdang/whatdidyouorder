@@ -28,15 +28,12 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .tab-group {
-    background: #181818;
-  }
   .tab {
     color: #eee;
-    background: #222;
+    background: #18181c;
   }
   .tab.active {
     background: #646cff;
-    color: #181818;
+    color: #fff;
   }
 }

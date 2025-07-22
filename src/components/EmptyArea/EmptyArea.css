@@ -16,3 +16,14 @@
   font-size: 1.2rem;
   margin-bottom: 1.5rem;
 }
+
+@media (prefers-color-scheme: dark) {
+  .empty-area {
+    background: #23243a;
+    color: #b3baff;
+    border-color: #646cff;
+  }
+  .empty-area__text {
+    color: #b3baff;
+  }
+}

@@ -8,3 +8,15 @@
 .read-the-docs {
   color: #888;
 }
+
+.description {
+  color: #555;
+  font-size: 1em;
+  margin-bottom: 1em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .description {
+    color: #ffe6c7;
+  }
+}

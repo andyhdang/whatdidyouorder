@@ -1,0 +1,54 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.stepper-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.25em 0.5em;
+  cursor: pointer;
+  color: inherit;
+  transition: border 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stepper-input {
+  width: 2.5em;
+  text-align: center;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.25em 0.5em;
+  background: var(--input-bg, #fff);
+  color: inherit;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.stepper-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stepper-input {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+  }
+  .stepper-btn {
+    border: 1px solid #444;
+  }
+}

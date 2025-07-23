@@ -30,7 +30,23 @@ function App() {
   }
 
   // Convert taxRate and tip to numbers for calculations
-  const taxRateNum = parseFloat(taxRate) || 0;
+  // Helper: get tax mode and value for Summary
+  let taxMode = "percent";
+  let taxAmount = null;
+  let taxRateNum = 0;
+  if (typeof taxRate === "object") {
+    if (taxRate.mode === "amount") {
+      taxMode = "amount";
+      taxAmount = taxRate.amount;
+      taxRateNum = parseFloat(taxRate.value) || 0;
+    } else {
+      taxMode = "percent";
+      taxRateNum = parseFloat(taxRate.value) || 0;
+    }
+  } else {
+    taxMode = "percent";
+    taxRateNum = parseFloat(taxRate) || 0;
+  }
   const tipNum = parseFloat(tip) || 0;
 
   // Detect dark mode
@@ -95,7 +111,9 @@ function App() {
               taxRate={taxRateNum}
               tip={tipNum}
               tipCalc={tipCalc}
-              setActiveTab={setActiveTab} // <-- pass down
+              setActiveTab={setActiveTab}
+              taxMode={taxMode}
+              taxAmount={taxAmount}
             />
           )}
         </Card>

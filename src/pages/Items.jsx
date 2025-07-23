@@ -30,7 +30,7 @@ function Items({ items, setItems }) {
       <p className="description">What was ordered?</p>
       <InputField
         label="Item Name"
-        placeholder="e.g. Burger"
+        placeholder="e.g. Cat Nip"
         name="itemName"
         id="itemName"
         value={itemName}

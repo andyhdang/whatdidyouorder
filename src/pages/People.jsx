@@ -6,26 +6,20 @@ import DeleteIcon from "../assets/icons/DeleteIcon";
 import PersonAddIcon from "../assets/icons/PersonAddIcon";
 
 const EMOJIS = [
-  "😀",
-  "😎",
-  "🥳",
-  "🦄",
-  "🍕",
-  "🌟",
   "🐱",
-  "🐶",
-  "🍀",
-  "🎉",
-  "🚀",
-  "🍔",
-  "🍣",
-  "🧋",
-  "🍦",
-  "🦕",
-  "🦖",
-  "🦋",
-  "🌈",
-  "🍩",
+  "😺",
+  "😸",
+  "😹",
+  "😻",
+  "😼",
+  "😽",
+  "🙀",
+  "😿",
+  "😾",
+  "🐈",
+  "🐈‍⬛",
+  "🧶",
+  "🐾",
 ];
 
 function People({ people, setPeople, emojis, setEmojis }) {
@@ -74,7 +68,7 @@ function People({ people, setPeople, emojis, setEmojis }) {
       <div className="description">Who are you splitting the bill with?</div>
       <InputField
         label="Name"
-        placeholder="e.g. Alice, Bob, Charlie"
+        placeholder="e.g. Garfield, Tom, Marie"
         name="personName"
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -82,7 +76,7 @@ function People({ people, setPeople, emojis, setEmojis }) {
         description="You can add multiple people at once by separating names with commas."
       />
       <Button
-        label="Add"
+        label="Add Person(s)"
         icon={
           <PersonAddIcon
             width={20}

@@ -215,43 +215,129 @@ function Assign({
       )}
       {/* Add extra spacing below the last item card */}
       <div style={{ height: "2.5em" }}></div>
-      <InputField
-        label="Tax Rate (%)"
-        placeholder="Enter tax rate"
-        name="taxRate"
-        type="number"
-        value={taxRate}
-        onChange={(e) => setTaxRate(e.target.value)}
-        onEnter={() => {
-          document.getElementById("tip")?.focus();
-        }}
-      />
-      <div style={{ height: "2em" }}></div>
-      <div style={{ marginBottom: "0.5em" }}>
-        <label style={{ fontWeight: 500, marginRight: "1em" }}>Tip:</label>
-        {TIP_PRESETS.map((preset) => (
+      {/* Tax Rate section with mode toggle */}
+      <div style={{ margin: "1.5em 0 1em 0", textAlign: "left" }}>
+        <label
+          style={{
+            fontWeight: 500,
+            marginRight: "0.5em",
+            display: "inline-block",
+            verticalAlign: "middle",
+          }}
+        >
+          Tax:
+        </label>
+        <span
+          style={{
+            display: "inline-flex",
+            gap: "0.25em",
+            verticalAlign: "middle",
+          }}
+        >
           <Pill
-            key={preset}
-            label={`${preset}%`}
-            selected={tipMode === "percent" && tipPreset === preset}
-            onClick={() => handleTipChange("percent", preset)}
+            label="%"
+            selected={!taxRate?.mode || taxRate.mode === "percent"}
+            onClick={() => {
+              if (typeof taxRate === "object") {
+                setTaxRate({ ...taxRate, mode: "percent" });
+              } else {
+                setTaxRate({ value: taxRate, mode: "percent" });
+              }
+            }}
           />
-        ))}
-        <Pill
-          label="Custom %"
-          selected={tipMode === "customPercent"}
-          onClick={() => setTipMode("customPercent")}
-        />
-        <Pill
-          label="$ Amount"
-          selected={tipMode === "amount"}
-          onClick={() => setTipMode("amount")}
-        />
-        {/* Decreased space below the tip pills */}
+          <Pill
+            label="$ Amount"
+            selected={taxRate?.mode === "amount"}
+            onClick={() => {
+              if (typeof taxRate === "object") {
+                setTaxRate({ ...taxRate, mode: "amount" });
+              } else {
+                setTaxRate({ value: taxRate, mode: "amount" });
+              }
+            }}
+          />
+        </span>
+        <div style={{ marginTop: "0.5em" }}>
+          {!taxRate?.mode || taxRate.mode === "percent" ? (
+            <InputField
+              label={undefined}
+              placeholder="Enter tax rate"
+              name="taxRate"
+              type="number"
+              value={
+                typeof taxRate === "object" ? taxRate.value || "" : taxRate
+              }
+              onChange={(e) => {
+                if (typeof taxRate === "object") {
+                  setTaxRate({ ...taxRate, value: e.target.value });
+                } else {
+                  setTaxRate(e.target.value);
+                }
+              }}
+              onEnter={() => {
+                document.getElementById("tip")?.focus();
+              }}
+              style={{ maxWidth: 120 }}
+            />
+          ) : (
+            <InputField
+              label={undefined}
+              placeholder="Enter tax amount"
+              name="taxAmount"
+              type="number"
+              value={taxRate.amount || ""}
+              onChange={(e) =>
+                setTaxRate({ ...taxRate, amount: e.target.value })
+              }
+              style={{ maxWidth: 120 }}
+            />
+          )}
+        </div>
+      </div>
+      <div style={{ height: "2em" }}></div>
+      <div style={{ marginBottom: "0.5em", textAlign: "left" }}>
+        <label
+          style={{
+            fontWeight: 500,
+            marginRight: "0.5em",
+            display: "inline-block",
+            verticalAlign: "middle",
+          }}
+        >
+          Tip:
+        </label>
+        <span
+          style={{
+            display: "inline-flex",
+            flexWrap: "wrap",
+            gap: "0.25em",
+            verticalAlign: "middle",
+            alignItems: "center",
+          }}
+        >
+          {TIP_PRESETS.map((preset) => (
+            <Pill
+              key={preset}
+              label={`${preset}%`}
+              selected={tipMode === "percent" && tipPreset === preset}
+              onClick={() => handleTipChange("percent", preset)}
+            />
+          ))}
+          <Pill
+            label="Custom %"
+            selected={tipMode === "customPercent"}
+            onClick={() => setTipMode("customPercent")}
+          />
+          <Pill
+            label="$ Amount"
+            selected={tipMode === "amount"}
+            onClick={() => setTipMode("amount")}
+          />
+        </span>
         <div style={{ height: "0.5em" }}></div>
         {tipMode === "customPercent" && (
           <InputField
-            label="Custom Tip (%)"
+            label={undefined}
             placeholder="Enter tip %"
             name="customTipPercent"
             type="number"
@@ -262,7 +348,7 @@ function Assign({
         )}
         {tipMode === "amount" && (
           <InputField
-            label="Tip ($)"
+            label={undefined}
             placeholder="Enter tip amount"
             name="tip"
             type="number"
@@ -271,33 +357,39 @@ function Assign({
             style={{ marginTop: "0.5em", maxWidth: 120 }}
           />
         )}
-        {/* Show total tip amount under the pills */}
-        <div
+      </div>
+      <div style={{ marginBottom: "2.5em" }}></div>
+      <div style={{ margin: "1em 0", textAlign: "left" }}>
+        <label
           style={{
-            marginTop: "0.25em",
-            marginBottom: "1.5em",
-            color: "#F56600",
-            fontWeight: 600,
+            fontWeight: 500,
+            marginRight: "0.5em",
+            display: "inline-block",
+            verticalAlign: "middle",
           }}
         >
-          Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
-        </div>
-        <div style={{ height: "1.5em" }}></div>
-      </div>
-      <div style={{ margin: "1em 0" }}>
-        <label style={{ fontWeight: 500, marginRight: "1em" }}>
           Tip Calculation:
         </label>
-        <Pill
-          label="Proportionally"
-          selected={tipCalc === "proportional"}
-          onClick={() => setTipCalc("proportional")}
-        />
-        <Pill
-          label="Evenly"
-          selected={tipCalc === "even"}
-          onClick={() => setTipCalc("even")}
-        />
+        <span
+          style={{
+            display: "inline-flex", // ensure pills stay in a row
+            gap: "0.25em",
+            verticalAlign: "middle",
+            flexWrap: "nowrap", // prevent wrapping
+            alignItems: "center",
+          }}
+        >
+          <Pill
+            label="Proportionally"
+            selected={tipCalc === "proportional"}
+            onClick={() => setTipCalc("proportional")}
+          />
+          <Pill
+            label="Evenly"
+            selected={tipCalc === "even"}
+            onClick={() => setTipCalc("even")}
+          />
+        </span>
         <div style={{ marginTop: "0.5em" }}>
           {tipCalc === "proportional" && (
             <span
@@ -322,6 +414,27 @@ function Assign({
             </span>
           )}
         </div>
+      </div>
+      <div
+        style={{
+          marginTop: "2em",
+          fontWeight: 600,
+          fontSize: "1.1em",
+          paddingTop: "2em",
+        }}
+      >
+        Total Tax: $
+        {!taxRate?.mode || taxRate.mode === "percent"
+          ? (
+              (subtotal *
+                ((typeof taxRate === "object"
+                  ? parseFloat(taxRate.value)
+                  : parseFloat(taxRate)) || 0)) /
+              100
+            ).toFixed(2)
+          : (parseFloat(taxRate.amount) || 0).toFixed(2)}
+        <br />
+        Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
       </div>
     </main>
   );

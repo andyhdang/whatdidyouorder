@@ -4,16 +4,23 @@ import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
+import Stepper from "../components/Stepper/Stepper";
 
 function Items({ items, setItems }) {
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
+  const [itemQuantity, setItemQuantity] = useState(1);
 
   const handleAddItem = () => {
-    if (itemName.trim() && itemPrice.trim()) {
-      setItems([...items, { name: itemName.trim(), price: itemPrice.trim() }]);
+    if (itemName.trim() && itemPrice.trim() && itemQuantity > 0) {
+      const newItems = [];
+      for (let i = 0; i < itemQuantity; i++) {
+        newItems.push({ name: itemName.trim(), price: itemPrice.trim() });
+      }
+      setItems([...items, ...newItems]);
       setItemName("");
       setItemPrice("");
+      setItemQuantity(1);
       setTimeout(() => {
         document.getElementById("itemName")?.focus();
       }, 0);
@@ -30,7 +37,7 @@ function Items({ items, setItems }) {
       <p className="description">What was ordered?</p>
       <InputField
         label="Item Name"
-        placeholder="e.g. Burger"
+        placeholder="e.g. Cat Nip"
         name="itemName"
         id="itemName"
         value={itemName}
@@ -46,8 +53,35 @@ function Items({ items, setItems }) {
         type="number"
         value={itemPrice}
         onChange={(e) => setItemPrice(e.target.value)}
-        onEnter={handleAddItem}
+        onEnter={() => {
+          if (itemName.trim() && itemPrice.trim()) {
+            handleAddItem();
+          } else {
+            document.getElementById("itemQuantity-stepper")?.focus();
+          }
+        }}
       />
+      <div
+        style={{
+          margin: "0.5em 0 2em 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+      >
+        <label
+          htmlFor="itemQuantity-stepper"
+          style={{ fontWeight: 500, marginRight: "0.5em" }}
+        >
+          Quantity:
+        </label>
+        <Stepper
+          id="itemQuantity-stepper"
+          value={itemQuantity}
+          min={1}
+          onChange={setItemQuantity}
+        />
+      </div>
       <Button
         label="Add Item"
         icon={
@@ -60,6 +94,22 @@ function Items({ items, setItems }) {
         onClick={handleAddItem}
         fullWidth
       />
+      {items.length > 0 && (
+        <Button
+          label="Clear All"
+          onClick={() => {
+            if (
+              window.confirm(
+                "Are you sure you want to clear all items? This cannot be undone."
+              )
+            ) {
+              setItems([]);
+            }
+          }}
+          className="custom-btn tertiary"
+          style={{ marginTop: "0.5em", width: "100%" }}
+        />
+      )}
       <div style={{ height: "2em" }}></div>
       <div>
         {items.map((item, idx) => (

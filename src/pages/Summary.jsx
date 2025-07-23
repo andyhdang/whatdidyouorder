@@ -12,14 +12,23 @@ function Summary({
   tip = 0,
   tipCalc = "even",
   setActiveTab,
+  taxMode = "percent", // new prop
+  taxAmount = null, // new prop
 }) {
   // Calculate subtotal
   const subtotal = items.reduce(
     (sum, item) => sum + (parseFloat(item.price) || 0),
     0
   );
-  const taxAmount = subtotal * (taxRate / 100);
-  const totalWithTax = subtotal + taxAmount;
+  // Use passed-in taxAmount if in $ mode, else calculate from taxRate
+  let effectiveTaxAmount, effectiveTaxRate;
+  if (taxMode === "amount") {
+    effectiveTaxAmount = parseFloat(taxAmount) || 0;
+    effectiveTaxRate = subtotal > 0 ? (effectiveTaxAmount / subtotal) * 100 : 0;
+  } else {
+    effectiveTaxRate = parseFloat(taxRate) || 0;
+    effectiveTaxAmount = (subtotal * effectiveTaxRate) / 100;
+  }
 
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
@@ -65,26 +74,29 @@ function Summary({
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
         subtotal += base;
-        const tax = base * (taxRate / 100);
-        // For even tip, do not add tip to each item
+        // Use effectiveTaxRate for per-person tax calculation
+        const tax = base * (effectiveTaxRate / 100);
         itemsOwed.push({
           name: item.name,
           base,
           tax,
-          tip: tipCalc === "proportional" ? tipPerPerson[pIdx] || 0 : 0,
+          tip: 0, // tip is not per item, handled below
           total: base + tax,
           splitWith: assignments[iIdx].length,
         });
         total += base + tax;
       }
     });
-    // Add tip once per person for even tip
+    // Add tip once per person for even/proportional tip
+    let personTip = 0;
     if (tipCalc === "even") {
-      total += tipPerPerson[pIdx] || 0;
+      personTip = totalTip / people.length;
+      total += personTip;
     } else if (tipCalc === "proportional") {
-      total += tipPerPerson[pIdx] || 0;
+      personTip = tipPerPerson[pIdx] || 0;
+      total += personTip;
     }
-    return { person, itemsOwed, total, tip: tipPerPerson[pIdx] || 0 };
+    return { person, itemsOwed, total, tip: personTip };
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
@@ -111,11 +123,10 @@ function Summary({
           (sum, item) => sum + item.base,
           0
         );
-        const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
+        const personTax = personSubtotal * (effectiveTaxRate / 100);
         // For even tip, use tip from personTotals, not sum of item tips
-        const personTip =
-          tipCalc === "even" ? tipPerPerson[idx] : tipPerPerson[idx];
-        const personTotalOwed = personSubtotal + personTax + personTip;
+        const personTip = tip;
+        const personTotalOwed = personSubtotal + personTax + tip;
         return (
           <Card key={idx} heading={person} className="custom-card-list">
             <ul style={{ paddingLeft: 0, listStyle: "none" }}>
@@ -131,9 +142,12 @@ function Summary({
             <div style={{ fontWeight: 600, marginTop: "1em" }}>
               Subtotal: ${personSubtotal.toFixed(2)}
               <br />
-              Tax ({taxRate}%): ${personTax.toFixed(2)}
+              Tax ({effectiveTaxRate.toFixed(2)}%): ${personTax.toFixed(2)}
               <br />
-              Tip: ${personTip.toFixed(2)}
+              Tip: $
+              {tipCalc === "even"
+                ? (totalTip / people.length).toFixed(2)
+                : tip.toFixed(2)}
               <br />
               <span
                 style={{
@@ -144,7 +158,12 @@ function Summary({
                   marginTop: "0.5em",
                 }}
               >
-                Total Owed: ${personTotalOwed.toFixed(2)}
+                Total Owed: $
+                {(
+                  personSubtotal +
+                  personTax +
+                  (tipCalc === "even" ? totalTip / people.length : tip)
+                ).toFixed(2)}
               </span>
             </div>
           </Card>
@@ -160,19 +179,24 @@ function Summary({
       >
         Subtotal: ${subtotal.toFixed(2)}
         <br />
-        Total Tax ({taxRate}%): ${taxAmount.toFixed(2)}
+        Total Tax ({effectiveTaxRate.toFixed(2)}%): $
+        {effectiveTaxAmount.toFixed(2)}
         <br />
         Total Tip: ${totalTip.toFixed(2)}
         <br />
-        Grand Total: ${grandTotal.toFixed(2)}
+        Grand Total: ${(subtotal + effectiveTaxAmount + totalTip).toFixed(2)}
       </div>
       {(() => {
+        // Remove rounding for validation calculations
         const sumSubtotals = personTotals.reduce(
           (sum, p) => sum + p.itemsOwed.reduce((s, i) => s + i.base, 0),
           0
         );
         const sumTax = personTotals.reduce(
-          (sum, p) => sum + p.itemsOwed.reduce((s, i) => s + i.tax, 0),
+          (sum, p) =>
+            sum +
+            p.itemsOwed.reduce((s, i) => s + i.base, 0) *
+              (effectiveTaxRate / 100),
           0
         );
         const sumTip = personTotals.reduce((sum, p) => sum + p.tip, 0);
@@ -185,7 +209,7 @@ function Summary({
             "Individual subtotals do not add up to the total subtotal."
           );
         }
-        if (Math.abs(sumTax - taxAmount) >= 0.01) {
+        if (Math.abs(sumTax - effectiveTaxAmount) >= 0.01) {
           errors.push("Individual tax amounts do not add up to the total tax.");
         }
         if (Math.abs(sumTip - totalTip) >= 0.01) {
@@ -219,11 +243,12 @@ function Summary({
               All calculations match! Subtotals, tax, tip, and total owed add
               up. Copy Summary to share with your group.
             </Callout>
-            {taxRate === 0 && (
+            {(taxMode === "percent" && effectiveTaxRate === 0) ||
+            (taxMode === "amount" && effectiveTaxAmount === 0) ? (
               <Callout type="warning">
                 Tax rate is at 0%. Add tax rate in Assign tab
               </Callout>
-            )}
+            ) : null}
           </>
         );
       })()}
@@ -269,15 +294,23 @@ function Summary({
               }
             });
             text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-            text += `  Tax (${taxRate}%): $${personTax.toFixed(2)}\n`;
-            text += `  Tip: $${personTip.toFixed(2)}\n`;
+            text += `  Tax (${effectiveTaxRate.toFixed(
+              2
+            )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
+            text += `  Tip: $${tip.toFixed(2)}\n`;
             text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
           });
           text += `\n---\n`;
           text += `Subtotal: $${subtotal.toFixed(2)}\n`;
-          text += `Total Tax (${taxRate}%): $${taxAmount.toFixed(2)}\n`;
+          text += `Total Tax (${effectiveTaxRate.toFixed(
+            2
+          )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
           text += `Total Tip: $${tip.toFixed(2)}\n`;
-          text += `Grand Total: $${grandTotal.toFixed(2)}\n`;
+          text += `Grand Total: $${(
+            subtotal +
+            effectiveTaxAmount +
+            totalTip
+          ).toFixed(2)}\n`;
           navigator.clipboard.writeText(text);
           alert("Summary copied to clipboard!");
         }}

@@ -1,11 +1,119 @@
+:root {
+  --brand: oklch(0.7314 0.1816 49.96);
+  --neutral: oklch(0.22 0 0);
+  color: var(--neutral-default);
+  background-color: var(--neutral-weakest);
+
+  /* Foundational brand variables */
+  --brand-weaker: color-mix(in oklab, var(--brand), white 90%);
+  --brand-weak: color-mix(in oklab, var(--brand), white 60%);
+  --brand-default: var(--brand);
+  --brand-strong: color-mix(in oklab, var(--brand), black 10%);
+  --brand-stronger: color-mix(in oklab, var(--brand), black 30%);
+
+  /* Foundational semantic variables */
+  --neutral-weakest: color-mix(in oklab, var(--neutral), white 98%);
+  --neutral-weaker: color-mix(in oklab, var(--neutral), white 95%);
+  --neutral-weak: color-mix(in oklab, var(--neutral), white 50%);
+  --neutral-default: var(--neutral);
+  --neutral-strong: color-mix(in oklab, var(--neutral), black 10%);
+  --neutral-stronger: color-mix(in oklab, var(--neutral), black 30%);
+  --neutral-strongest: color-mix(in oklab, var(--neutral), black 50%);
+
+  /* Card variables */
+  --card-bg: var(--neutral-weakest);
+  --card-border: var(--neutral-weaker);
+  --card-shadow: 0 2px 8px 0 var(--neutral-weaker);
+  --card-title: var(--neutral-default);
+  --card-text: var(--neutral-default);
+  --card-muted: var(--neutral-weak);
+
+  /* Tab variables */
+  --tab-text: var(--neutral-weak);
+  --tab-bg: var(--neutral-weaker);
+  --tab-active-bg: var(--brand-weaker);
+  --tab-active-text: var(--brand-strong);
+  --tab-focus: var(--brand);
+
+  /* Input variables */
+  --input-bg: var(--neutral-weaker);
+  --input-text: var(--neutral-default);
+  --input-border: var(--neutral-weak);
+  --input-hover-bg: var(--brand-weaker);
+  --input-hover-border: var(--brand-default);
+  --input-focus-bg: var(--brand-weaker);
+  --input-focus-border: var(--brand-default);
+  --input-active-bg: var(--brand-weaker);
+  --input-active-border: var(--neutral-default);
+  --input-label: var(--neutral-default);
+  --input-description: var(--neutral-weak);
+
+  --input-error: oklch(0.62 0.19 29);
+  --input-error-bg: oklch(0.98 0.03 29);
+  --input-error-text: oklch(0.62 0.19 29);
+
+  /* Button variables */
+  --btn-bg: var(--brand-default);
+  --btn-hover-bg: var(--brand-strong);
+  --btn-active-bg: var(--brand-stronger);
+  --btn-text: var(--brand-weaker);
+  --btn-focus: var(--brand-default);
+
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: var(--brand-default);
+  --btn-secondary-border: var(--brand-default);
+  --btn-secondary-hover-bg: var(--brand-weaker);
+  --btn-secondary-hover-text: var(--brand-default);
+  --btn-secondary-hover-border: var(--brand-default);
+  --btn-secondary-active-bg: var(--brand-weak);
+  --btn-secondary-active-text: var(--brand-strong);
+  --btn-secondary-active-border: var(--brand-strong);
+
+  --btn-tertiary-bg: transparent;
+  --btn-tertiary-text: var(--brand-strong);
+  --btn-tertiary-hover-text: var(--brand-stronger);
+  --btn-tertiary-active-text: var(--brand-stronger);
+  --btn-tertiary-focus: var(--brand-default);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: oklch(0.607 0.214553 275.6035);
+    --neutral: oklch(1 0.03 265);
+
+    /* Foundational brand variables */
+    --brand-weaker: color-mix(in oklab, var(--brand), black 90%);
+    --brand-weak: color-mix(in oklab, var(--brand), black 60%);
+    --brand-default: var(--brand);
+    --brand-strong: color-mix(in oklab, var(--brand), white 10%);
+    --brand-stronger: color-mix(in oklab, var(--brand), white 30%);
+
+    /* Foundational semantic variables */
+    --neutral-weakest: color-mix(in oklab, var(--neutral), black 80%);
+    --neutral-weaker: color-mix(in oklab, var(--neutral), black 77%);
+    --neutral-weak: color-mix(in oklab, var(--neutral), black 50%);
+    --neutral-default: var(--neutral);
+    --neutral-strong: color-mix(in oklab, var(--neutral), white 10%);
+    --neutral-stronger: color-mix(in oklab, var(--neutral), white 30%);
+    --neutral-strongest: color-mix(in oklab, var(--neutral), white 50%);
+
+    /* Adjustments */
+    --card-bg: var(--neutral-weaker);
+  }
+}
 #root {
   margin: 0 auto;
   text-align: center;
   padding-top: 2rem;
 }
 
-.read-the-docs {
-  color: #888;
+/* Highlighted summary text */
+.text-highlight {
+  color: var(--brand-default);
+  font-weight: 700;
+  font-size: 1.1em;
+  display: inline-block;
+  margin-top: 0.5em;
 }
 
 .description {

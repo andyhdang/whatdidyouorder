@@ -392,24 +392,12 @@ function Assign({
         </span>
         <div style={{ marginTop: "0.5em" }}>
           {tipCalc === "proportional" && (
-            <span
-              style={{
-                color: "#F56600",
-                fontWeight: 500,
-                fontSize: "0.95em",
-              }}
-            >
+            <span className="input-description">
               Tip is split proportionally based on each person's subtotal.
             </span>
           )}
           {tipCalc === "even" && (
-            <span
-              style={{
-                color: "#F56600",
-                fontWeight: 500,
-                fontSize: "0.95em",
-              }}
-            >
+            <span className="input-description">
               Tip is split evenly: total tip divided by total number of people.
             </span>
           )}

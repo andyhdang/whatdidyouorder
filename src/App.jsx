@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
 import Items from "./pages/Items";
@@ -6,6 +6,7 @@ import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
 import logo from "./assets/logos/logo.png";
+import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
 
 const tabs = ["People", "Items", "Assign", "Summary"];
@@ -49,15 +50,24 @@ function App() {
   }
   const tipNum = parseFloat(tip) || 0;
 
-  // Detect dark mode
-  const isDarkMode =
+  // Detect dark mode and update on theme change
+  const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
+  // Listen for theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => setIsDarkMode(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   return (
     <main>
       <img
-        src={logo}
+        src={isDarkMode ? logoBlurple : logo}
         alt="Tabby Split Logo"
         style={{ height: "100px", marginBottom: "0rem" }}
       />

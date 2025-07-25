@@ -1,6 +1,6 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
-import copyIcon from "../assets/icons/copy.svg";
+import CopyIcon from "../assets/icons/CopyIcon";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
 
@@ -149,15 +149,7 @@ function Summary({
                 ? (totalTip / people.length).toFixed(2)
                 : tip.toFixed(2)}
               <br />
-              <span
-                style={{
-                  color: "#F56600",
-                  fontWeight: 700,
-                  fontSize: "1.1em",
-                  display: "inline-block",
-                  marginTop: "0.5em",
-                }}
-              >
+              <span className="text-highlight">
                 Total Owed: $
                 {(
                   personSubtotal +
@@ -257,15 +249,10 @@ function Summary({
       <Button
         label="Copy Summary"
         icon={
-          <img
-            src={copyIcon}
-            alt="Copy"
+          <CopyIcon
+            size={18}
             style={{
-              width: 18,
-              height: 18,
               verticalAlign: "middle",
-              marginRight: 8,
-              filter: "brightness(0) invert(1)",
             }}
           />
         }

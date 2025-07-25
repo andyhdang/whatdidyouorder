@@ -7,8 +7,8 @@
   font-weight: 500;
   border: none;
   border-radius: 8px;
-  background: #f56600; /* orange */
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
 }
@@ -20,16 +20,16 @@
 }
 
 .custom-btn:hover {
-  background: #c24a00; /* darker orange */
+  background: var(--btn-hover-bg);
 }
 
 .custom-btn:active {
-  background: #a03a00; /* even darker orange */
+  background: var(--btn-active-bg);
 }
 
 .custom-btn:focus {
-  outline: 2px solid #ffae5c; /* light orange border */
-  box-shadow: 0 0 0 2px #ffae5c;
+  outline: 2px solid var(--btn-focus);
+  box-shadow: 0 0 0 2px var(--btn-focus);
 }
 
 .custom-btn.full-width {
@@ -48,32 +48,32 @@
 }
 
 .custom-btn.secondary {
-  background: transparent;
-  color: #f56600;
-  border: 2px solid #f56600;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 2px solid var(--btn-secondary-border);
   box-shadow: none;
 }
 
 .custom-btn.secondary:hover {
-  background: #ffecd2;
-  color: #c24a00;
-  border-color: #c24a00;
+  background: var(--btn-secondary-hover-bg);
+  color: var(--btn-secondary-hover-text);
+  border-color: var(--btn-secondary-hover-border);
 }
 
 .custom-btn.secondary:active {
-  background: #ffe0c2;
-  color: #a03a00;
-  border-color: #a03a00;
+  background: var(--btn-secondary-active-bg);
+  color: var(--btn-secondary-active-text);
+  border-color: var(--btn-secondary-active-border);
 }
 
 .custom-btn.secondary:focus {
-  outline: 2px solid #ffae5c;
-  box-shadow: 0 0 0 2px #ffae5c;
+  outline: 2px solid var(--btn-focus);
+  box-shadow: 0 0 0 2px var(--btn-focus);
 }
 
 .custom-btn.tertiary {
-  background: transparent;
-  color: #c24a00;
+  background: var(--btn-tertiary-bg);
+  color: var(--btn-tertiary-text);
   border: none;
   box-shadow: none;
   font-weight: 500;
@@ -84,71 +84,71 @@
 }
 
 .custom-btn.tertiary:hover {
-  color: #f56600;
+  color: var(--btn-tertiary-hover-text);
   text-decoration: underline;
 }
 
 .custom-btn.tertiary:active {
-  color: #a03a00;
+  color: var(--btn-tertiary-active-text);
   text-decoration: underline;
 }
 
 .custom-btn.tertiary:focus {
-  outline: 2px solid #ffae5c;
-  box-shadow: 0 0 0 2px #ffae5c;
+  outline: 2px solid var(--btn-tertiary-focus);
+  box-shadow: 0 0 0 2px var(--btn-tertiary-focus);
   text-decoration: underline;
 }
 
 @media (prefers-color-scheme: dark) {
   .custom-btn {
-    background: #c24a00;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-text);
   }
   .custom-btn:hover {
-    background: #f56600;
+    background: var(--btn-hover-bg);
   }
   .custom-btn:active {
-    background: #a03a00;
+    background: var(--btn-active-bg);
   }
   .custom-btn:focus {
-    outline: 2px solid #ffae5c;
-    box-shadow: 0 0 0 2px #ffae5c;
+    outline: 2px solid var(--btn-focus);
+    box-shadow: 0 0 0 2px var(--btn-focus);
   }
   .custom-btn.secondary {
-    background: transparent;
-    color: #ffae5c;
-    border: 2px solid #ffae5c;
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border: 2px solid var(--btn-secondary-border);
     box-shadow: none;
   }
   .custom-btn.secondary:hover {
-    background: #3a2200;
-    color: #f56600;
-    border-color: #f56600;
+    background: var(--btn-secondary-hover-bg);
+    color: var(--btn-secondary-hover-text);
+    border-color: var(--btn-secondary-hover-border);
   }
   .custom-btn.secondary:active {
-    background: #23232a;
-    color: #c24a00;
-    border-color: #c24a00;
+    background: var(--btn-secondary-active-bg);
+    color: var(--btn-secondary-active-text);
+    border-color: var(--btn-secondary-active-border);
   }
   .custom-btn.secondary:focus {
-    outline: 2px solid #ffae5c;
-    box-shadow: 0 0 0 2px #ffae5c;
+    outline: 2px solid var(--btn-focus);
+    box-shadow: 0 0 0 2px var(--btn-focus);
   }
   .custom-btn.tertiary {
-    color: #ffae5c;
+    color: var(--btn-tertiary-text);
     text-decoration: underline;
   }
   .custom-btn.tertiary:hover {
-    color: #f56600;
+    color: var(--btn-tertiary-hover-text);
     text-decoration: underline;
   }
   .custom-btn.tertiary:active {
-    color: #c24a00;
+    color: var(--btn-tertiary-active-text);
     text-decoration: underline;
   }
   .custom-btn.tertiary:focus {
-    outline: 2px solid #ffae5c;
-    box-shadow: 0 0 0 2px #ffae5c;
+    outline: 2px solid var(--btn-tertiary-focus);
+    box-shadow: 0 0 0 2px var(--btn-tertiary-focus);
     text-decoration: underline;
   }
 }

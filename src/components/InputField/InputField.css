@@ -7,103 +7,103 @@
 
 .input-label {
   font-weight: 500;
-  color: #333;
+  color: var(--input-label);
   text-align: left;
 }
 
 .input-description {
   font-size: 0.85em;
-  color: #666;
+  color: var(--input-description);
   margin-bottom: 0.2em;
   text-align: left;
 }
 
 .input-box {
   padding: 0.75em 1em;
-  border: 1.5px solid #ccc;
+  border: 1.5px solid var(--input-border);
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
-  background: #fafafa;
-  color: #222;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .input-box:hover {
-  border-color: #f56600;
-  background: #ffecd2;
+  border-color: var(--input-hover-border);
+  background: var(--input-hover-bg);
 }
 
 .input-box:focus {
-  border-color: #c24a00;
-  box-shadow: 0 0 0 2px #ffecd2;
-  background: #ffecd2;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 2px var(--input-focus-bg);
+  background: var(--input-focus-bg);
 }
 
 .input-box:active {
-  border-color: #213547;
-  background: #ffecd2;
+  border-color: var(--input-active-border);
+  background: var(--input-active-bg);
 }
 
 .input-field.error .input-label {
-  color: #d32f2f;
+  color: var(--input-error);
 }
 
 .input-box.input-error {
-  border-color: #d32f2f;
-  background: #fff0f0;
-  color: #d32f2f;
+  border-color: var(--input-error);
+  background: var(--input-error-bg);
+  color: var(--input-error-text);
 }
 
 .input-error-message {
-  color: #d32f2f;
+  color: var(--input-error);
   font-size: 0.95em;
   margin-top: 0.3em;
 }
 
 @media (prefers-color-scheme: dark) {
   .input-box {
-    background: #23232a;
-    color: #ffecd2;
-    border-color: #444; /* dark gray border for dark mode */
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
   }
 
   .input-box:hover {
-    background: #3a2200;
-    border-color: #ffecd2;
-    box-shadow: 0 0 0 2px #f56600;
+    background: var(--input-hover-bg);
+    border-color: var(--input-hover-border);
+    box-shadow: 0 0 0 2px var(--input-hover-bg);
   }
 
   .input-box:focus {
-    background: #3a2200;
-    border-color: #ffecd2;
-    box-shadow: 0 0 0 2px #f56600;
+    background: var(--input-focus-bg);
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 2px var(--input-focus-bg);
   }
 
   .input-box:active {
-    background: #23232a;
-    border-color: #666;
+    background: var(--input-active-bg);
+    border-color: var(--input-active-border);
   }
 
   .input-label {
-    color: #fff;
+    color: var(--input-label);
   }
 
   .input-description {
-    color: #fff;
+    color: var(--input-description);
   }
 
   .input-field.error .input-label {
-    color: #ffbdbd;
+    color: var(--input-error);
   }
 
   .input-box.input-error {
-    background: #2a1a1a;
-    color: #ffbdbd;
-    border-color: #d32f2f;
+    background: var(--input-error-bg);
+    color: var(--input-error-text);
+    border-color: var(--input-error);
   }
 
   .input-error-message {
-    color: #ffbdbd;
+    color: var(--input-error);
   }
 }

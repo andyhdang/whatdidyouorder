@@ -1,10 +1,25 @@
+/* Pill color variables */
+:root {
+  --pill-bg: var(--neutral-weakest);
+  --pill-border: var(--brand-default);
+  --pill-text: var(--brand-default);
+  --pill-selected-bg: var(--brand-default);
+  --pill-selected-text: var(--neutral-weakest);
+  --pill-selected-border: var(--brand-default);
+  --pill-focus: var(--brand-default);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+  }
+}
 .pill {
   display: inline-block;
   padding: 0.4em 1.2em;
   border-radius: 999px;
-  border: 1.5px solid #f56600; /* orange border */
-  background: #fff;
-  color: #f56600; /* orange text */
+  border: 1.5px solid var(--pill-border);
+  background: var(--pill-bg);
+  color: var(--pill-text);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -13,27 +28,11 @@
 }
 
 .pill.selected {
-  background: #f56600; /* orange background */
-  color: #fff;
-  border-color: #c24a00; /* dark orange border */
+  background: var(--pill-selected-bg);
+  color: var(--pill-selected-text);
+  border-color: var(--pill-selected-border);
 }
 
 .pill:focus {
-  outline: 2px solid #ffae5c; /* light orange focus */
-}
-
-@media (prefers-color-scheme: dark) {
-  .pill {
-    background: #23232a;
-    color: #ffae5c; /* light orange text */
-    border-color: #c24a00; /* dark orange border */
-  }
-  .pill.selected {
-    background: #c24a00; /* dark orange background */
-    color: #fff;
-    border-color: #f56600; /* orange border */
-  }
-  .pill:focus {
-    outline: 2px solid #ffae5c;
-  }
+  outline: 2px solid var(--pill-focus);
 }

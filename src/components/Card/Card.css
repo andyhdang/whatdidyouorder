@@ -1,6 +1,6 @@
 /* List-style card: flat, bottom border only */
 .custom-card-list {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 0;
   box-shadow: none;
   border-bottom: 1px solid #eee;
@@ -18,9 +18,10 @@
 
 /* Classic card: rounded, shadow */
 .custom-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(60, 60, 100, 0.08);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
   padding: 2rem;
   margin: 1rem 0;
   display: flex;
@@ -33,35 +34,16 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--card-title);
 }
 
 .card-body {
   flex: 1;
   margin-bottom: 1.5rem;
+  color: var(--card-text);
 }
 
 .card-action {
   display: flex;
   justify-content: flex-end;
-}
-
-@media (prefers-color-scheme: dark) {
-  .custom-card,
-  .custom-card-list {
-    background: #18181c;
-    color: #fff5e8;
-  }
-  .custom-card-list {
-    border-bottom: 1px solid #23232a;
-  }
-  .card-heading {
-    color: #fff;
-  }
-  .card-body {
-    color: #fff5e8;
-  }
-  .card-action {
-    color: #b3baf7;
-  }
 }

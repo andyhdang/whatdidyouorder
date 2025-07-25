@@ -1,3 +1,5 @@
+/* Variables moved to App.css */
+
 .tab-group {
   display: flex;
   gap: min(2vw, 1rem);
@@ -12,7 +14,8 @@
 .tab {
   padding: 0.5em min(3vw, 1em); /* Padding scales with screen width */
   border: none;
-  color: #333;
+  color: var(--tab-text);
+  background: var(--tab-bg);
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
@@ -23,27 +26,27 @@
 }
 
 .tab.active {
-  background: #ffecd2; /* light orange */
-  color: #c24a00; /* darker orange */
+  background: var(--tab-active-bg);
+  color: var(--tab-active-text);
 }
 
 /* Undo focus border color change */
 .tab:focus {
-  outline: 1px solid #c24a00; /* dark orange for focus in light mode */
-  box-shadow: 0 0 0 2px #c24a00;
+  outline: 1px solid var(--tab-focus);
+  box-shadow: 0 0 0 2px var(--tab-focus);
 }
 
 @media (prefers-color-scheme: dark) {
   .tab {
-    color: #eee;
-    background: #18181c;
+    color: var(--tab-text);
+    background: var(--tab-bg);
   }
   .tab.active {
-    background: #3a2200; /* deep brown/orange for dark mode */
-    color: #ffae5c; /* light orange text for contrast */
+    background: var(--tab-active-bg);
+    color: var(--tab-active-text);
   }
   .tab:focus {
-    outline: 1px solid #ffae5c; /* light orange for focus in dark mode */
-    box-shadow: 0 0 0 2px #ffae5c;
+    outline: 1px solid var(--tab-focus);
+    box-shadow: 0 0 0 2px var(--tab-focus);
   }
 }

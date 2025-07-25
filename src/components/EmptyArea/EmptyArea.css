@@ -1,3 +1,10 @@
+/* EmptyArea color variables */
+:root {
+  --emptyArea-bg: var(--brand-weaker);
+  --emptyArea-text: var(--brand-strong);
+  --emptyArea-border: var(--brand-default);
+}
+
 .empty-area {
   display: flex;
   flex-direction: column;
@@ -5,26 +12,14 @@
   justify-content: center;
   min-height: 200px;
   padding: 2rem 1rem;
-  color: #f56600; /* orange text */
+  color: var(--emptyArea-text);
   text-align: center;
-  background: #fff5e8; /* light orange background */
-  border: 2px dashed #f56600; /* orange border */
+  background: var(--emptyArea-bg);
+  border: 2px dashed var(--emptyArea-border);
   border-radius: 16px;
 }
 
 .empty-area__text {
   font-size: 1.2rem;
   margin-bottom: 1.5rem;
-  color: #c24a00; /* dark orange text */
-}
-
-@media (prefers-color-scheme: dark) {
-  .empty-area {
-    background: #3a2200; /* deep brown/orange */
-    color: #ffae5c; /* light orange text */
-    border-color: #c24a00; /* dark orange border */
-  }
-  .empty-area__text {
-    color: #ffae5c; /* light orange text */
-  }
 }

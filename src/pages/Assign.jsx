@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
 import InputField from "../components/InputField/InputField";
@@ -27,14 +27,33 @@ function Assign({
   setActiveTab, // <-- add this prop
 }) {
   // Keep assignments array in sync with items
-  if (assignments.length !== items.length) {
-    setAssignments(items.map((_, idx) => assignments[idx] || []));
-  }
+
+  useEffect(() => {
+    if (assignments.length !== items.length) {
+      setAssignments(items.map((_, idx) => assignments[idx] || []));
+    }
+  }, [items, assignments, setAssignments]);
 
   // Set proportionally as default if not set
-  if (!tipCalc || tipCalc === "") {
-    setTipCalc("proportional");
-  }
+  useEffect(() => {
+    if (!tipCalc || tipCalc === "") {
+      setTipCalc("proportional");
+    }
+  }, [tipCalc, setTipCalc]);
+
+  // Ensure tip is set to 15% by default if not selected
+  useEffect(() => {
+    const subtotal = items.reduce(
+      (sum, item) => sum + (parseFloat(item.price) || 0),
+      0
+    );
+    const defaultTipPercent = 15;
+    if (tip === "" && items.length > 0) {
+      setTip(((subtotal * defaultTipPercent) / 100).toFixed(2));
+      setTipPreset(defaultTipPercent);
+      setTipMode("percent");
+    }
+  }, [tip, items, setTip, setTipPreset, setTipMode]);
 
   const handleTogglePerson = (itemIdx, personIdx) => {
     setAssignments((sel) =>
@@ -86,13 +105,6 @@ function Assign({
       : tip !== ""
       ? tip
       : ((subtotal * defaultTipPercent) / 100).toFixed(2);
-
-  // Ensure tip is set to 15% by default if not selected
-  if (tip === "" && items.length > 0) {
-    setTip(((subtotal * defaultTipPercent) / 100).toFixed(2));
-    setTipPreset(defaultTipPercent);
-    setTipMode("percent");
-  }
 
   return (
     <main>

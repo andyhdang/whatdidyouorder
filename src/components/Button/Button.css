@@ -1,7 +1,29 @@
-/* Icon button variant: outlined circle */
+:root {
+  --btn-bg: var(--brand-default);
+  --btn-hover-bg: var(--brand-strong);
+  --btn-active-bg: var(--brand-stronger);
+  --btn-text: var(--neutral-weakest);
+  --btn-focus: var(--brand-default);
+
+  --btn-secondary-bg: transparent;
+  --btn-secondary-text: var(--brand-default);
+  --btn-secondary-border: var(--brand-default);
+  --btn-secondary-hover-bg: var(--brand-weaker);
+  --btn-secondary-hover-text: var(--brand-default);
+  --btn-secondary-hover-border: var(--brand-default);
+  --btn-secondary-active-bg: var(--brand-weak);
+  --btn-secondary-active-text: var(--brand-strong);
+  --btn-secondary-active-border: var(--brand-strong);
+
+  --btn-tertiary-bg: transparent;
+  --btn-tertiary-text: var(--brand-strong);
+  --btn-tertiary-hover-text: var(--brand-stronger);
+  --btn-tertiary-active-text: var(--brand-stronger);
+  --btn-tertiary-focus: var(--brand-default);
+}
 .icon-btn {
   border-radius: 50%;
-  border: 2px solid var(--color-neutral-300, #d1d5db);
+  border: 2px solid var(--brand-default);
   background: transparent;
   width: 2.5em;
   height: 2.5em;
@@ -104,6 +126,7 @@
   box-shadow: none;
   font-weight: 500;
   padding: 0.7em 1.5em;
+  width: auto;
   cursor: pointer;
   transition: color 0.2s;
   text-decoration: underline;

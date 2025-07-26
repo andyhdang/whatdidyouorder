@@ -116,7 +116,13 @@ function App() {
               setEmojis={setEmojis}
             />
           )}
-          {activeTab === 1 && <Items items={items} setItems={setItems} />}
+          {activeTab === 1 && (
+            <Items
+              items={items}
+              setItems={setItems}
+              setActiveTab={setActiveTab}
+            />
+          )}
           {activeTab === 2 && (
             <Assign
               people={people}

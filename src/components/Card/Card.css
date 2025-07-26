@@ -1,4 +1,17 @@
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: var(--neutral-weaker);
+  }
+}
 /* List-style card: flat, bottom border only */
+:root {
+  --card-bg: var(--neutral-weakest);
+  --card-border: var(--neutral-weaker);
+  --card-shadow: 0 2px 8px 0 var(--neutral-weaker);
+  --card-title: var(--neutral-default);
+  --card-text: var(--neutral-default);
+  --card-muted: var(--neutral-weak);
+}
 .custom-card-list {
   background: var(--card-bg);
   border-radius: 0;

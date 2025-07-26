@@ -1,4 +1,11 @@
 /* Variables moved to App.css */
+:root {
+  --tab-text: var(--neutral-weak);
+  --tab-bg: var(--neutral-weaker);
+  --tab-active-bg: var(--brand-weaker);
+  --tab-active-text: var(--brand-strong);
+  --tab-focus: var(--brand);
+}
 
 .tab-group {
   display: flex;

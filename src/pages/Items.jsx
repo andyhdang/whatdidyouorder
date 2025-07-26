@@ -8,7 +8,7 @@ import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
 import Modal from "../components/Modal/Modal";
 
-function Items({ items, setItems }) {
+function Items({ items, setItems, setActiveTab }) {
   const [editIdx, setEditIdx] = useState(null);
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
@@ -185,10 +185,9 @@ function Items({ items, setItems }) {
                       style={{ color: "inherit" }}
                     />
                   }
-                  iconButton
                   onClick={() => openEditModal(idx)}
                   aria-label={`Edit ${item.name}`}
-                  className="custom-btn secondary"
+                  className="icon-btn custom-btn secondary"
                 />
                 <Button
                   icon={
@@ -198,10 +197,9 @@ function Items({ items, setItems }) {
                       style={{ color: "inherit" }}
                     />
                   }
-                  iconButton
                   onClick={() => handleDeleteItem(idx)}
                   aria-label={`Delete ${item.name}`}
-                  className="custom-btn secondary"
+                  className="icon-btn custom-btn secondary"
                 />
               </div>
             </div>
@@ -257,6 +255,21 @@ function Items({ items, setItems }) {
         {items
           .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
           .toFixed(2)}
+        {items.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "1em",
+            }}
+          >
+            <Button
+              label="Next: Assign Items"
+              className="custom-btn tertiary"
+              onClick={() => setActiveTab && setActiveTab(2)}
+            />
+          </div>
+        )}
       </div>
     </main>
   );

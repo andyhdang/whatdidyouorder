@@ -10,6 +10,23 @@ function Button({
   fullWidth = false,
   ...props
 }) {
+  // Icon button variant
+  if (props.iconButton) {
+    return (
+      <button
+        className={`custom-btn icon-btn${
+          className ? ` ${className}` : ""
+        }`.trim()}
+        onClick={onClick}
+        style={style}
+        {...props}
+      >
+        {icon && <span className="btn-icon">{icon}</span>}
+      </button>
+    );
+  }
+
+  // ...existing code...
   return (
     <button
       className={`custom-btn${

@@ -4,9 +4,40 @@ import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
+import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
+import Modal from "../components/Modal/Modal";
 
 function Items({ items, setItems }) {
+  const [editIdx, setEditIdx] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
+  const openEditModal = (idx) => {
+    setEditIdx(idx);
+    setEditName(items[idx].name);
+    setEditPrice(items[idx].price);
+  };
+
+  const handleSaveEdit = () => {
+    if (editName.trim() && editPrice.trim()) {
+      const updatedItems = items.map((item, idx) =>
+        idx === editIdx
+          ? { ...item, name: editName.trim(), price: editPrice.trim() }
+          : item
+      );
+      setItems(updatedItems);
+      setEditIdx(null);
+      setEditName("");
+      setEditPrice("");
+    }
+  };
+
+  const handleCloseEdit = () => {
+    setEditIdx(null);
+    setEditName("");
+    setEditPrice("");
+  };
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemQuantity, setItemQuantity] = useState(1);
@@ -145,24 +176,76 @@ function Items({ items, setItems }) {
                   Price: ${item.price}
                 </span>
               </div>
-              <Button
-                label="Delete"
-                icon={
-                  <DeleteIcon
-                    width={20}
-                    height={20}
-                    style={{ color: "inherit" }}
-                  />
-                }
-                onClick={() => handleDeleteItem(idx)}
-                aria-label={`Delete ${item.name}`}
-                className="custom-btn secondary"
-              />
+              <div style={{ display: "flex", gap: "0.5em" }}>
+                <Button
+                  icon={
+                    <EditIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  iconButton
+                  onClick={() => openEditModal(idx)}
+                  aria-label={`Edit ${item.name}`}
+                  className="custom-btn secondary"
+                />
+                <Button
+                  icon={
+                    <DeleteIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  iconButton
+                  onClick={() => handleDeleteItem(idx)}
+                  aria-label={`Delete ${item.name}`}
+                  className="custom-btn secondary"
+                />
+              </div>
             </div>
           </Card>
         ))}
       </div>
       {/* Subtotal calculation and display */}
+      {/* Edit Item Modal */}
+      <Modal open={editIdx !== null} onClose={handleCloseEdit}>
+        <div style={{ padding: "1em", minWidth: 260 }}>
+          <h3>Edit Item</h3>
+          <InputField
+            label="Item Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            autoFocus
+          />
+          <InputField
+            label="Price"
+            type="number"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
+          />
+          <div
+            style={{
+              display: "flex",
+              gap: "1em",
+              marginTop: "1.5em",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              label="Cancel"
+              onClick={handleCloseEdit}
+              className="custom-btn tertiary"
+            />
+            <Button
+              label="Save"
+              onClick={handleSaveEdit}
+              className="custom-btn primary"
+            />
+          </div>
+        </div>
+      </Modal>
       <div
         style={{
           marginTop: "2em",

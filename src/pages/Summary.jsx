@@ -2,6 +2,8 @@ import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import CopyIcon from "../assets/icons/CopyIcon";
 import LinkIcon from "../assets/icons/LinkIcon";
+import QrcodeIcon from "../assets/icons/QrcodeIcon";
+import Modal from "../components/Modal/Modal";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
 import LZString from "lz-string";
@@ -41,10 +43,10 @@ function Summary({
       items,
       assignments,
       taxRate,
-      tip,
-      tipCalc,
       taxMode,
       taxAmount,
+      tip,
+      tipCalc,
     };
     const compressed = LZString.compressToEncodedURIComponent(
       JSON.stringify(state)
@@ -136,6 +138,8 @@ function Summary({
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
+
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   return (
     <main>
@@ -283,72 +287,87 @@ function Summary({
       })()}
       {/* Increased space before Copy Summary button */}
       <div style={{ height: "2em" }}></div>
-      <Button
-        label="Copy Summary"
-        icon={
-          <CopyIcon
-            size={18}
-            style={{
-              verticalAlign: "middle",
-            }}
-          />
-        }
-        onClick={() => {
-          let text = `TabbySplit.app Summary\n`;
-          text += `People involved: ${people.length}\n`;
-          personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
-            const personSubtotal = itemsOwed.reduce(
-              (sum, item) => sum + item.base,
-              0
-            );
-            const personTax = itemsOwed.reduce(
-              (sum, item) => sum + item.tax,
-              0
-            );
-            const personTip = tip;
-            const personTotalOwed = personSubtotal + personTax + personTip;
-            text += `\n${person}:\n`;
-            itemsOwed.forEach((item) => {
-              if (item.splitWith && item.splitWith > 1) {
-                text += `  - ${item.name}: $${item.base.toFixed(
-                  2
-                )} (split with ${item.splitWith} people)\n`;
-              } else {
-                text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
-              }
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1em",
+          maxWidth: 320,
+          margin: "0 auto",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          label="Copy Summary"
+          icon={<CopyIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => {
+            let text = `TabbySplit.app Summary\n`;
+            text += `People involved: ${people.length}\n`;
+            personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
+              const personSubtotal = itemsOwed.reduce(
+                (sum, item) => sum + item.base,
+                0
+              );
+              const personTax = itemsOwed.reduce(
+                (sum, item) => sum + item.tax,
+                0
+              );
+              const personTip = tip;
+              const personTotalOwed = personSubtotal + personTax + personTip;
+              text += `\n${person}:\n`;
+              itemsOwed.forEach((item) => {
+                if (item.splitWith && item.splitWith > 1) {
+                  text += `  - ${item.name}: $${item.base.toFixed(
+                    2
+                  )} (split with ${item.splitWith} people)\n`;
+                } else {
+                  text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
+                }
+              });
+              text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
+              text += `  Tax (${effectiveTaxRate.toFixed(
+                2
+              )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
+              text += `  Tip: $${tip.toFixed(2)}\n`;
+              text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
             });
-            text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-            text += `  Tax (${effectiveTaxRate.toFixed(
+            text += `\n---\n`;
+            text += `Subtotal: $${subtotal.toFixed(2)}\n`;
+            text += `Total Tax (${effectiveTaxRate.toFixed(
               2
             )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
-            text += `  Tip: $${tip.toFixed(2)}\n`;
-            text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
-          });
-          text += `\n---\n`;
-          text += `Subtotal: $${subtotal.toFixed(2)}\n`;
-          text += `Total Tax (${effectiveTaxRate.toFixed(
-            2
-          )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
-          text += `Total Tip: $${tip.toFixed(2)}\n`;
-          text += `Grand Total: $${(
-            subtotal +
-            effectiveTaxAmount +
-            totalTip
-          ).toFixed(2)}\n`;
-          navigator.clipboard.writeText(text);
-          alert("Summary copied to clipboard!");
-        }}
-      />
-
-      <Button
-        label="Share URL"
-        icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
-        onClick={() => {
-          const url = getShareUrl();
-          navigator.clipboard.writeText(url);
-          alert("Shareable URL copied to clipboard!");
-        }}
-      />
+            text += `Total Tip: $${tip.toFixed(2)}\n`;
+            text += `Grand Total: $${(
+              subtotal +
+              effectiveTaxAmount +
+              totalTip
+            ).toFixed(2)}\n`;
+            navigator.clipboard.writeText(text);
+            alert("Summary copied to clipboard!");
+          }}
+        />
+        <Button
+          label="Share URL"
+          icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => {
+            const url = getShareUrl();
+            navigator.clipboard.writeText(url);
+            alert("Shareable URL copied to clipboard!");
+          }}
+        />
+        <Button
+          label="Generate QR Code"
+          icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => setQrModalOpen(true)}
+        />
+        <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
+          <div style={{ textAlign: "center", padding: "1em" }}>
+            <h3>Share via QR Code</h3>
+            {/* QR code will be rendered here in next step */}
+            <p>QR code functionality coming soon.</p>
+          </div>
+        </Modal>
+      </div>
     </main>
   );
 }

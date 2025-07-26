@@ -1,8 +1,12 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import CopyIcon from "../assets/icons/CopyIcon";
+import LinkIcon from "../assets/icons/LinkIcon";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
+import LZString from "lz-string";
+
+import { useEffect, useState, useRef } from "react";
 
 function Summary({
   people = [],
@@ -15,6 +19,38 @@ function Summary({
   taxMode = "percent", // new prop
   taxAmount = null, // new prop
 }) {
+  // Detect if user is coming from a shared URL
+  const [fromSharedUrl, setFromSharedUrl] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const isShared = params.get("data");
+    const alertKey = "tabby-shared-alert-shown";
+    if (isShared && !sessionStorage.getItem(alertKey)) {
+      setFromSharedUrl(true);
+      sessionStorage.setItem(alertKey, "true");
+      setTimeout(() => {
+        alert("Tabby did the math, here’s the damage!");
+      }, 100);
+    }
+  }, []);
+
+  // Shareable URL logic
+  const getShareUrl = () => {
+    const state = {
+      people,
+      items,
+      assignments,
+      taxRate,
+      tip,
+      tipCalc,
+      taxMode,
+      taxAmount,
+    };
+    const compressed = LZString.compressToEncodedURIComponent(
+      JSON.stringify(state)
+    );
+    return `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+  };
   // Calculate subtotal
   const subtotal = items.reduce(
     (sum, item) => sum + (parseFloat(item.price) || 0),
@@ -104,6 +140,7 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
+      {/* Alert dialog shown instead of Callout for shared URL message */}
       {personTotals.every((p) => p.itemsOwed.length === 0) && (
         <EmptyArea
           text="Assign people to items to calculate total owed for each person."
@@ -300,6 +337,16 @@ function Summary({
           ).toFixed(2)}\n`;
           navigator.clipboard.writeText(text);
           alert("Summary copied to clipboard!");
+        }}
+      />
+
+      <Button
+        label="Share URL"
+        icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+        onClick={() => {
+          const url = getShareUrl();
+          navigator.clipboard.writeText(url);
+          alert("Shareable URL copied to clipboard!");
         }}
       />
     </main>

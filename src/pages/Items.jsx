@@ -125,22 +125,6 @@ function Items({ items, setItems, setActiveTab }) {
         onClick={handleAddItem}
         fullWidth
       />
-      {items.length > 0 && (
-        <Button
-          label="Clear All"
-          onClick={() => {
-            if (
-              window.confirm(
-                "Are you sure you want to clear all items? This cannot be undone."
-              )
-            ) {
-              setItems([]);
-            }
-          }}
-          className="custom-btn tertiary"
-          style={{ marginTop: "0.5em", width: "100%" }}
-        />
-      )}
       <div style={{ height: "2em" }}></div>
       <div>
         {items.map((item, idx) => (
@@ -172,7 +156,9 @@ function Items({ items, setItems, setActiveTab }) {
                 <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
                   {item.name}
                 </span>
-                <span style={{ fontSize: "0.95rem", color: "#888" }}>
+                <span
+                  style={{ fontSize: "0.95rem", color: "var(--neutral-weak)" }}
+                >
                   Price: ${item.price}
                 </span>
               </div>
@@ -267,7 +253,7 @@ function Items({ items, setItems, setActiveTab }) {
               }}
             >
               <Button
-                label="Next: Assign Items"
+                label="Next: Assign People to Items"
                 className="custom-btn tertiary"
                 onClick={() => {
                   if (typeof setActiveTab === "function") {

@@ -8,6 +8,8 @@ import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
 import LZString from "lz-string";
 
+import ShareUrlQRCode from "../components/ShareUrlQRCode";
+
 import { useEffect, useState, useRef } from "react";
 
 function Summary({
@@ -274,7 +276,7 @@ function Summary({
           <>
             <Callout type="success">
               All calculations match! Subtotals, tax, tip, and total owed add
-              up. Copy Summary to share with your group.
+              up. Choose one of the options below to share with your group.
             </Callout>
             {(taxMode === "percent" && effectiveTaxRate === 0) ||
             (taxMode === "amount" && effectiveTaxAmount === 0) ? (
@@ -285,7 +287,6 @@ function Summary({
           </>
         );
       })()}
-      {/* Increased space before Copy Summary button */}
       <div style={{ height: "2em" }}></div>
       <div
         style={{
@@ -361,11 +362,7 @@ function Summary({
           onClick={() => setQrModalOpen(true)}
         />
         <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
-          <div style={{ textAlign: "center", padding: "1em" }}>
-            <h3>Share via QR Code</h3>
-            {/* QR code will be rendered here in next step */}
-            <p>QR code functionality coming soon.</p>
-          </div>
+          <ShareUrlQRCode url={getShareUrl()} />
         </Modal>
       </div>
     </main>

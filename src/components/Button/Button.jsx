@@ -19,6 +19,7 @@ function Button({
         }`.trim()}
         onClick={onClick}
         style={style}
+        title={props.title}
         {...props}
       >
         {icon && <span className="btn-icon">{icon}</span>}
@@ -34,6 +35,7 @@ function Button({
       } ${className}`.trim()}
       onClick={onClick}
       style={style}
+      title={props.title}
       {...props}
     >
       {icon && <span className="btn-icon">{icon}</span>}

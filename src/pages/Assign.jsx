@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
 import InputField from "../components/InputField/InputField";
-import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
+import Button from "../components/Button/Button";
 
 const TIP_PRESETS = [15, 18, 20];
 
@@ -371,6 +371,7 @@ function Assign({
         )}
       </div>
       <div style={{ marginBottom: "2.5em" }}></div>
+
       <div style={{ margin: "1em 0", textAlign: "left" }}>
         <label
           style={{
@@ -415,6 +416,7 @@ function Assign({
           )}
         </div>
       </div>
+
       <div
         style={{
           marginTop: "2em",
@@ -435,6 +437,24 @@ function Assign({
           : (parseFloat(taxRate.amount) || 0).toFixed(2)}
         <br />
         Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "1.5em",
+          }}
+        >
+          <Button
+            label="Final Step: See Summary"
+            className="custom-btn tertiary"
+            onClick={() => {
+              if (typeof setActiveTab === "function") {
+                setActiveTab(3);
+              }
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        </div>
       </div>
     </main>
   );

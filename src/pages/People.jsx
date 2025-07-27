@@ -3,6 +3,8 @@ import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import DeleteIcon from "../assets/icons/DeleteIcon";
+import EditIcon from "../assets/icons/EditIcon";
+import Modal from "../components/Modal/Modal";
 import PersonAddIcon from "../assets/icons/PersonAddIcon";
 
 const EMOJIS = [
@@ -24,6 +26,8 @@ const EMOJIS = [
 
 function People({ people, setPeople, emojis, setEmojis }) {
   const [name, setName] = useState("");
+  const [editIdx, setEditIdx] = useState(null);
+  const [editName, setEditName] = useState("");
 
   const handleAdd = () => {
     if (name.trim()) {
@@ -43,6 +47,27 @@ function People({ people, setPeople, emojis, setEmojis }) {
   const handleRemove = (idx) => {
     setPeople(people.filter((_, i) => i !== idx));
     setEmojis(emojis.filter((_, i) => i !== idx));
+  };
+
+  const openEditModal = (idx) => {
+    setEditIdx(idx);
+    setEditName(people[idx]);
+  };
+
+  const handleSaveEdit = () => {
+    if (editName.trim()) {
+      const updatedPeople = people.map((person, idx) =>
+        idx === editIdx ? editName.trim() : person
+      );
+      setPeople(updatedPeople);
+      setEditIdx(null);
+      setEditName("");
+    }
+  };
+
+  const handleCloseEdit = () => {
+    setEditIdx(null);
+    setEditName("");
   };
 
   useEffect(() => {
@@ -111,19 +136,67 @@ function People({ people, setPeople, emojis, setEmojis }) {
                 {emojis[idx] ? emojis[idx] + " " : ""}
                 {person}
               </span>
-              <Button
-                label="Delete"
-                icon={
-                  <DeleteIcon
-                    width={20}
-                    height={20}
-                    style={{ color: "inherit" }}
+              <div style={{ display: "flex", gap: "0.5em" }}>
+                <Button
+                  icon={
+                    <EditIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                      title="Edit"
+                    />
+                  }
+                  onClick={() => openEditModal(idx)}
+                  aria-label={`Edit ${person}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Edit Name"
+                />
+                <Button
+                  icon={
+                    <DeleteIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                      title="Delete"
+                    />
+                  }
+                  onClick={() => handleRemove(idx)}
+                  aria-label={`Remove ${person}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Delete Name"
+                />
+              </div>
+              {/* Edit Person Modal */}
+              <Modal open={editIdx !== null} onClose={handleCloseEdit}>
+                <div style={{ padding: "1em", minWidth: 260 }}>
+                  <h3>Edit Person</h3>
+                  <InputField
+                    label="Name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    autoFocus
                   />
-                }
-                onClick={() => handleRemove(idx)}
-                aria-label={`Remove ${person}`}
-                className="custom-btn secondary"
-              />
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "1em",
+                      marginTop: "1.5em",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Button
+                      label="Cancel"
+                      onClick={handleCloseEdit}
+                      className="custom-btn tertiary"
+                    />
+                    <Button
+                      label="Save"
+                      onClick={handleSaveEdit}
+                      className="custom-btn primary"
+                    />
+                  </div>
+                </div>
+              </Modal>
             </div>
           </Card>
         ))}
@@ -131,6 +204,22 @@ function People({ people, setPeople, emojis, setEmojis }) {
       <div style={{ marginTop: "2em", fontWeight: 600, fontSize: "1.1em" }}>
         Total people: {people.length}
       </div>
+      {people.length > 0 && (
+        <Button
+          label="Next: Add Items"
+          className="custom-btn tertiary"
+          onClick={() => {
+            if (typeof setActiveTab === "function") {
+              setActiveTab(3);
+            } else {
+              window.dispatchEvent(
+                new CustomEvent("changeTab", { detail: { tab: "Items" } })
+              );
+            }
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+      )}
     </main>
   );
 }

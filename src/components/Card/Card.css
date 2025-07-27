@@ -3,7 +3,7 @@
     --card-bg: var(--neutral-weaker);
   }
 }
-/* List-style card: flat, bottom border only */
+
 :root {
   --card-bg: var(--neutral-weakest);
   --card-border: var(--neutral-weaker);
@@ -16,13 +16,12 @@
   background: var(--card-bg);
   border-radius: 0;
   box-shadow: none;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--card-border);
   padding: 0.75rem 0;
   margin: 1rem 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  /* min-width: 250px; */
 }
 
 .custom-card-list.no-border {

@@ -23,7 +23,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --brand: oklch(0.607 0.214553 275.6035);
+    --brand: oklch(0.67 0.21 275.6);
     --neutral: oklch(1 0.03 265);
 
     /* Foundational brand variables */

@@ -188,6 +188,7 @@ function Items({ items, setItems, setActiveTab }) {
                   onClick={() => openEditModal(idx)}
                   aria-label={`Edit ${item.name}`}
                   className="icon-btn custom-btn secondary"
+                  title="Edit Item"
                 />
                 <Button
                   icon={
@@ -200,6 +201,7 @@ function Items({ items, setItems, setActiveTab }) {
                   onClick={() => handleDeleteItem(idx)}
                   aria-label={`Delete ${item.name}`}
                   className="icon-btn custom-btn secondary"
+                  title="Delete Item"
                 />
               </div>
             </div>
@@ -256,19 +258,26 @@ function Items({ items, setItems, setActiveTab }) {
           .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
           .toFixed(2)}
         {items.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "1em",
-            }}
-          >
-            <Button
-              label="Next: Assign Items"
-              className="custom-btn tertiary"
-              onClick={() => setActiveTab && setActiveTab(2)}
-            />
-          </div>
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "1em",
+              }}
+            >
+              <Button
+                label="Next: Assign Items"
+                className="custom-btn tertiary"
+                onClick={() => {
+                  if (typeof setActiveTab === "function") {
+                    setActiveTab(2);
+                  }
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
+          </>
         )}
       </div>
     </main>

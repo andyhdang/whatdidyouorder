@@ -10,6 +10,24 @@ function Button({
   fullWidth = false,
   ...props
 }) {
+  // Icon button variant
+  if (props.iconButton) {
+    return (
+      <button
+        className={`custom-btn icon-btn${
+          className ? ` ${className}` : ""
+        }`.trim()}
+        onClick={onClick}
+        style={style}
+        title={props.title}
+        {...props}
+      >
+        {icon && <span className="btn-icon">{icon}</span>}
+      </button>
+    );
+  }
+
+  // ...existing code...
   return (
     <button
       className={`custom-btn${
@@ -17,6 +35,7 @@ function Button({
       } ${className}`.trim()}
       onClick={onClick}
       style={style}
+      title={props.title}
       {...props}
     >
       {icon && <span className="btn-icon">{icon}</span>}

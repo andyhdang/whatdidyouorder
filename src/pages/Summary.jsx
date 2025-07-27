@@ -1,8 +1,16 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import CopyIcon from "../assets/icons/CopyIcon";
+import LinkIcon from "../assets/icons/LinkIcon";
+import QrcodeIcon from "../assets/icons/QrcodeIcon";
+import Modal from "../components/Modal/Modal";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
+import LZString from "lz-string";
+
+import ShareUrlQRCode from "../components/ShareUrlQRCode";
+
+import { useEffect, useState, useRef } from "react";
 
 function Summary({
   people = [],
@@ -14,7 +22,42 @@ function Summary({
   setActiveTab,
   taxMode = "percent", // new prop
   taxAmount = null, // new prop
+  tipAmountInput = "",
+  customTipPercentInput = "",
+  tipMode = "percent", // add tipMode prop
 }) {
+  // Detect if user is coming from a shared URL
+  const [fromSharedUrl, setFromSharedUrl] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const isShared = params.get("data");
+    const alertKey = "tabby-shared-alert-shown";
+    if (isShared && !sessionStorage.getItem(alertKey)) {
+      setFromSharedUrl(true);
+      sessionStorage.setItem(alertKey, "true");
+      setTimeout(() => {
+        alert("Tabby did the math, here’s the damage!");
+      }, 100);
+    }
+  }, []);
+
+  // Shareable URL logic
+  const getShareUrl = () => {
+    const state = {
+      people,
+      items,
+      assignments,
+      taxRate,
+      taxMode,
+      taxAmount,
+      tip,
+      tipCalc,
+    };
+    const compressed = LZString.compressToEncodedURIComponent(
+      JSON.stringify(state)
+    );
+    return `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+  };
   // Calculate subtotal
   const subtotal = items.reduce(
     (sum, item) => sum + (parseFloat(item.price) || 0),
@@ -34,16 +77,13 @@ function Summary({
   let tipPerPerson = Array(people.length).fill(0);
   let totalTip = 0;
   // Determine tip value based on Assign page choices
-  if (typeof tip === "string" && tip.endsWith("%")) {
-    // Tip entered as percent string, e.g. "18%"
-    const percent = parseFloat(tip);
-    const subtotal = items.reduce(
-      (sum, item) => sum + (parseFloat(item.price) || 0),
-      0
-    );
-    totalTip = (subtotal * percent) / 100;
+  if (tipMode === "customPercent" && customTipPercentInput !== "") {
+    totalTip = (subtotal * parseFloat(customTipPercentInput)) / 100;
+  } else if (tipMode === "amount" && tipAmountInput !== "") {
+    totalTip = parseFloat(tipAmountInput) || 0;
+  } else if (tipMode === "percent" && typeof tip === "number") {
+    totalTip = tip;
   } else {
-    // Tip entered as dollar amount (number or string)
     totalTip = parseFloat(tip) || 0;
   }
 
@@ -101,9 +141,12 @@ function Summary({
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
 
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+
   return (
     <main>
       <h2>Summary</h2>
+      {/* Alert dialog shown instead of Callout for shared URL message */}
       {personTotals.every((p) => p.itemsOwed.length === 0) && (
         <EmptyArea
           text="Assign people to items to calculate total owed for each person."
@@ -233,7 +276,7 @@ function Summary({
           <>
             <Callout type="success">
               All calculations match! Subtotals, tax, tip, and total owed add
-              up. Copy Summary to share with your group.
+              up. Choose one of the options below to share with your group.
             </Callout>
             {(taxMode === "percent" && effectiveTaxRate === 0) ||
             (taxMode === "amount" && effectiveTaxAmount === 0) ? (
@@ -244,64 +287,84 @@ function Summary({
           </>
         );
       })()}
-      {/* Increased space before Copy Summary button */}
       <div style={{ height: "2em" }}></div>
-      <Button
-        label="Copy Summary"
-        icon={
-          <CopyIcon
-            size={18}
-            style={{
-              verticalAlign: "middle",
-            }}
-          />
-        }
-        onClick={() => {
-          let text = `TabbySplit.app Summary\n`;
-          text += `People involved: ${people.length}\n`;
-          personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
-            const personSubtotal = itemsOwed.reduce(
-              (sum, item) => sum + item.base,
-              0
-            );
-            const personTax = itemsOwed.reduce(
-              (sum, item) => sum + item.tax,
-              0
-            );
-            const personTip = tip;
-            const personTotalOwed = personSubtotal + personTax + personTip;
-            text += `\n${person}:\n`;
-            itemsOwed.forEach((item) => {
-              if (item.splitWith && item.splitWith > 1) {
-                text += `  - ${item.name}: $${item.base.toFixed(
-                  2
-                )} (split with ${item.splitWith} people)\n`;
-              } else {
-                text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
-              }
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1em",
+          maxWidth: 320,
+          margin: "0 auto",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          label="Copy Summary"
+          icon={<CopyIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => {
+            let text = `TabbySplit.app Summary\n`;
+            text += `People involved: ${people.length}\n`;
+            personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
+              const personSubtotal = itemsOwed.reduce(
+                (sum, item) => sum + item.base,
+                0
+              );
+              const personTax = itemsOwed.reduce(
+                (sum, item) => sum + item.tax,
+                0
+              );
+              const personTip = tip;
+              const personTotalOwed = personSubtotal + personTax + personTip;
+              text += `\n${person}:\n`;
+              itemsOwed.forEach((item) => {
+                if (item.splitWith && item.splitWith > 1) {
+                  text += `  - ${item.name}: $${item.base.toFixed(
+                    2
+                  )} (split with ${item.splitWith} people)\n`;
+                } else {
+                  text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
+                }
+              });
+              text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
+              text += `  Tax (${effectiveTaxRate.toFixed(
+                2
+              )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
+              text += `  Tip: $${tip.toFixed(2)}\n`;
+              text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
             });
-            text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-            text += `  Tax (${effectiveTaxRate.toFixed(
+            text += `\n---\n`;
+            text += `Subtotal: $${subtotal.toFixed(2)}\n`;
+            text += `Total Tax (${effectiveTaxRate.toFixed(
               2
             )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
-            text += `  Tip: $${tip.toFixed(2)}\n`;
-            text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
-          });
-          text += `\n---\n`;
-          text += `Subtotal: $${subtotal.toFixed(2)}\n`;
-          text += `Total Tax (${effectiveTaxRate.toFixed(
-            2
-          )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
-          text += `Total Tip: $${tip.toFixed(2)}\n`;
-          text += `Grand Total: $${(
-            subtotal +
-            effectiveTaxAmount +
-            totalTip
-          ).toFixed(2)}\n`;
-          navigator.clipboard.writeText(text);
-          alert("Summary copied to clipboard!");
-        }}
-      />
+            text += `Total Tip: $${tip.toFixed(2)}\n`;
+            text += `Grand Total: $${(
+              subtotal +
+              effectiveTaxAmount +
+              totalTip
+            ).toFixed(2)}\n`;
+            navigator.clipboard.writeText(text);
+            alert("Summary copied to clipboard!");
+          }}
+        />
+        <Button
+          label="Share URL"
+          icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => {
+            const url = getShareUrl();
+            navigator.clipboard.writeText(url);
+            alert("Shareable URL copied to clipboard!");
+          }}
+        />
+        <Button
+          label="Generate QR Code"
+          icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => setQrModalOpen(true)}
+        />
+        <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
+          <ShareUrlQRCode url={getShareUrl()} />
+        </Modal>
+      </div>
     </main>
   );
 }

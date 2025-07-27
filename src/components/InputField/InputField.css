@@ -1,3 +1,21 @@
+:root {
+  --input-bg: var(--neutral-weaker);
+  --input-text: var(--neutral-default);
+  --input-border: var(--neutral-weak);
+  --input-hover-bg: var(--brand-weaker);
+  --input-hover-border: var(--brand-default);
+  --input-focus-bg: var(--brand-weaker);
+  --input-focus-border: var(--brand-default);
+  --input-active-bg: var(--brand-weaker);
+  --input-active-border: var(--neutral-default);
+  --input-label: var(--neutral-default);
+  --input-description: var(--neutral-weak);
+
+  --input-error: oklch(0.62 0.19 29);
+  --input-error-bg: oklch(0.98 0.03 29);
+  --input-error-text: oklch(0.62 0.19 29);
+}
+
 .input-field {
   display: flex;
   flex-direction: column;

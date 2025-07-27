@@ -4,9 +4,40 @@ import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
+import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
+import Modal from "../components/Modal/Modal";
 
-function Items({ items, setItems }) {
+function Items({ items, setItems, setActiveTab }) {
+  const [editIdx, setEditIdx] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
+  const openEditModal = (idx) => {
+    setEditIdx(idx);
+    setEditName(items[idx].name);
+    setEditPrice(items[idx].price);
+  };
+
+  const handleSaveEdit = () => {
+    if (editName.trim() && editPrice.trim()) {
+      const updatedItems = items.map((item, idx) =>
+        idx === editIdx
+          ? { ...item, name: editName.trim(), price: editPrice.trim() }
+          : item
+      );
+      setItems(updatedItems);
+      setEditIdx(null);
+      setEditName("");
+      setEditPrice("");
+    }
+  };
+
+  const handleCloseEdit = () => {
+    setEditIdx(null);
+    setEditName("");
+    setEditPrice("");
+  };
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemQuantity, setItemQuantity] = useState(1);
@@ -94,22 +125,6 @@ function Items({ items, setItems }) {
         onClick={handleAddItem}
         fullWidth
       />
-      {items.length > 0 && (
-        <Button
-          label="Clear All"
-          onClick={() => {
-            if (
-              window.confirm(
-                "Are you sure you want to clear all items? This cannot be undone."
-              )
-            ) {
-              setItems([]);
-            }
-          }}
-          className="custom-btn tertiary"
-          style={{ marginTop: "0.5em", width: "100%" }}
-        />
-      )}
       <div style={{ height: "2em" }}></div>
       <div>
         {items.map((item, idx) => (
@@ -141,28 +156,82 @@ function Items({ items, setItems }) {
                 <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
                   {item.name}
                 </span>
-                <span style={{ fontSize: "0.95rem", color: "#888" }}>
+                <span
+                  style={{ fontSize: "0.95rem", color: "var(--neutral-weak)" }}
+                >
                   Price: ${item.price}
                 </span>
               </div>
-              <Button
-                label="Delete"
-                icon={
-                  <DeleteIcon
-                    width={20}
-                    height={20}
-                    style={{ color: "inherit" }}
-                  />
-                }
-                onClick={() => handleDeleteItem(idx)}
-                aria-label={`Delete ${item.name}`}
-                className="custom-btn secondary"
-              />
+              <div style={{ display: "flex", gap: "0.5em" }}>
+                <Button
+                  icon={
+                    <EditIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  onClick={() => openEditModal(idx)}
+                  aria-label={`Edit ${item.name}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Edit Item"
+                />
+                <Button
+                  icon={
+                    <DeleteIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  onClick={() => handleDeleteItem(idx)}
+                  aria-label={`Delete ${item.name}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Delete Item"
+                />
+              </div>
             </div>
           </Card>
         ))}
       </div>
       {/* Subtotal calculation and display */}
+      {/* Edit Item Modal */}
+      <Modal open={editIdx !== null} onClose={handleCloseEdit}>
+        <div style={{ padding: "1em", minWidth: 260 }}>
+          <h3>Edit Item</h3>
+          <InputField
+            label="Item Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            autoFocus
+          />
+          <InputField
+            label="Price"
+            type="number"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
+          />
+          <div
+            style={{
+              display: "flex",
+              gap: "1em",
+              marginTop: "1.5em",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              label="Cancel"
+              onClick={handleCloseEdit}
+              className="custom-btn tertiary"
+            />
+            <Button
+              label="Save"
+              onClick={handleSaveEdit}
+              className="custom-btn primary"
+            />
+          </div>
+        </div>
+      </Modal>
       <div
         style={{
           marginTop: "2em",
@@ -174,6 +243,28 @@ function Items({ items, setItems }) {
         {items
           .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
           .toFixed(2)}
+        {items.length > 0 && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "1em",
+              }}
+            >
+              <Button
+                label="Next: Assign People to Items"
+                className="custom-btn tertiary"
+                onClick={() => {
+                  if (typeof setActiveTab === "function") {
+                    setActiveTab(2);
+                  }
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
     </main>
   );

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import LZString from "lz-string";
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
 import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
+import Footer from "./components/Footer/Footer";
 import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
@@ -12,6 +14,33 @@ import "./App.css";
 const tabs = ["People", "Items", "Assign", "Summary"];
 
 function App() {
+  // Tip input states for Assign/Summary
+  const [tipAmountInput, setTipAmountInput] = useState("");
+  const [customTipPercentInput, setCustomTipPercentInput] = useState("");
+  // Load state from URL if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const compressed = params.get("data");
+    if (compressed) {
+      try {
+        const raw = LZString.decompressFromEncodedURIComponent(compressed);
+        if (raw) {
+          const state = JSON.parse(raw);
+          if (state.people) setPeople(state.people);
+          if (state.items) setItems(state.items);
+          if (state.assignments) setAssignments(state.assignments);
+          if (state.taxRate !== undefined) setTaxRate(state.taxRate);
+          if (state.tip !== undefined) setTip(state.tip);
+          if (state.tipCalc) setTipCalc(state.tipCalc);
+          // Optionally handle taxMode and taxAmount if you store them in state
+          setActiveTab(3); // Go straight to Summary tab
+        }
+      } catch (e) {
+        // Optionally show error to user
+        console.error("Failed to load shared data from URL", e);
+      }
+    }
+  }, []);
   const [activeTab, setActiveTab] = useState(0);
   const [people, setPeople] = useState([]);
   const [emojis, setEmojis] = useState([]);
@@ -91,7 +120,13 @@ function App() {
               setEmojis={setEmojis}
             />
           )}
-          {activeTab === 1 && <Items items={items} setItems={setItems} />}
+          {activeTab === 1 && (
+            <Items
+              items={items}
+              setItems={setItems}
+              setActiveTab={setActiveTab}
+            />
+          )}
           {activeTab === 2 && (
             <Assign
               people={people}
@@ -110,7 +145,11 @@ function App() {
               setTipPreset={setTipPreset}
               customTipPercent={customTipPercent}
               setCustomTipPercent={setCustomTipPercent}
-              setActiveTab={setActiveTab} // <-- pass down
+              setActiveTab={setActiveTab}
+              tipAmountInput={tipAmountInput}
+              setTipAmountInput={setTipAmountInput}
+              customTipPercentInput={customTipPercentInput}
+              setCustomTipPercentInput={setCustomTipPercentInput}
             />
           )}
           {activeTab === 3 && (
@@ -121,13 +160,17 @@ function App() {
               taxRate={taxRateNum}
               tip={tipNum}
               tipCalc={tipCalc}
+              tipMode={tipMode}
               setActiveTab={setActiveTab}
               taxMode={taxMode}
               taxAmount={taxAmount}
+              tipAmountInput={tipAmountInput}
+              customTipPercentInput={customTipPercentInput}
             />
           )}
         </Card>
       </div>
+      <Footer />
     </main>
   );
 }

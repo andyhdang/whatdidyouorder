@@ -5,6 +5,13 @@ import Button from "../Button/Button";
 
 function Footer() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
+
+  const handleOpen = () => {
+    setModalOpen(true);
+    setIframeLoading(true);
+  };
+
   return (
     <footer className="footer">
       <div className="footer-content">
@@ -13,11 +20,16 @@ function Footer() {
           <Button
             label="Help us improve"
             className="custom-btn tertiary"
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpen}
           ></Button>
         </span>
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        {iframeLoading && (
+          <div style={{ textAlign: "center", padding: "2em 0" }}>
+            <span>Loading form…</span>
+          </div>
+        )}
         <iframe
           src="https://docs.google.com/forms/d/e/1FAIpQLScwPLlQ9bzW87hJhJPgMUWDDrBKOJsNGVa30IadB3xu-1HLGg/viewform?embedded=true"
           width="640"
@@ -27,9 +39,8 @@ function Footer() {
           marginWidth="0"
           title="Feedback Form"
           style={{ border: "none", maxWidth: "100%" }}
-        >
-          Loading…
-        </iframe>
+          onLoad={() => setIframeLoading(false)}
+        />
       </Modal>
     </footer>
   );

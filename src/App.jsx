@@ -14,6 +14,9 @@ import "./App.css";
 const tabs = ["People", "Items", "Assign", "Summary"];
 
 function App() {
+  // Tip input states for Assign/Summary
+  const [tipAmountInput, setTipAmountInput] = useState("");
+  const [customTipPercentInput, setCustomTipPercentInput] = useState("");
   // Load state from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -143,6 +146,10 @@ function App() {
               customTipPercent={customTipPercent}
               setCustomTipPercent={setCustomTipPercent}
               setActiveTab={setActiveTab}
+              tipAmountInput={tipAmountInput}
+              setTipAmountInput={setTipAmountInput}
+              customTipPercentInput={customTipPercentInput}
+              setCustomTipPercentInput={setCustomTipPercentInput}
             />
           )}
           {activeTab === 3 && (
@@ -153,9 +160,12 @@ function App() {
               taxRate={taxRateNum}
               tip={tipNum}
               tipCalc={tipCalc}
+              tipMode={tipMode}
               setActiveTab={setActiveTab}
               taxMode={taxMode}
               taxAmount={taxAmount}
+              tipAmountInput={tipAmountInput}
+              customTipPercentInput={customTipPercentInput}
             />
           )}
         </Card>

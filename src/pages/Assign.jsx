@@ -25,6 +25,10 @@ function Assign({
   customTipPercent,
   setCustomTipPercent,
   setActiveTab, // <-- add this prop
+  tipAmountInput,
+  setTipAmountInput,
+  customTipPercentInput,
+  setCustomTipPercentInput,
 }) {
   // Keep assignments array in sync with items
 
@@ -48,12 +52,36 @@ function Assign({
       0
     );
     const defaultTipPercent = 15;
-    if (tip === "" && items.length > 0) {
+    // Only set default tip if tip is empty, items exist, and tipMode is not 'amount'
+    if (tip === "" && items.length > 0 && tipMode !== "amount") {
       setTip(((subtotal * defaultTipPercent) / 100).toFixed(2));
       setTipPreset(defaultTipPercent);
       setTipMode("percent");
+    } else if (tipMode === "amount" && tip !== "") {
+      // If switching to $Amount and tip is the default 15% value, clear it
+      const defaultTip = ((subtotal * defaultTipPercent) / 100).toFixed(2);
+      if (tip === defaultTip) {
+        setTip("");
+      }
     }
-  }, [tip, items, setTip, setTipPreset, setTipMode]);
+    // Make $Amount the default option for tax
+    if (!taxRate?.mode) {
+      if (typeof taxRate === "object") {
+        setTaxRate({ ...taxRate, mode: "amount" });
+      } else {
+        setTaxRate({ value: taxRate, mode: "amount" });
+      }
+    }
+  }, [
+    tip,
+    items,
+    setTip,
+    setTipPreset,
+    setTipMode,
+    tipMode,
+    taxRate,
+    setTaxRate,
+  ]);
 
   const handleTogglePerson = (itemIdx, personIdx) => {
     setAssignments((sel) =>
@@ -72,6 +100,7 @@ function Assign({
     if (mode === "percent") {
       setTipPreset(value);
       setCustomTipPercent("");
+      // Do NOT clear customTipPercentInput so it persists when switching back
       // Calculate tip based on subtotal
       const subtotal = items.reduce(
         (sum, item) => sum + (parseFloat(item.price) || 0),
@@ -80,14 +109,37 @@ function Assign({
       setTip(((subtotal * value) / 100).toFixed(2));
     } else if (mode === "customPercent") {
       setTipPreset("");
-      setCustomTipPercent(value);
-      const subtotal = items.reduce(
-        (sum, item) => sum + (parseFloat(item.price) || 0),
-        0
-      );
-      setTip(((subtotal * value) / 100).toFixed(2));
+      // If value is undefined, restore previous input
+      if (value === undefined) {
+        setCustomTipPercent(customTipPercentInput);
+        const subtotal = items.reduce(
+          (sum, item) => sum + (parseFloat(item.price) || 0),
+          0
+        );
+        setTip(
+          (
+            (subtotal *
+              (customTipPercentInput === "" ? 0 : customTipPercentInput)) /
+            100
+          ).toFixed(2)
+        );
+      } else {
+        setCustomTipPercent(value);
+        setCustomTipPercentInput(value);
+        const subtotal = items.reduce(
+          (sum, item) => sum + (parseFloat(item.price) || 0),
+          0
+        );
+        setTip(((subtotal * value) / 100).toFixed(2));
+      }
     } else if (mode === "amount") {
-      setTip(value);
+      // If switching to $Amount, restore previous input if available
+      if (value === undefined) {
+        setTip(tipAmountInput);
+      } else {
+        setTip(value);
+        setTipAmountInput(value);
+      }
     }
   };
 
@@ -101,9 +153,13 @@ function Assign({
     tipMode === "percent"
       ? ((subtotal * (tipPreset || defaultTipPercent)) / 100).toFixed(2)
       : tipMode === "customPercent"
-      ? ((subtotal * (customTipPercent || defaultTipPercent)) / 100).toFixed(2)
-      : tip !== ""
-      ? tip
+      ? customTipPercentInput === ""
+        ? "0.00"
+        : ((subtotal * parseFloat(customTipPercentInput)) / 100).toFixed(2)
+      : tipMode === "amount"
+      ? tipAmountInput === ""
+        ? "0.00"
+        : tipAmountInput
       : ((subtotal * defaultTipPercent) / 100).toFixed(2);
 
   return (
@@ -151,7 +207,7 @@ function Assign({
                   <span
                     style={{
                       fontSize: "0.95rem",
-                      color: "#888",
+                      color: "var(--neutral-weak)",
                       marginBottom: "1em",
                     }}
                   >
@@ -247,17 +303,6 @@ function Assign({
           }}
         >
           <Pill
-            label="%"
-            selected={!taxRate?.mode || taxRate.mode === "percent"}
-            onClick={() => {
-              if (typeof taxRate === "object") {
-                setTaxRate({ ...taxRate, mode: "percent" });
-              } else {
-                setTaxRate({ value: taxRate, mode: "percent" });
-              }
-            }}
-          />
-          <Pill
             label="$ Amount"
             selected={taxRate?.mode === "amount"}
             onClick={() => {
@@ -265,6 +310,17 @@ function Assign({
                 setTaxRate({ ...taxRate, mode: "amount" });
               } else {
                 setTaxRate({ value: taxRate, mode: "amount" });
+              }
+            }}
+          />
+          <Pill
+            label="%"
+            selected={!taxRate?.mode || taxRate.mode === "percent"}
+            onClick={() => {
+              if (typeof taxRate === "object") {
+                setTaxRate({ ...taxRate, mode: "percent" });
+              } else {
+                setTaxRate({ value: taxRate, mode: "percent" });
               }
             }}
           />
@@ -338,7 +394,7 @@ function Assign({
           <Pill
             label="Custom %"
             selected={tipMode === "customPercent"}
-            onClick={() => setTipMode("customPercent")}
+            onClick={() => handleTipChange("customPercent", undefined)}
           />
           <Pill
             label="$ Amount"
@@ -353,8 +409,11 @@ function Assign({
             placeholder="Enter tip %"
             name="customTipPercent"
             type="number"
-            value={customTipPercent}
-            onChange={(e) => handleTipChange("customPercent", e.target.value)}
+            value={customTipPercentInput}
+            onChange={(e) => {
+              setCustomTipPercentInput(e.target.value);
+              handleTipChange("customPercent", e.target.value);
+            }}
             style={{ marginTop: "0.5em", maxWidth: 120 }}
           />
         )}
@@ -364,8 +423,11 @@ function Assign({
             placeholder="Enter tip amount"
             name="tip"
             type="number"
-            value={tip}
-            onChange={(e) => handleTipChange("amount", e.target.value)}
+            value={tipAmountInput}
+            onChange={(e) => {
+              setTipAmountInput(e.target.value);
+              handleTipChange("amount", e.target.value);
+            }}
             style={{ marginTop: "0.5em", maxWidth: 120 }}
           />
         )}

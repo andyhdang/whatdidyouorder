@@ -22,6 +22,9 @@ function Summary({
   setActiveTab,
   taxMode = "percent", // new prop
   taxAmount = null, // new prop
+  tipAmountInput = "",
+  customTipPercentInput = "",
+  tipMode = "percent", // add tipMode prop
 }) {
   // Detect if user is coming from a shared URL
   const [fromSharedUrl, setFromSharedUrl] = useState(false);
@@ -74,16 +77,13 @@ function Summary({
   let tipPerPerson = Array(people.length).fill(0);
   let totalTip = 0;
   // Determine tip value based on Assign page choices
-  if (typeof tip === "string" && tip.endsWith("%")) {
-    // Tip entered as percent string, e.g. "18%"
-    const percent = parseFloat(tip);
-    const subtotal = items.reduce(
-      (sum, item) => sum + (parseFloat(item.price) || 0),
-      0
-    );
-    totalTip = (subtotal * percent) / 100;
+  if (tipMode === "customPercent" && customTipPercentInput !== "") {
+    totalTip = (subtotal * parseFloat(customTipPercentInput)) / 100;
+  } else if (tipMode === "amount" && tipAmountInput !== "") {
+    totalTip = parseFloat(tipAmountInput) || 0;
+  } else if (tipMode === "percent" && typeof tip === "number") {
+    totalTip = tip;
   } else {
-    // Tip entered as dollar amount (number or string)
     totalTip = parseFloat(tip) || 0;
   }
 

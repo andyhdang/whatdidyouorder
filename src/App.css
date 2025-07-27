@@ -14,7 +14,7 @@
   /* Foundational semantic variables */
   --neutral-weakest: color-mix(in oklab, var(--neutral), white 100%);
   --neutral-weaker: color-mix(in oklab, var(--neutral), white 95%);
-  --neutral-weak: color-mix(in oklab, var(--neutral), white 50%);
+  --neutral-weak: color-mix(in oklab, var(--neutral), white 40%);
   --neutral-default: var(--neutral);
   --neutral-strong: color-mix(in oklab, var(--neutral), black 10%);
   --neutral-stronger: color-mix(in oklab, var(--neutral), black 30%);
@@ -36,7 +36,7 @@
     /* Foundational semantic variables */
     --neutral-weakest: color-mix(in oklab, var(--neutral), black 80%);
     --neutral-weaker: color-mix(in oklab, var(--neutral), black 77%);
-    --neutral-weak: color-mix(in oklab, var(--neutral), black 50%);
+    --neutral-weak: color-mix(in oklab, var(--neutral), black 30%);
     --neutral-default: var(--neutral);
     --neutral-strong: color-mix(in oklab, var(--neutral), white 10%);
     --neutral-stronger: color-mix(in oklab, var(--neutral), white 30%);
@@ -60,13 +60,7 @@
 }
 
 .description {
-  color: #555;
+  color: var(--neutral-weak);
   font-size: 1em;
   margin-bottom: 1em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .description {
-    color: #fff;
-  }
 }

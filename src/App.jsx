@@ -6,6 +6,7 @@ import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
 import Card from "./components/Card/Card";
+import Footer from "./components/Footer/Footer";
 import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
@@ -141,7 +142,7 @@ function App() {
               setTipPreset={setTipPreset}
               customTipPercent={customTipPercent}
               setCustomTipPercent={setCustomTipPercent}
-              setActiveTab={setActiveTab} // <-- pass down
+              setActiveTab={setActiveTab}
             />
           )}
           {activeTab === 3 && (
@@ -159,6 +160,7 @@ function App() {
           )}
         </Card>
       </div>
+      <Footer />
     </main>
   );
 }

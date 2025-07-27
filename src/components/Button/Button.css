@@ -135,6 +135,7 @@
 .custom-btn.tertiary:hover {
   color: var(--btn-tertiary-hover-text);
   text-decoration: underline;
+  background: none;
 }
 
 .custom-btn.tertiary:active {

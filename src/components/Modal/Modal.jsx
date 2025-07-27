@@ -8,7 +8,11 @@ const Modal = ({ open, onClose, children }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <button className="modal-close" onClick={onClose} aria-label="Close">
-          <CloseIcon size={24} />
+          <CloseIcon
+            size={24}
+            style={{ color: "inherit" }}
+            fill="currentColor"
+          />
         </button>
         {children}
       </div>

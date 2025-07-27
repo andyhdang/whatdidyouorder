@@ -47,11 +47,15 @@ function Summary({
       people,
       items,
       assignments,
-      taxRate,
+      // Use effective values for tax
+      taxRate: effectiveTaxRate,
       taxMode,
-      taxAmount,
+      taxAmount: effectiveTaxAmount,
       tip,
       tipCalc,
+      tipMode,
+      tipAmountInput,
+      customTipPercentInput,
     };
     const compressed = LZString.compressToEncodedURIComponent(
       JSON.stringify(state)
@@ -146,6 +150,12 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
+      {fromSharedUrl && (
+        <Callout type="warning" style={{ marginBottom: "1em" }}>
+          You opened a shared summary. Navigating away from this tab may change
+          the results.
+        </Callout>
+      )}
       {/* Alert dialog shown instead of Callout for shared URL message */}
       {personTotals.every((p) => p.itemsOwed.length === 0) && (
         <EmptyArea

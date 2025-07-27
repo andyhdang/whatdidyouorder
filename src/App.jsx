@@ -93,6 +93,30 @@ function App() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  // Shareable URL logic (now includes taxMode and taxAmount)
+  const getShareUrl = () => {
+    // For sharing, use the actual tax value used in Summary
+    let sharedTaxRate = taxMode === "percent" ? taxRateNum : "";
+    let sharedTaxAmount = taxMode === "amount" ? taxAmount : null;
+    const state = {
+      people,
+      items,
+      assignments,
+      taxRate: sharedTaxRate,
+      taxMode: taxMode,
+      taxAmount: sharedTaxAmount,
+      tip,
+      tipCalc,
+      tipMode,
+      tipAmountInput,
+      customTipPercentInput,
+    };
+    const compressed = LZString.compressToEncodedURIComponent(
+      JSON.stringify(state)
+    );
+    return `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+  };
+
   return (
     <main>
       <img
@@ -166,6 +190,7 @@ function App() {
               taxAmount={taxAmount}
               tipAmountInput={tipAmountInput}
               customTipPercentInput={customTipPercentInput}
+              getShareUrl={getShareUrl}
             />
           )}
         </Card>

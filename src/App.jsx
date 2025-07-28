@@ -29,7 +29,30 @@ function App() {
           if (state.people) setPeople(state.people);
           if (state.items) setItems(state.items);
           if (state.assignments) setAssignments(state.assignments);
-          if (state.taxRate !== undefined) setTaxRate(state.taxRate);
+          if (state.taxMode === "amount") {
+            setTaxRate({
+              value: state.taxRate || "",
+              mode: "amount",
+              amount: state.taxAmount || "",
+            });
+          } else {
+            setTaxRate({ value: state.taxRate || "", mode: "percent" });
+          }
+          // Restore tip mode and value
+          if (state.tipMode === "amount") {
+            setTipMode("amount");
+            setTipAmountInput(state.tipAmount || state.tipAmountInput || "");
+            setTip(state.tipAmount || state.tipAmountInput || "");
+          } else if (state.tipMode === "customPercent") {
+            setTipMode("customPercent");
+            setCustomTipPercentInput(
+              state.tipPercent || state.customTipPercentInput || ""
+            );
+            setTip("");
+          } else {
+            setTipMode(state.tipMode || "percent");
+            setTip(state.tip !== undefined ? state.tip : "");
+          }
           if (state.tip !== undefined) setTip(state.tip);
           if (state.tipCalc) setTipCalc(state.tipCalc);
           // Optionally handle taxMode and taxAmount if you store them in state
@@ -95,19 +118,43 @@ function App() {
 
   // Shareable URL logic (now includes taxMode and taxAmount)
   const getShareUrl = () => {
-    // For sharing, use the actual tax value used in Summary
-    let sharedTaxRate = taxMode === "percent" ? taxRateNum : "";
-    let sharedTaxAmount = taxMode === "amount" ? taxAmount : null;
+    // Tax encoding
+    let encodedTaxMode =
+      taxRate && typeof taxRate === "object" && taxRate.mode
+        ? taxRate.mode
+        : "percent";
+    let encodedTaxAmount = null;
+    let encodedTaxRate = "";
+    if (encodedTaxMode === "amount") {
+      encodedTaxAmount =
+        taxRate && typeof taxRate === "object" ? taxRate.amount : null;
+    } else {
+      encodedTaxRate =
+        taxRate && typeof taxRate === "object" ? taxRate.value : taxRate;
+    }
+
+    // Tip encoding
+    let encodedTipMode = tipMode;
+    let encodedTipAmount = null;
+    let encodedTipPercent = null;
+    if (encodedTipMode === "amount") {
+      encodedTipAmount = tipAmountInput;
+    } else if (encodedTipMode === "customPercent") {
+      encodedTipPercent = customTipPercentInput;
+    }
+
     const state = {
       people,
       items,
       assignments,
-      taxRate: sharedTaxRate,
-      taxMode: taxMode,
-      taxAmount: sharedTaxAmount,
-      tip,
+      taxMode: encodedTaxMode,
+      taxAmount: encodedTaxAmount,
+      taxRate: encodedTaxRate,
+      tipMode: encodedTipMode,
+      tipAmount: encodedTipAmount,
+      tipPercent: encodedTipPercent,
       tipCalc,
-      tipMode,
+      tip,
       tipAmountInput,
       customTipPercentInput,
     };

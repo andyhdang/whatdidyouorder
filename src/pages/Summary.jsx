@@ -154,18 +154,12 @@ function Summary({
   return (
     <main>
       <h2>Summary</h2>
-      {fromSharedUrl && (
-        <Callout type="warning" style={{ marginBottom: "1em" }}>
-          You opened a shared summary. Navigating away from this tab may change
-          the results.
-        </Callout>
-      )}
       <Modal open={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)}>
         <div
           style={{ padding: "2em 1.5em", textAlign: "center", maxWidth: 320 }}
         >
           <h3 style={{ marginTop: 0 }}>
-            Tabby did the math to split your bill!
+            Tabby did the math to split your bill. Let's see the damage!
           </h3>
           <Button
             label="See Summary"

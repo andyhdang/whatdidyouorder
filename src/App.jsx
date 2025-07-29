@@ -166,11 +166,20 @@ function App() {
 
   return (
     <main>
-      <img
-        src={isDarkMode ? logoBlurple : logo}
-        alt="Tabby Split Logo"
-        style={{ height: "100px", marginBottom: "0rem" }}
-      />
+      <a
+        href={window.location.origin + window.location.pathname}
+        target="_blank"
+        rel="noopener noreferrer"
+        tabIndex={0}
+        aria-label="Open a new blank TabbySplit tab"
+        style={{ display: "inline-block" }}
+      >
+        <img
+          src={isDarkMode ? logoBlurple : logo}
+          alt="Tabby Split Logo"
+          style={{ height: "100px", marginBottom: "0rem", cursor: "pointer" }}
+        />
+      </a>
       <h1>TabbySplit</h1>
       <p style={{ marginBottom: "2.5rem" }}>Split the bill, purrfectly.</p>
       <TabGroup tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

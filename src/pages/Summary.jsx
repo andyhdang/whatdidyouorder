@@ -29,6 +29,7 @@ function Summary({
 }) {
   // Detect if user is coming from a shared URL
   const [fromSharedUrl, setFromSharedUrl] = useState(false);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isShared = params.get("data");
@@ -37,7 +38,7 @@ function Summary({
       setFromSharedUrl(true);
       sessionStorage.setItem(alertKey, "true");
       setTimeout(() => {
-        alert("Tabby did the math, here’s the damage!");
+        setWelcomeModalOpen(true);
       }, 100);
     }
   }, []);
@@ -159,6 +160,20 @@ function Summary({
           the results.
         </Callout>
       )}
+      <Modal open={welcomeModalOpen} onClose={() => setWelcomeModalOpen(false)}>
+        <div
+          style={{ padding: "2em 1.5em", textAlign: "center", maxWidth: 320 }}
+        >
+          <h3 style={{ marginTop: 0 }}>
+            Tabby did the math to split your bill!
+          </h3>
+          <Button
+            label="See Summary"
+            onClick={() => setWelcomeModalOpen(false)}
+            style={{ marginTop: 24 }}
+          />
+        </div>
+      </Modal>
       {/* Alert dialog shown instead of Callout for shared URL message */}
       {personTotals.every((p) => p.itemsOwed.length === 0) && (
         <EmptyArea

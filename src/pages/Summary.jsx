@@ -9,6 +9,7 @@ import EmptyArea from "../components/EmptyArea/EmptyArea";
 import LZString from "lz-string";
 
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
+import Snackbar from "../components/Snackbar/Snackbar";
 
 import { useEffect, useState, useRef } from "react";
 
@@ -146,6 +147,8 @@ function Summary({
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
 
   const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
 
   return (
     <main>
@@ -354,7 +357,8 @@ function Summary({
               totalTip
             ).toFixed(2)}\n`;
             navigator.clipboard.writeText(text);
-            alert("Summary copied to clipboard!");
+            setSnackbarMsg("Summary copied to clipboard!");
+            setSnackbarOpen(true);
           }}
         />
         <Button
@@ -363,13 +367,30 @@ function Summary({
           onClick={() => {
             const url = getShareUrl();
             navigator.clipboard.writeText(url);
-            alert("Shareable URL copied to clipboard!");
+            setSnackbarMsg("Shareable URL copied to clipboard!");
+            setSnackbarOpen(true);
           }}
+        />
+        <Snackbar
+          open={snackbarOpen}
+          message={snackbarMsg}
+          type="success"
+          onClose={() => setSnackbarOpen(false)}
         />
         <Button
           label="Generate QR Code"
           icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
           onClick={() => setQrModalOpen(true)}
+        />
+        <Button
+          label="Split Another Bill"
+          className="tertiary"
+          onClick={() => {
+            window.open(
+              window.location.origin + window.location.pathname,
+              "_blank"
+            );
+          }}
         />
         <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
           <ShareUrlQRCode url={getShareUrl()} />

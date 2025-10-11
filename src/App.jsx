@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import LZString from "lz-string";
+
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
 import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
+import UploadReceipt from "./pages/UploadReceipt";
 import Card from "./components/Card/Card";
 import Footer from "./components/Footer/Footer";
 import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
 
-const tabs = ["People", "Items", "Assign", "Summary"];
+const tabs = ["Upload Receipt", "People", "Items", "Assign", "Summary"];
 
 function App() {
   // Tip input states for Assign/Summary
@@ -65,6 +67,7 @@ function App() {
     }
   }, []);
   const [activeTab, setActiveTab] = useState(0);
+  const [receiptFile, setReceiptFile] = useState(null);
   const [people, setPeople] = useState([]);
   const [emojis, setEmojis] = useState([]);
   const [items, setItems] = useState([]);
@@ -193,6 +196,14 @@ function App() {
       >
         <Card>
           {activeTab === 0 && (
+            <UploadReceipt
+              onNext={(file) => {
+                setReceiptFile(file);
+                setActiveTab(1);
+              }}
+            />
+          )}
+          {activeTab === 1 && (
             <People
               people={people}
               setPeople={setPeople}
@@ -200,14 +211,14 @@ function App() {
               setEmojis={setEmojis}
             />
           )}
-          {activeTab === 1 && (
+          {activeTab === 2 && (
             <Items
               items={items}
               setItems={setItems}
               setActiveTab={setActiveTab}
             />
           )}
-          {activeTab === 2 && (
+          {activeTab === 3 && (
             <Assign
               people={people}
               items={items}
@@ -232,7 +243,7 @@ function App() {
               setCustomTipPercentInput={setCustomTipPercentInput}
             />
           )}
-          {activeTab === 3 && (
+          {activeTab === 4 && (
             <Summary
               people={people}
               items={items}

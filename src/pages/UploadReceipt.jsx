@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import "./UploadReceipt.css";
 
 const UploadReceipt = ({ onNext }) => {
@@ -6,13 +6,6 @@ const UploadReceipt = ({ onNext }) => {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://localhost:300/")
-      .then((response) => response.text())
-      .then((data) => setMessage(data))
-      .catch((error) => console.error("Error fetching from backend:", error));
-  }, []);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -35,8 +28,6 @@ const UploadReceipt = ({ onNext }) => {
   return (
     <div className="upload-receipt-container">
       <h2>Upload Receipt</h2>
-      <h1>React talking to Backend</h1>
-      <p>{message}</p>
       <p>Please upload a photo or PDF of your receipt to get started.</p>
       <input
         type="file"

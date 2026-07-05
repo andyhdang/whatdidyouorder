@@ -42,15 +42,40 @@
   cursor: not-allowed;
 }
 
-.file-preview {
-  margin: 16px 0 8px 0;
+.json-paste-section {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.json-paste-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.json-paste-section textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.json-error,
+.json-success {
+  font-size: 0.95rem;
+  margin: 8px 0 0 0;
   text-align: center;
 }
 
-.receipt-preview-img {
-  max-width: 100%;
-  max-height: 200px;
-  margin-top: 8px;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+.json-error {
+  color: #b91c1c;
+}
+
+.json-success {
+  color: #047857;
 }

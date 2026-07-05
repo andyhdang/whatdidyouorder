@@ -13,7 +13,7 @@ import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
 
-const tabs = ["Upload Receipt", "People", "Items", "Assign", "Summary"];
+const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
 
 function App() {
   // Tip input states for Assign/Summary
@@ -58,7 +58,7 @@ function App() {
           if (state.tip !== undefined) setTip(state.tip);
           if (state.tipCalc) setTipCalc(state.tipCalc);
           // Optionally handle taxMode and taxAmount if you store them in state
-          setActiveTab(3); // Go straight to Summary tab
+          setActiveTab(4); // Go straight to Summary tab
         }
       } catch (e) {
         // Optionally show error to user
@@ -67,7 +67,6 @@ function App() {
     }
   }, []);
   const [activeTab, setActiveTab] = useState(0);
-  const [receiptFile, setReceiptFile] = useState(null);
   const [people, setPeople] = useState([]);
   const [emojis, setEmojis] = useState([]);
   const [items, setItems] = useState([]);
@@ -197,24 +196,27 @@ function App() {
         <Card>
           {activeTab === 0 && (
             <UploadReceipt
-              onNext={(file) => {
-                setReceiptFile(file);
+              onNext={({ extractedItems }) => {
+                if (Array.isArray(extractedItems) && extractedItems.length > 0) {
+                  setItems(extractedItems);
+                }
                 setActiveTab(1);
               }}
             />
           )}
           {activeTab === 1 && (
+            <Items
+              items={items}
+              setItems={setItems}
+              setActiveTab={setActiveTab}
+            />
+          )}
+          {activeTab === 2 && (
             <People
               people={people}
               setPeople={setPeople}
               emojis={emojis}
               setEmojis={setEmojis}
-            />
-          )}
-          {activeTab === 2 && (
-            <Items
-              items={items}
-              setItems={setItems}
               setActiveTab={setActiveTab}
             />
           )}

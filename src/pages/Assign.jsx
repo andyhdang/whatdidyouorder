@@ -511,7 +511,7 @@ function Assign({
             className="custom-btn tertiary"
             onClick={() => {
               if (typeof setActiveTab === "function") {
-                setActiveTab(3);
+                setActiveTab(4);
               }
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}

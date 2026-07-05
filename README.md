@@ -34,6 +34,33 @@ npm run dev
 
 Open http://localhost:5173 in your browser.
 
+### Configure receipt extraction API
+
+Set this environment variable before running serverless APIs locally/deployed:
+
+```sh
+export OPENAI_API_KEY="your_api_key_here"
+```
+
+`POST /api/extract-items` accepts JSON:
+
+```json
+{
+  "imageBase64": "data:image/jpeg;base64,..."
+}
+```
+
+You can also send `"imageUrl"` instead of `"imageBase64"`.  
+Response format:
+
+```json
+{
+  "items": [
+    { "name": "Spicy Tuna Roll", "quantity": 2, "unitPrice": 8.5 }
+  ]
+}
+```
+
 ### Other scripts
 
 | Script | Description |

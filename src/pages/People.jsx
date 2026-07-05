@@ -24,7 +24,7 @@ const EMOJIS = [
   "🐾",
 ];
 
-function People({ people, setPeople, emojis, setEmojis }) {
+function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
   const [name, setName] = useState("");
   const [editIdx, setEditIdx] = useState(null);
   const [editName, setEditName] = useState("");
@@ -206,14 +206,14 @@ function People({ people, setPeople, emojis, setEmojis }) {
       </div>
       {people.length > 0 && (
         <Button
-          label="Next: Add Items"
+          label="Next: Assign People to Items"
           className="custom-btn tertiary"
           onClick={() => {
             if (typeof setActiveTab === "function") {
               setActiveTab(3);
             } else {
               window.dispatchEvent(
-                new CustomEvent("changeTab", { detail: { tab: "Items" } })
+                new CustomEvent("changeTab", { detail: { tab: "Assign" } })
               );
             }
             window.scrollTo({ top: 0, behavior: "smooth" });

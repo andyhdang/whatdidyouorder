@@ -253,7 +253,7 @@ function Items({ items, setItems, setActiveTab }) {
               }}
             >
               <Button
-                label="Next: Assign People to Items"
+                label="Next: Add People"
                 className="custom-btn tertiary"
                 onClick={() => {
                   if (typeof setActiveTab === "function") {

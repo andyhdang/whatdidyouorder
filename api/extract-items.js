@@ -1,6 +1,7 @@
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-4.1-mini";
-const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const MAX_REQUEST_BODY_BYTES = 4 * 1024 * 1024;
 
 function sendJson(res, status, payload) {
   return res.status(status).json(payload);
@@ -46,10 +47,20 @@ function normalizeExtractedItems(payload) {
 
 function parseBody(req) {
   if (req.body && typeof req.body === "object") {
+    try {
+      if (Buffer.byteLength(JSON.stringify(req.body), "utf8") > MAX_REQUEST_BODY_BYTES) {
+        return Promise.reject(new Error("BODY_TOO_LARGE"));
+      }
+    } catch {
+      return Promise.reject(new Error("INVALID_JSON_BODY"));
+    }
     return Promise.resolve(req.body);
   }
 
   if (typeof req.body === "string" && req.body.trim()) {
+    if (Buffer.byteLength(req.body, "utf8") > MAX_REQUEST_BODY_BYTES) {
+      return Promise.reject(new Error("BODY_TOO_LARGE"));
+    }
     try {
       return Promise.resolve(JSON.parse(req.body));
     } catch {
@@ -59,7 +70,15 @@ function parseBody(req) {
 
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
+    let totalSize = 0;
+    req.on("data", (chunk) => {
+      chunks.push(chunk);
+      totalSize += chunk.length;
+      if (totalSize > MAX_REQUEST_BODY_BYTES) {
+        reject(new Error("BODY_TOO_LARGE"));
+        req.destroy();
+      }
+    });
     req.on("end", () => {
       const raw = Buffer.concat(chunks).toString("utf8").trim();
       if (!raw) {
@@ -190,6 +209,11 @@ export default async function handler(req, res) {
   try {
     body = await parseBody(req);
   } catch (error) {
+    if (error instanceof Error && error.message === "BODY_TOO_LARGE") {
+      return sendJson(res, 413, {
+        error: "Request body is too large. Upload a smaller image.",
+      });
+    }
     if (error instanceof Error && error.message === "EMPTY_BODY") {
       return sendJson(res, 400, { error: "Request body is required" });
     }

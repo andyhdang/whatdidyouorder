@@ -50,6 +50,8 @@ export OPENAI_API_KEY="your_api_key_here"
 }
 ```
 
+Images are automatically compressed client-side before upload to stay within serverless payload limits (about 4MB request body, ~3MB decoded image).
+
 You can also send `"imageUrl"` instead of `"imageBase64"`.  
 Response format:
 

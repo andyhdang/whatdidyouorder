@@ -44,6 +44,44 @@ function normalizeExtractedItems(payload) {
     .filter(Boolean);
 }
 
+function extractRawContent(completionPayload) {
+  const content = completionPayload?.choices?.[0]?.message?.content;
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    const joinedText = content
+      .map((part) => {
+        if (!part || typeof part !== "object") return "";
+        if (typeof part.text === "string") return part.text;
+        return "";
+      })
+      .join("")
+      .trim();
+    if (joinedText) return joinedText;
+  }
+
+  return "";
+}
+
+function parseJsonContent(rawContent) {
+  const trimmed = rawContent.trim();
+  if (!trimmed) return null;
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+    if (!fenceMatch?.[1]) return null;
+    try {
+      return JSON.parse(fenceMatch[1]);
+    } catch {
+      return null;
+    }
+  }
+}
+
 function parseBody(req) {
   if (req.body && typeof req.body === "object") {
     return Promise.resolve(req.body);
@@ -150,15 +188,13 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
   }
 
   const completion = await response.json();
-  const rawContent = completion?.choices?.[0]?.message?.content;
-  if (typeof rawContent !== "string" || !rawContent.trim()) {
+  const rawContent = extractRawContent(completion);
+  if (!rawContent) {
     throw new Error("EMPTY_MODEL_RESPONSE");
   }
 
-  let parsedContent;
-  try {
-    parsedContent = JSON.parse(rawContent);
-  } catch {
+  const parsedContent = parseJsonContent(rawContent);
+  if (!parsedContent) {
     throw new Error("INVALID_MODEL_JSON");
   }
 

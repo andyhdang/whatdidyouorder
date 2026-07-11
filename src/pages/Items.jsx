@@ -1,0 +1,273 @@
+import React, { useState } from "react";
+import InputField from "../components/InputField/InputField";
+import Button from "../components/Button/Button";
+import Card from "../components/Card/Card";
+import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
+import DeleteIcon from "../assets/icons/DeleteIcon";
+import EditIcon from "../assets/icons/EditIcon";
+import Stepper from "../components/Stepper/Stepper";
+import Modal from "../components/Modal/Modal";
+
+function Items({ items, setItems, setActiveTab }) {
+  const [editIdx, setEditIdx] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
+  const openEditModal = (idx) => {
+    setEditIdx(idx);
+    setEditName(items[idx].name);
+    setEditPrice(items[idx].price);
+  };
+
+  const handleSaveEdit = () => {
+    if (editName.trim() && editPrice.trim()) {
+      const updatedItems = items.map((item, idx) =>
+        idx === editIdx
+          ? { ...item, name: editName.trim(), price: editPrice.trim() }
+          : item
+      );
+      setItems(updatedItems);
+      setEditIdx(null);
+      setEditName("");
+      setEditPrice("");
+    }
+  };
+
+  const handleCloseEdit = () => {
+    setEditIdx(null);
+    setEditName("");
+    setEditPrice("");
+  };
+  const [itemName, setItemName] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
+  const [itemQuantity, setItemQuantity] = useState(1);
+
+  const handleAddItem = () => {
+    if (itemName.trim() && itemPrice.trim() && itemQuantity > 0) {
+      const newItems = [];
+      for (let i = 0; i < itemQuantity; i++) {
+        newItems.push({ name: itemName.trim(), price: itemPrice.trim() });
+      }
+      setItems([...items, ...newItems]);
+      setItemName("");
+      setItemPrice("");
+      setItemQuantity(1);
+      setTimeout(() => {
+        document.getElementById("itemName")?.focus();
+      }, 0);
+    }
+  };
+
+  const handleDeleteItem = (idx) => {
+    setItems(items.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <main>
+      <h2>Items</h2>
+      <p className="description">What was ordered?</p>
+      <InputField
+        label="Item Name"
+        placeholder="e.g. Cat Nip"
+        name="itemName"
+        id="itemName"
+        value={itemName}
+        onChange={(e) => setItemName(e.target.value)}
+        onEnter={() => {
+          document.getElementById("itemPrice")?.focus();
+        }}
+      />
+      <InputField
+        label="Price"
+        placeholder="e.g. 12.99"
+        name="itemPrice"
+        type="number"
+        value={itemPrice}
+        onChange={(e) => setItemPrice(e.target.value)}
+        onEnter={() => {
+          if (itemName.trim() && itemPrice.trim()) {
+            handleAddItem();
+          } else {
+            document.getElementById("itemQuantity-stepper")?.focus();
+          }
+        }}
+      />
+      <div
+        style={{
+          margin: "0.5em 0 2em 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+      >
+        <label
+          htmlFor="itemQuantity-stepper"
+          style={{ fontWeight: 500, marginRight: "0.5em" }}
+        >
+          Quantity:
+        </label>
+        <Stepper
+          id="itemQuantity-stepper"
+          value={itemQuantity}
+          min={1}
+          onChange={setItemQuantity}
+        />
+      </div>
+      <Button
+        label="Add Item"
+        icon={
+          <ShoppingCartAddIcon
+            width={20}
+            height={20}
+            style={{ color: "inherit" }}
+          />
+        }
+        onClick={handleAddItem}
+        fullWidth
+      />
+      <div style={{ height: "2em" }}></div>
+      <div>
+        {items.map((item, idx) => (
+          <Card
+            key={idx}
+            heading={null}
+            button={null}
+            className={
+              idx === items.length - 1
+                ? "custom-card-list no-border"
+                : "custom-card-list"
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                  {item.name}
+                </span>
+                <span
+                  style={{ fontSize: "0.95rem", color: "var(--neutral-weak)" }}
+                >
+                  Price: ${item.price}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "0.5em" }}>
+                <Button
+                  icon={
+                    <EditIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  onClick={() => openEditModal(idx)}
+                  aria-label={`Edit ${item.name}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Edit Item"
+                />
+                <Button
+                  icon={
+                    <DeleteIcon
+                      width={20}
+                      height={20}
+                      style={{ color: "inherit" }}
+                    />
+                  }
+                  onClick={() => handleDeleteItem(idx)}
+                  aria-label={`Delete ${item.name}`}
+                  className="icon-btn custom-btn secondary"
+                  title="Delete Item"
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+      {/* Subtotal calculation and display */}
+      {/* Edit Item Modal */}
+      <Modal open={editIdx !== null} onClose={handleCloseEdit}>
+        <div style={{ padding: "1em", minWidth: 260 }}>
+          <h3>Edit Item</h3>
+          <InputField
+            label="Item Name"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            autoFocus
+          />
+          <InputField
+            label="Price"
+            type="number"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
+          />
+          <div
+            style={{
+              display: "flex",
+              gap: "1em",
+              marginTop: "1.5em",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              label="Cancel"
+              onClick={handleCloseEdit}
+              className="custom-btn tertiary"
+            />
+            <Button
+              label="Save"
+              onClick={handleSaveEdit}
+              className="custom-btn primary"
+            />
+          </div>
+        </div>
+      </Modal>
+      <div
+        style={{
+          marginTop: "2em",
+          fontWeight: 600,
+          fontSize: "1.1em",
+        }}
+      >
+        Subtotal: $
+        {items
+          .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0)
+          .toFixed(2)}
+        {items.length > 0 && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "1em",
+              }}
+            >
+              <Button
+                label="Next: Add People"
+                className="custom-btn tertiary"
+                onClick={() => {
+                  if (typeof setActiveTab === "function") {
+                    setActiveTab(2);
+                  }
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </main>
+  );
+}
+
+export default Items;

@@ -170,7 +170,7 @@ function Assign({
         <EmptyArea
           text="Add items to assign."
           buttonLabel="Go to Items"
-          onButtonClick={() => setActiveTab && setActiveTab(1)}
+          onButtonClick={() => setActiveTab && setActiveTab(0)}
         />
       ) : (
         items.map((item, itemIdx) => {
@@ -511,7 +511,7 @@ function Assign({
             className="custom-btn tertiary"
             onClick={() => {
               if (typeof setActiveTab === "function") {
-                setActiveTab(4);
+                setActiveTab(3);
               }
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}

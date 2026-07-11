@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import "./UploadReceipt.css";
 
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+const RECEIPT_EXTRACT_ENDPOINT =
+  import.meta.env.VITE_RECEIPT_EXTRACT_API_URL?.trim() || "/api/extract-items";
 
 const UploadReceipt = ({ onNext }) => {
   const cameraInputRef = useRef(null);
@@ -15,18 +17,46 @@ const UploadReceipt = ({ onNext }) => {
   const [extractedItems, setExtractedItems] = useState([]);
 
   const parseErrorMessage = async (response) => {
+    const statusSuffix = ` (HTTP ${response.status})`;
+
     try {
-      const errorPayload = await response.json();
-      if (
-        typeof errorPayload?.error === "string" &&
-        errorPayload.error.trim()
-      ) {
-        return errorPayload.error.trim();
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const errorPayload = await response.json();
+        if (
+          typeof errorPayload?.error === "string" &&
+          errorPayload.error.trim()
+        ) {
+          return `${errorPayload.error.trim()}${statusSuffix}`;
+        }
       }
-    } catch {
-      return "Failed to extract receipt items.";
+    } catch (error) {
+      void error;
     }
-    return "Failed to extract receipt items.";
+
+    try {
+      const errorText = (await response.text()).trim();
+      if (errorText) {
+        if (
+          errorText.toLowerCase().includes("<!doctype html") ||
+          errorText.toLowerCase().includes("<html")
+        ) {
+          return (
+            `Receipt extraction endpoint is unavailable${statusSuffix}. ` +
+            "Set VITE_RECEIPT_EXTRACT_API_URL to your backend /api/extract-items URL."
+          );
+        }
+        return `${errorText}${statusSuffix}`;
+      }
+    } catch (error) {
+      void error;
+    }
+
+    if (response.status === 404) {
+      return "Receipt extraction endpoint was not found (HTTP 404).";
+    }
+
+    return `Failed to extract receipt items${statusSuffix}.`;
   };
 
   const readFileAsDataUrl = (file) =>
@@ -140,7 +170,7 @@ const UploadReceipt = ({ onNext }) => {
   };
 
   const extractItemsFromImage = async (imageBase64) => {
-    const response = await fetch("/api/extract-items", {
+    const response = await fetch(RECEIPT_EXTRACT_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

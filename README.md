@@ -36,11 +36,15 @@ Open http://localhost:5173 in your browser.
 
 ### Configure receipt extraction API
 
-Set this environment variable before running serverless APIs locally/deployed:
+Set these environment variables before running receipt extraction:
 
 ```sh
 export OPENAI_API_KEY="your_api_key_here"
+export VITE_RECEIPT_EXTRACT_API_URL="https://your-backend.example.com/api/extract-items"
 ```
+
+`VITE_RECEIPT_EXTRACT_API_URL` is optional in environments that already serve `/api/extract-items` on the same host (for example Vercel serverless).  
+For static hosting (like GitHub Pages), you must point this to a separately deployed backend endpoint.
 
 `POST /api/extract-items` accepts JSON:
 

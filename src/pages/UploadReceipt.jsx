@@ -1,7 +1,12 @@
 import React, { useRef, useState } from "react";
 import "./UploadReceipt.css";
 
-const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+const MAX_SOURCE_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const MAX_REQUEST_BODY_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 2200;
+const SCALE_RETRY_MULTIPLIER = 0.85;
+const QUALITY_STEPS = [0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42];
 
 const UploadReceipt = ({ onNext }) => {
   const cameraInputRef = useRef(null);
@@ -15,6 +20,10 @@ const UploadReceipt = ({ onNext }) => {
   const [extractedItems, setExtractedItems] = useState([]);
 
   const parseErrorMessage = async (response) => {
+    if (response.status === 413) {
+      return "Image is too large to process. Try cropping the receipt photo and re-uploading.";
+    }
+
     try {
       const errorPayload = await response.json();
       if (typeof errorPayload?.error === "string" && errorPayload.error.trim()) {
@@ -26,19 +35,73 @@ const UploadReceipt = ({ onNext }) => {
     return "Failed to extract receipt items.";
   };
 
-  const readFileAsDataUrl = (file) =>
+  const estimateBase64Bytes = (base64Value) => {
+    const clean = base64Value.replace(/\s/g, "");
+    const padding = clean.endsWith("==") ? 2 : clean.endsWith("=") ? 1 : 0;
+    return Math.floor((clean.length * 3) / 4) - padding;
+  };
+
+  const estimateRequestPayloadBytes = (imageDataUrl) =>
+    new TextEncoder().encode(JSON.stringify({ imageBase64: imageDataUrl })).length;
+
+  const loadImageFromObjectUrl = (file) =>
     new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result !== "string") {
-          reject(new Error("Failed to read image file."));
-          return;
-        }
-        resolve(reader.result);
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
       };
-      reader.onerror = () => reject(new Error("Failed to read image file."));
-      reader.readAsDataURL(file);
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Failed to read image file."));
+      };
+      image.src = objectUrl;
     });
+
+  const drawToCanvas = (image, width, height) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Failed to process image.");
+    }
+    context.drawImage(image, 0, 0, width, height);
+    return canvas;
+  };
+
+  const prepareImageForUpload = async (file) => {
+    const image = await loadImageFromObjectUrl(file);
+    let width = image.naturalWidth || image.width;
+    let height = image.naturalHeight || image.height;
+    const largestDimension = Math.max(width, height);
+    if (largestDimension > MAX_IMAGE_DIMENSION) {
+      const scale = MAX_IMAGE_DIMENSION / largestDimension;
+      width = Math.max(1, Math.round(width * scale));
+      height = Math.max(1, Math.round(height * scale));
+    }
+
+    for (let pass = 0; pass < 4; pass += 1) {
+      const canvas = drawToCanvas(image, width, height);
+      for (const quality of QUALITY_STEPS) {
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        const encodedPart = dataUrl.split(",")[1] || "";
+        const imageBytes = estimateBase64Bytes(encodedPart);
+        const payloadBytes = estimateRequestPayloadBytes(dataUrl);
+        if (imageBytes <= MAX_IMAGE_BYTES && payloadBytes <= MAX_REQUEST_BODY_BYTES) {
+          return dataUrl;
+        }
+      }
+
+      width = Math.max(1, Math.round(width * SCALE_RETRY_MULTIPLIER));
+      height = Math.max(1, Math.round(height * SCALE_RETRY_MULTIPLIER));
+    }
+
+    throw new Error(
+      "Image is too large to process. Crop the receipt and try again."
+    );
+  };
 
   const normalizeApiItems = (items) => {
     if (!Array.isArray(items)) return [];
@@ -164,8 +227,8 @@ const UploadReceipt = ({ onNext }) => {
       return;
     }
 
-    if (file.size > MAX_IMAGE_BYTES) {
-      setUploadError("Image is too large. Please use one smaller than 7MB.");
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) {
+      setUploadError("Image is too large. Please use one smaller than 20MB.");
       return;
     }
 
@@ -173,7 +236,7 @@ const UploadReceipt = ({ onNext }) => {
     setIsExtracting(true);
 
     try {
-      const imageBase64 = await readFileAsDataUrl(file);
+      const imageBase64 = await prepareImageForUpload(file);
       setImagePreview(imageBase64);
       const normalizedItems = await extractItemsFromImage(imageBase64);
       setExtractedItems(normalizedItems);

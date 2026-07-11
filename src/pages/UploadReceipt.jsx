@@ -17,7 +17,10 @@ const UploadReceipt = ({ onNext }) => {
   const parseErrorMessage = async (response) => {
     try {
       const errorPayload = await response.json();
-      if (typeof errorPayload?.error === "string" && errorPayload.error.trim()) {
+      if (
+        typeof errorPayload?.error === "string" &&
+        errorPayload.error.trim()
+      ) {
         return errorPayload.error.trim();
       }
     } catch {
@@ -48,7 +51,7 @@ const UploadReceipt = ({ onNext }) => {
       const name = typeof item.name === "string" ? item.name.trim() : "";
       const quantity = Math.max(
         1,
-        Number.parseInt(String(item.quantity ?? 1), 10) || 1
+        Number.parseInt(String(item.quantity ?? 1), 10) || 1,
       );
       const unitPrice = Number.parseFloat(String(item.unitPrice));
       if (!name || !Number.isFinite(unitPrice) || unitPrice < 0) return [];
@@ -73,8 +76,10 @@ const UploadReceipt = ({ onNext }) => {
 
     const quantity = Math.max(
       1,
-      Number.parseInt(String(item.quantity ?? item.qty ?? item.count ?? 1), 10) ||
-        1
+      Number.parseInt(
+        String(item.quantity ?? item.qty ?? item.count ?? 1),
+        10,
+      ) || 1,
     );
     const name =
       item.name ||
@@ -87,9 +92,11 @@ const UploadReceipt = ({ onNext }) => {
         item.unit_price ??
         item.price ??
         item.amount ??
-        item.cost
+        item.cost,
     );
-    const totalPrice = toNumber(item.totalPrice ?? item.total_price ?? item.total);
+    const totalPrice = toNumber(
+      item.totalPrice ?? item.total_price ?? item.total,
+    );
     const resolvedPrice =
       unitPrice !== null
         ? unitPrice
@@ -215,7 +222,7 @@ const UploadReceipt = ({ onNext }) => {
       const normalized = itemsArray.flatMap(normalizeItem);
       if (!normalized.length) {
         setJsonError(
-          "Could not find ordered items with name and price fields in the JSON."
+          "Could not find ordered items with name and price fields in the JSON.",
         );
         setExtractedItems([]);
         return;
@@ -236,20 +243,20 @@ const UploadReceipt = ({ onNext }) => {
   };
 
   return (
-    <div className="upload-receipt-container">
+    <div className='upload-receipt-container'>
       <h2>Upload Receipt</h2>
       <p>Take a receipt photo or upload one to extract ordered items.</p>
 
-      <div className="image-actions">
+      <div className='image-actions'>
         <button
-          className="upload-btn"
+          className='upload-btn'
           onClick={() => cameraInputRef.current?.click()}
           disabled={isExtracting}
         >
           Use Camera
         </button>
         <button
-          className="upload-btn"
+          className='upload-btn'
           onClick={() => uploadInputRef.current?.click()}
           disabled={isExtracting}
         >
@@ -259,66 +266,72 @@ const UploadReceipt = ({ onNext }) => {
 
       <input
         ref={cameraInputRef}
-        className="image-input"
-        type="file"
-        accept="image/*"
-        capture="environment"
+        className='image-input'
+        type='file'
+        accept='image/*'
+        capture='environment'
         onChange={handleCameraChange}
       />
       <input
         ref={uploadInputRef}
-        className="image-input"
-        type="file"
-        accept="image/*"
+        className='image-input'
+        type='file'
+        accept='image/*'
         onChange={handleUploadChange}
       />
 
       {selectedImageName && (
-        <p className="selected-image-name">Selected image: {selectedImageName}</p>
+        <p className='selected-image-name'>
+          Selected image: {selectedImageName}
+        </p>
       )}
       {imagePreview && (
         <img
-          className="receipt-preview"
+          className='receipt-preview'
           src={imagePreview}
-          alt="Receipt preview"
+          alt='Receipt preview'
         />
       )}
 
-      {isExtracting && <p className="json-status">Extracting items...</p>}
-      {uploadError && <p className="json-error">{uploadError}</p>}
+      {isExtracting && <p className='json-status'>Extracting items...</p>}
+      {uploadError && <p className='json-error'>{uploadError}</p>}
 
-      <p className="input-divider">or paste JSON</p>
-      <div className="json-paste-section">
-        <label htmlFor="receipt-json-input">Paste receipt JSON</label>
+      <p className='input-divider'>or paste JSON</p>
+      <div className='json-paste-section'>
+        <label htmlFor='receipt-json-input'>Paste receipt JSON</label>
         <textarea
-          id="receipt-json-input"
+          id='receipt-json-input'
           value={jsonInput}
           onChange={(event) => setJsonInput(event.target.value)}
           placeholder='{"items":[{"name":"Pasta","price":14.99}]}'
           rows={6}
           disabled={isExtracting}
         />
-        <button
-          className="upload-btn"
-          onClick={handleExtractJson}
-          disabled={isExtracting}
-        >
-          Extract from JSON
-        </button>
+        <div className='btn-group'>
+          <button
+            className='upload-btn'
+            onClick={handleExtractJson}
+            disabled={isExtracting}
+          >
+            Extract from JSON
+          </button>
+
+          {jsonError && <p className='json-error'>{jsonError}</p>}
+          {extractedItems.length > 0 && (
+            <p className='json-success'>
+              Extracted {extractedItems.length} item
+              {extractedItems.length === 1 ? "" : "s"}.
+            </p>
+          )}
+          <button
+            className='next-btn'
+            onClick={handleNext}
+            disabled={extractedItems.length === 0 || isExtracting}
+          >
+            Next
+          </button>
+        </div>
       </div>
-      {jsonError && <p className="json-error">{jsonError}</p>}
-      {extractedItems.length > 0 && (
-        <p className="json-success">
-          Extracted {extractedItems.length} item{extractedItems.length === 1 ? "" : "s"}.
-        </p>
-      )}
-      <button
-        className="next-btn"
-        onClick={handleNext}
-        disabled={extractedItems.length === 0 || isExtracting}
-      >
-        Next
-      </button>
     </div>
   );
 };

@@ -51,6 +51,7 @@ export OPENAI_API_KEY="your_api_key_here"
 ```
 
 You can also send `"imageUrl"` instead of `"imageBase64"`.  
+Supported image formats: JPG, PNG, WEBP, and GIF.
 Response format:
 
 ```json

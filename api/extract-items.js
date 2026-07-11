@@ -1,6 +1,13 @@
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+const SUPPORTED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 function sendJson(res, status, payload) {
   return res.status(status).json(payload);
@@ -15,6 +22,12 @@ function estimateBase64Bytes(base64Value) {
 function toImageDataUrl(imageBase64) {
   if (imageBase64.startsWith("data:image/")) return imageBase64;
   return `data:image/jpeg;base64,${imageBase64}`;
+}
+
+function extractDataUrlMimeType(dataUrl) {
+  const match = /^data:([^;,]+)[;,]/i.exec(dataUrl);
+  if (!match?.[1]) return "";
+  return String(match[1]).toLowerCase();
 }
 
 function safePrice(value) {
@@ -259,6 +272,13 @@ export default async function handler(req, res) {
       });
     }
     imageReference = toImageDataUrl(imageBase64);
+    const mimeType = extractDataUrlMimeType(imageReference);
+    if (mimeType && !SUPPORTED_IMAGE_TYPES.has(mimeType)) {
+      return sendJson(res, 415, {
+        error:
+          "Unsupported image format. Please upload JPG, PNG, WEBP, or GIF.",
+      });
+    }
   }
 
   try {

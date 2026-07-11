@@ -122,3 +122,9 @@
 .json-status {
   color: #4338ca;
 }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

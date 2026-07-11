@@ -9,6 +9,13 @@ import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
+const SUPPORTED_UPLOAD_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 function AddItems({ items, setItems, setActiveTab }) {
   // Active add mode: null | 'scan' | 'upload' | 'manual'
@@ -58,6 +65,45 @@ function AddItems({ items, setItems, setActiveTab }) {
       reader.onerror = () => reject(new Error("Failed to read image file."));
       reader.readAsDataURL(file);
     });
+
+  const convertImageToJpegDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Failed to process image file."));
+          return;
+        }
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+        const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        URL.revokeObjectURL(objectUrl);
+        resolve(jpegDataUrl);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Failed to process image file."));
+      };
+
+      image.src = objectUrl;
+    });
+
+  const toUploadDataUrl = async (file) => {
+    const fileType = String(file.type || "").toLowerCase();
+    if (SUPPORTED_UPLOAD_TYPES.has(fileType)) {
+      return readFileAsDataUrl(file);
+    }
+    return convertImageToJpegDataUrl(file);
+  };
 
   const normalizeApiItems = (apiItems) => {
     if (!Array.isArray(apiItems)) return [];
@@ -110,7 +156,7 @@ function AddItems({ items, setItems, setActiveTab }) {
     setSelectedImageName(file.name);
     setIsExtracting(true);
     try {
-      const imageBase64 = await readFileAsDataUrl(file);
+      const imageBase64 = await toUploadDataUrl(file);
       setImagePreview(imageBase64);
       const extracted = await extractItemsFromImage(imageBase64);
       setItems((prev) => [...prev, ...extracted]);

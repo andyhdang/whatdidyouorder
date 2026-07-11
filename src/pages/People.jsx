@@ -210,7 +210,7 @@ function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
           className="custom-btn tertiary"
           onClick={() => {
             if (typeof setActiveTab === "function") {
-              setActiveTab(3);
+              setActiveTab(2);
             } else {
               window.dispatchEvent(
                 new CustomEvent("changeTab", { detail: { tab: "Assign" } })

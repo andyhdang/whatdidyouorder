@@ -3,16 +3,17 @@ import LZString from "lz-string";
 
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
-import AddItems from "./pages/AddItems";
+import Items from "./pages/Items";
 import Assign from "./pages/Assign";
 import Summary from "./pages/Summary";
+import UploadReceipt from "./pages/UploadReceipt";
 import Card from "./components/Card/Card";
 import Footer from "./components/Footer/Footer";
 import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
 import "./App.css";
 
-const tabs = ["Add Items", "People", "Assign", "Summary"];
+const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
 
 function App() {
   // Tip input states for Assign/Summary
@@ -57,7 +58,7 @@ function App() {
           if (state.tip !== undefined) setTip(state.tip);
           if (state.tipCalc) setTipCalc(state.tipCalc);
           // Optionally handle taxMode and taxAmount if you store them in state
-          setActiveTab(3); // Go straight to Summary tab
+          setActiveTab(4); // Go straight to Summary tab
         }
       } catch (e) {
         // Optionally show error to user
@@ -194,13 +195,23 @@ function App() {
       >
         <Card>
           {activeTab === 0 && (
-            <AddItems
+            <UploadReceipt
+              onNext={({ extractedItems }) => {
+                if (Array.isArray(extractedItems) && extractedItems.length > 0) {
+                  setItems(extractedItems);
+                }
+                setActiveTab(1);
+              }}
+            />
+          )}
+          {activeTab === 1 && (
+            <Items
               items={items}
               setItems={setItems}
               setActiveTab={setActiveTab}
             />
           )}
-          {activeTab === 1 && (
+          {activeTab === 2 && (
             <People
               people={people}
               setPeople={setPeople}
@@ -209,7 +220,7 @@ function App() {
               setActiveTab={setActiveTab}
             />
           )}
-          {activeTab === 2 && (
+          {activeTab === 3 && (
             <Assign
               people={people}
               items={items}
@@ -234,7 +245,7 @@ function App() {
               setCustomTipPercentInput={setCustomTipPercentInput}
             />
           )}
-          {activeTab === 3 && (
+          {activeTab === 4 && (
             <Summary
               people={people}
               items={items}

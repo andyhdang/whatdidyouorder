@@ -173,7 +173,7 @@ function Summary({
         <EmptyArea
           text="Assign people to items to calculate total owed for each person."
           buttonLabel="Go to Assign"
-          onButtonClick={() => setActiveTab && setActiveTab(2)}
+          onButtonClick={() => setActiveTab && setActiveTab(3)}
         />
       )}
       {items.length > 0 &&

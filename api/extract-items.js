@@ -1,13 +1,6 @@
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
-const SUPPORTED_IMAGE_TYPES = new Set([
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
 
 function sendJson(res, status, payload) {
   return res.status(status).json(payload);
@@ -22,12 +15,6 @@ function estimateBase64Bytes(base64Value) {
 function toImageDataUrl(imageBase64) {
   if (imageBase64.startsWith("data:image/")) return imageBase64;
   return `data:image/jpeg;base64,${imageBase64}`;
-}
-
-function extractDataUrlMimeType(dataUrl) {
-  const match = /^data:([^;,]+)[;,]/i.exec(dataUrl);
-  if (!match?.[1]) return "";
-  return String(match[1]).toLowerCase();
 }
 
 function safePrice(value) {
@@ -55,44 +42,6 @@ function normalizeExtractedItems(payload) {
       return { name, quantity, unitPrice };
     })
     .filter(Boolean);
-}
-
-function extractRawContent(completionPayload) {
-  const content = completionPayload?.choices?.[0]?.message?.content;
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    const joinedText = content
-      .map((part) => {
-        if (!part || typeof part !== "object") return "";
-        if (typeof part.text === "string") return part.text;
-        return "";
-      })
-      .join("")
-      .trim();
-    if (joinedText) return joinedText;
-  }
-
-  return "";
-}
-
-function parseJsonContent(rawContent) {
-  const trimmed = rawContent.trim();
-  if (!trimmed) return null;
-
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-    if (!fenceMatch?.[1]) return null;
-    try {
-      return JSON.parse(fenceMatch[1]);
-    } catch {
-      return null;
-    }
-  }
 }
 
 function parseBody(req) {
@@ -201,13 +150,15 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
   }
 
   const completion = await response.json();
-  const rawContent = extractRawContent(completion);
-  if (!rawContent) {
+  const rawContent = completion?.choices?.[0]?.message?.content;
+  if (typeof rawContent !== "string" || !rawContent.trim()) {
     throw new Error("EMPTY_MODEL_RESPONSE");
   }
 
-  const parsedContent = parseJsonContent(rawContent);
-  if (!parsedContent) {
+  let parsedContent;
+  try {
+    parsedContent = JSON.parse(rawContent);
+  } catch {
     throw new Error("INVALID_MODEL_JSON");
   }
 
@@ -272,13 +223,6 @@ export default async function handler(req, res) {
       });
     }
     imageReference = toImageDataUrl(imageBase64);
-    const mimeType = extractDataUrlMimeType(imageReference);
-    if (mimeType && !SUPPORTED_IMAGE_TYPES.has(mimeType)) {
-      return sendJson(res, 415, {
-        error:
-          "Unsupported image format. Please upload JPG, PNG, WEBP, or GIF.",
-      });
-    }
   }
 
   try {

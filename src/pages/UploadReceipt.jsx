@@ -1,5 +1,7 @@
 import React, { useRef, useState } from "react";
 import "./UploadReceipt.css";
+import Button from "../components/Button/Button";
+import Modal from "../components/Modal/Modal";
 
 const MAX_SOURCE_IMAGE_BYTES = 20 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
@@ -7,6 +9,7 @@ const MAX_REQUEST_BODY_BYTES = 4 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 2200;
 const SCALE_RETRY_MULTIPLIER = 0.85;
 const QUALITY_STEPS = [0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42];
+const SHOW_JSON_INPUT = false;
 
 const UploadReceipt = ({ onNext }) => {
   const cameraInputRef = useRef(null);
@@ -18,6 +21,8 @@ const UploadReceipt = ({ onNext }) => {
   const [jsonError, setJsonError] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedItems, setExtractedItems] = useState([]);
+  const [showExtractionSuccessModal, setShowExtractionSuccessModal] =
+    useState(false);
 
   const parseErrorMessage = async (response) => {
     if (response.status === 413) {
@@ -26,7 +31,10 @@ const UploadReceipt = ({ onNext }) => {
 
     try {
       const errorPayload = await response.json();
-      if (typeof errorPayload?.error === "string" && errorPayload.error.trim()) {
+      if (
+        typeof errorPayload?.error === "string" &&
+        errorPayload.error.trim()
+      ) {
         return errorPayload.error.trim();
       }
     } catch {
@@ -42,7 +50,8 @@ const UploadReceipt = ({ onNext }) => {
   };
 
   const estimateRequestPayloadBytes = (imageDataUrl) =>
-    new TextEncoder().encode(JSON.stringify({ imageBase64: imageDataUrl })).length;
+    new TextEncoder().encode(JSON.stringify({ imageBase64: imageDataUrl }))
+      .length;
 
   const loadImageFromObjectUrl = (file) =>
     new Promise((resolve, reject) => {
@@ -89,7 +98,10 @@ const UploadReceipt = ({ onNext }) => {
         const encodedPart = dataUrl.split(",")[1] || "";
         const imageBytes = estimateBase64Bytes(encodedPart);
         const payloadBytes = estimateRequestPayloadBytes(dataUrl);
-        if (imageBytes <= MAX_IMAGE_BYTES && payloadBytes <= MAX_REQUEST_BODY_BYTES) {
+        if (
+          imageBytes <= MAX_IMAGE_BYTES &&
+          payloadBytes <= MAX_REQUEST_BODY_BYTES
+        ) {
           return dataUrl;
         }
       }
@@ -99,7 +111,7 @@ const UploadReceipt = ({ onNext }) => {
     }
 
     throw new Error(
-      "Image is too large to process. Crop the receipt and try again."
+      "Image is too large to process. Crop the receipt and try again.",
     );
   };
 
@@ -111,7 +123,7 @@ const UploadReceipt = ({ onNext }) => {
       const name = typeof item.name === "string" ? item.name.trim() : "";
       const quantity = Math.max(
         1,
-        Number.parseInt(String(item.quantity ?? 1), 10) || 1
+        Number.parseInt(String(item.quantity ?? 1), 10) || 1,
       );
       const unitPrice = Number.parseFloat(String(item.unitPrice));
       if (!name || !Number.isFinite(unitPrice) || unitPrice < 0) return [];
@@ -136,8 +148,10 @@ const UploadReceipt = ({ onNext }) => {
 
     const quantity = Math.max(
       1,
-      Number.parseInt(String(item.quantity ?? item.qty ?? item.count ?? 1), 10) ||
-        1
+      Number.parseInt(
+        String(item.quantity ?? item.qty ?? item.count ?? 1),
+        10,
+      ) || 1,
     );
     const name =
       item.name ||
@@ -150,9 +164,11 @@ const UploadReceipt = ({ onNext }) => {
         item.unit_price ??
         item.price ??
         item.amount ??
-        item.cost
+        item.cost,
     );
-    const totalPrice = toNumber(item.totalPrice ?? item.total_price ?? item.total);
+    const totalPrice = toNumber(
+      item.totalPrice ?? item.total_price ?? item.total,
+    );
     const resolvedPrice =
       unitPrice !== null
         ? unitPrice
@@ -221,6 +237,7 @@ const UploadReceipt = ({ onNext }) => {
     setUploadError("");
     setJsonError("");
     setExtractedItems([]);
+    setShowExtractionSuccessModal(false);
 
     if (!file.type.startsWith("image/")) {
       setUploadError("Please select an image file.");
@@ -240,6 +257,7 @@ const UploadReceipt = ({ onNext }) => {
       setImagePreview(imageBase64);
       const normalizedItems = await extractItemsFromImage(imageBase64);
       setExtractedItems(normalizedItems);
+      setShowExtractionSuccessModal(true);
     } catch (error) {
       const message =
         error instanceof Error && error.message
@@ -266,6 +284,7 @@ const UploadReceipt = ({ onNext }) => {
 
   const handleExtractJson = () => {
     setUploadError("");
+    setShowExtractionSuccessModal(false);
     if (!jsonInput.trim()) {
       setJsonError("Paste JSON first.");
       setExtractedItems([]);
@@ -278,7 +297,7 @@ const UploadReceipt = ({ onNext }) => {
       const normalized = itemsArray.flatMap(normalizeItem);
       if (!normalized.length) {
         setJsonError(
-          "Could not find ordered items with name and price fields in the JSON."
+          "Could not find ordered items with name and price fields in the JSON.",
         );
         setExtractedItems([]);
         return;
@@ -286,6 +305,7 @@ const UploadReceipt = ({ onNext }) => {
 
       setJsonError("");
       setExtractedItems(normalized);
+      setShowExtractionSuccessModal(true);
     } catch {
       setJsonError("Invalid JSON. Please check the format and try again.");
       setExtractedItems([]);
@@ -298,90 +318,129 @@ const UploadReceipt = ({ onNext }) => {
     }
   };
 
-  return (
-    <div className="upload-receipt-container">
-      <h2>Upload Receipt</h2>
-      <p>Take a receipt photo or upload one to extract ordered items.</p>
+  const handleAddItemsManually = () => {
+    if (onNext) {
+      onNext({ extractedItems: [] });
+    }
+  };
 
-      <div className="image-actions">
-        <button
-          className="upload-btn"
+  const handleExtractionModalNext = () => {
+    setShowExtractionSuccessModal(false);
+    handleNext();
+  };
+
+  return (
+    <div>
+      <h2>Upload Receipt</h2>
+      <p className='description'>
+        Take a receipt photo or upload one to extract ordered items.
+      </p>
+
+      <div className='image-actions'>
+        <Button
+          label='Use Camera'
+          className='secondary'
           onClick={() => cameraInputRef.current?.click()}
           disabled={isExtracting}
-        >
-          Use Camera
-        </button>
-        <button
-          className="upload-btn"
+        />
+        <Button
+          label='Upload Image'
+          className='secondary'
           onClick={() => uploadInputRef.current?.click()}
           disabled={isExtracting}
-        >
-          Upload Image
-        </button>
+        />
       </div>
+
+      <Button
+        label='Add Items Manually'
+        className='tertiary'
+        onClick={handleAddItemsManually}
+      />
 
       <input
         ref={cameraInputRef}
-        className="image-input"
-        type="file"
-        accept="image/*"
-        capture="environment"
+        className='image-input'
+        type='file'
+        accept='image/*'
+        capture='environment'
         onChange={handleCameraChange}
       />
       <input
         ref={uploadInputRef}
-        className="image-input"
-        type="file"
-        accept="image/*"
+        className='image-input'
+        type='file'
+        accept='image/*'
         onChange={handleUploadChange}
       />
 
       {selectedImageName && (
-        <p className="selected-image-name">Selected image: {selectedImageName}</p>
+        <p className='selected-image-name'>
+          Selected image: {selectedImageName}
+        </p>
       )}
       {imagePreview && (
         <img
-          className="receipt-preview"
+          className='receipt-preview'
           src={imagePreview}
-          alt="Receipt preview"
+          alt='Receipt preview'
         />
       )}
 
-      {isExtracting && <p className="json-status">Extracting items...</p>}
-      {uploadError && <p className="json-error">{uploadError}</p>}
+      {isExtracting && <p className='json-status'>Extracting items...</p>}
+      {uploadError && <p className='json-error'>{uploadError}</p>}
 
-      <p className="input-divider">or paste JSON</p>
-      <div className="json-paste-section">
-        <label htmlFor="receipt-json-input">Paste receipt JSON</label>
-        <textarea
-          id="receipt-json-input"
-          value={jsonInput}
-          onChange={(event) => setJsonInput(event.target.value)}
-          placeholder='{"items":[{"name":"Pasta","price":14.99}]}'
-          rows={6}
-          disabled={isExtracting}
-        />
-        <button
-          className="upload-btn"
-          onClick={handleExtractJson}
-          disabled={isExtracting}
-        >
-          Extract from JSON
-        </button>
-      </div>
-      {jsonError && <p className="json-error">{jsonError}</p>}
-      {extractedItems.length > 0 && (
-        <p className="json-success">
-          Extracted {extractedItems.length} item{extractedItems.length === 1 ? "" : "s"}.
-        </p>
+      {SHOW_JSON_INPUT && (
+        <>
+          <p className='input-divider'>or paste JSON</p>
+          <div className='json-paste-section'>
+            <label htmlFor='receipt-json-input'>Paste receipt JSON</label>
+            <textarea
+              id='receipt-json-input'
+              value={jsonInput}
+              onChange={(event) => setJsonInput(event.target.value)}
+              placeholder='{"items":[{"name":"Pasta","price":14.99}]}'
+              rows={6}
+              disabled={isExtracting}
+            />
+            <div className='btn-group'>
+              <button
+                className='upload-btn'
+                onClick={handleExtractJson}
+                disabled={isExtracting}
+              >
+                Extract from JSON
+              </button>
+
+              {jsonError && <p className='json-error'>{jsonError}</p>}
+              {extractedItems.length > 0 && (
+                <p className='json-success'>
+                  Extracted {extractedItems.length} item
+                  {extractedItems.length === 1 ? "" : "s"}.
+                </p>
+              )}
+            </div>
+          </div>
+        </>
       )}
-      <button
-        className="next-btn"
-        onClick={handleNext}
-        disabled={extractedItems.length === 0 || isExtracting}
+
+      <Modal
+        open={showExtractionSuccessModal && extractedItems.length > 0}
+        onClose={() => setShowExtractionSuccessModal(false)}
       >
-        Next
-      </button>
+        <div style={{ padding: "1.5em 1em 1em", textAlign: "center" }}>
+          <h3 style={{ marginTop: 0 }}>Items extracted successfully</h3>
+          <p>
+            Found {extractedItems.length} item
+            {extractedItems.length === 1 ? "" : "s"}.
+          </p>
+          <Button
+            label='Next'
+            className='next-btn'
+            onClick={handleExtractionModalNext}
+            disabled={isExtracting}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

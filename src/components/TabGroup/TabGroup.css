@@ -10,12 +10,15 @@
 .tab-group {
   display: flex;
   gap: min(2vw, 1rem);
-  justify-content: center;
+  justify-content: flex-start;
   width: 90vw;
   max-width: 700px;
   min-width: 300px;
   box-sizing: border-box;
   flex-wrap: nowrap; /* Force single row */
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab {
@@ -26,9 +29,8 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
-  min-width: 0;
-  flex-shrink: 1;
-  flex-grow: 1;
+  white-space: nowrap;
+  flex: 0 0 auto;
   text-align: center;
 }
 

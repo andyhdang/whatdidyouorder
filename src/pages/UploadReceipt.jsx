@@ -50,7 +50,8 @@ const UploadReceipt = ({ onNext }) => {
   };
 
   const estimateRequestPayloadBytes = (imageDataUrl) =>
-    new TextEncoder().encode(JSON.stringify({ imageBase64: imageDataUrl })).length;
+    new TextEncoder().encode(JSON.stringify({ imageBase64: imageDataUrl }))
+      .length;
 
   const loadImageFromObjectUrl = (file) =>
     new Promise((resolve, reject) => {
@@ -97,7 +98,10 @@ const UploadReceipt = ({ onNext }) => {
         const encodedPart = dataUrl.split(",")[1] || "";
         const imageBytes = estimateBase64Bytes(encodedPart);
         const payloadBytes = estimateRequestPayloadBytes(dataUrl);
-        if (imageBytes <= MAX_IMAGE_BYTES && payloadBytes <= MAX_REQUEST_BODY_BYTES) {
+        if (
+          imageBytes <= MAX_IMAGE_BYTES &&
+          payloadBytes <= MAX_REQUEST_BODY_BYTES
+        ) {
           return dataUrl;
         }
       }
@@ -107,7 +111,7 @@ const UploadReceipt = ({ onNext }) => {
     }
 
     throw new Error(
-      "Image is too large to process. Crop the receipt and try again."
+      "Image is too large to process. Crop the receipt and try again.",
     );
   };
 

@@ -15,6 +15,7 @@
   max-width: 700px;
   min-width: 300px;
   box-sizing: border-box;
+  padding: 2px;
   flex-wrap: nowrap; /* Force single row */
   overflow-x: auto;
   overflow-y: hidden;

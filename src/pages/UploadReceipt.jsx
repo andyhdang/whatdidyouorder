@@ -21,6 +21,7 @@ const UploadReceipt = ({ onNext }) => {
   const [jsonError, setJsonError] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedItems, setExtractedItems] = useState([]);
+  const [extractedTaxAmount, setExtractedTaxAmount] = useState(null);
   const [showExtractionSuccessModal, setShowExtractionSuccessModal] =
     useState(false);
 
@@ -229,7 +230,14 @@ const UploadReceipt = ({ onNext }) => {
     if (!normalized.length) {
       throw new Error("No items were found in that image.");
     }
-    return normalized;
+    const taxAmount = Number.parseFloat(String(payload?.taxAmount));
+    return {
+      items: normalized,
+      taxAmount:
+        Number.isFinite(taxAmount) && taxAmount >= 0
+          ? taxAmount.toFixed(2)
+          : null,
+    };
   };
 
   const handleImageSelection = async (file) => {
@@ -237,6 +245,7 @@ const UploadReceipt = ({ onNext }) => {
     setUploadError("");
     setJsonError("");
     setExtractedItems([]);
+    setExtractedTaxAmount(null);
     setShowExtractionSuccessModal(false);
 
     if (!file.type.startsWith("image/")) {
@@ -255,8 +264,9 @@ const UploadReceipt = ({ onNext }) => {
     try {
       const imageBase64 = await prepareImageForUpload(file);
       setImagePreview(imageBase64);
-      const normalizedItems = await extractItemsFromImage(imageBase64);
-      setExtractedItems(normalizedItems);
+      const extraction = await extractItemsFromImage(imageBase64);
+      setExtractedItems(extraction.items);
+      setExtractedTaxAmount(extraction.taxAmount);
       setShowExtractionSuccessModal(true);
     } catch (error) {
       const message =
@@ -314,13 +324,13 @@ const UploadReceipt = ({ onNext }) => {
 
   const handleNext = () => {
     if (extractedItems.length > 0 && onNext) {
-      onNext({ extractedItems });
+      onNext({ extractedItems, extractedTaxAmount });
     }
   };
 
   const handleAddItemsManually = () => {
     if (onNext) {
-      onNext({ extractedItems: [] });
+      onNext({ extractedItems: [], extractedTaxAmount: null });
     }
   };
 
@@ -432,6 +442,8 @@ const UploadReceipt = ({ onNext }) => {
           <p>
             Found {extractedItems.length} item
             {extractedItems.length === 1 ? "" : "s"}.
+            {extractedTaxAmount !== null &&
+              ` Tax of $${extractedTaxAmount} will be added.`}
           </p>
           <Button
             label='Next'

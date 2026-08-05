@@ -45,6 +45,11 @@ function normalizeExtractedItems(payload) {
     .filter(Boolean);
 }
 
+function normalizeExtractedTax(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  return safePrice(payload.taxAmount);
+}
+
 function parseBody(req) {
   if (req.body && typeof req.body === "object") {
     try {
@@ -119,8 +124,12 @@ function extractionSchema() {
               required: ["name", "quantity", "unitPrice"],
             },
           },
+          taxAmount: {
+            type: ["number", "null"],
+            minimum: 0,
+          },
         },
-        required: ["items"],
+        required: ["items", "taxAmount"],
       },
     },
   };
@@ -142,7 +151,8 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
           role: "system",
           content:
             "You extract ordered food/drink items from a restaurant receipt. " +
-            "Return only billable menu items. Exclude tax, tip, fees, discounts, and totals.",
+            "Return only billable menu items. Exclude tax, tip, fees, discounts, and totals from items. " +
+            "Also extract the receipt tax as taxAmount when it is explicitly shown; otherwise return null.",
         },
         {
           role: "user",
@@ -150,8 +160,8 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
             {
               type: "text",
               text:
-                "Extract receipt line items into JSON. " +
-                "If an item appears multiple times, combine with quantity.",
+                "Extract receipt line items and the explicitly listed tax into JSON. " +
+                "If an item appears multiple times, combine with quantity. Do not infer tax.",
             },
             {
               type: "image_url",
@@ -186,7 +196,10 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
     throw new Error("NO_ITEMS_FOUND");
   }
 
-  return normalized;
+  return {
+    items: normalized,
+    taxAmount: normalizeExtractedTax(parsedContent),
+  };
 }
 
 export default async function handler(req, res) {
@@ -250,12 +263,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const items = await extractItemsFromImage({
+    const extraction = await extractItemsFromImage({
       imageReference,
       model,
       apiKey,
     });
-    return sendJson(res, 200, { items });
+    return sendJson(res, 200, extraction);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("OPENAI_ERROR:")) {
       const [, statusCode] = error.message.split(":");

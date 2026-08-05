@@ -196,9 +196,16 @@ function App() {
         <Card>
           {activeTab === 0 && (
             <UploadReceipt
-              onNext={({ extractedItems }) => {
+              onNext={({ extractedItems, extractedTaxAmount }) => {
                 if (Array.isArray(extractedItems) && extractedItems.length > 0) {
                   setItems(extractedItems);
+                }
+                if (extractedTaxAmount !== null) {
+                  setTaxRate({
+                    value: "",
+                    mode: "amount",
+                    amount: extractedTaxAmount,
+                  });
                 }
                 setActiveTab(1);
               }}

@@ -193,7 +193,11 @@ function Summary({
         const personTip = tip;
         const personTotalOwed = personSubtotal + personTax + tip;
         return (
-          <Card key={idx} heading={person} className="custom-card-list">
+          <Card
+            key={idx}
+            heading={person}
+            className="custom-card-list"
+          >
             <ul style={{ paddingLeft: 0, listStyle: "none" }}>
               {itemsOwed.map((item, i) => (
                 <li key={i} style={{ marginBottom: "0.5em" }}>
@@ -214,13 +218,24 @@ function Summary({
                 ? (totalTip / people.length).toFixed(2)
                 : tip.toFixed(2)}
               <br />
-              <span className="text-highlight">
-                Total Owed: $
-                {(
-                  personSubtotal +
-                  personTax +
-                  (tipCalc === "even" ? totalTip / people.length : tip)
-                ).toFixed(2)}
+              <span
+                className="text-highlight"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}
+              >
+                Total Owed: ${personTotalOwed.toFixed(2)}
+                <Button
+                  icon={<CopyIcon size={18} />}
+                  iconButton
+                  className="secondary"
+                  aria-label={`Copy ${person}'s amount owed`}
+                  title="Copy amount owed"
+                  onClick={() => {
+                    const amountOwed = `$${personTotalOwed.toFixed(2)}`;
+                    navigator.clipboard.writeText(amountOwed);
+                    setSnackbarMsg(`${amountOwed} copied for ${person}!`);
+                    setSnackbarOpen(true);
+                  }}
+                />
               </span>
             </div>
           </Card>

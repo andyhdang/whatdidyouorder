@@ -163,6 +163,10 @@ function Summary({
     const totalsStartRow = allocationEndRow + 3;
     const tipRow = totalsStartRow + 2;
     const taxRate = effectiveTaxRate / 100;
+    const assignmentStartColumn = XLSX.utils.encode_col(4);
+    const assignmentEndColumn = XLSX.utils.encode_col(
+      Math.max(people.length + 3, 4)
+    );
     const rows = [
       ["Summary by TabbySplit.app"],
       [],
@@ -249,6 +253,10 @@ function Summary({
 
     items.forEach((_, index) => {
       const sheetRow = allocationStartRow + index;
+      setFormula(
+        `C${sheetRow}`,
+        `COUNTIF(${assignmentStartColumn}${sheetRow}:${assignmentEndColumn}${sheetRow},"X")`
+      );
       setFormula(`D${sheetRow}`, `IF(C${sheetRow}=0,0,B${sheetRow}/C${sheetRow})`);
       setStyle(`A${sheetRow}`, bodyStyle);
       setStyle(`B${sheetRow}`, currencyStyle);
@@ -297,7 +305,7 @@ function Summary({
       `SUM($E$${summaryStartRow}:$E$${summaryEndRow})`
     );
 
-    const lastColumn = XLSX.utils.encode_col(Math.max(people.length + 3, 4));
+    const lastColumn = assignmentEndColumn;
     worksheet["!merges"] = [
       { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
       {

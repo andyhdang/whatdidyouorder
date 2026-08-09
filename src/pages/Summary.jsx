@@ -1,12 +1,14 @@
 import Card from "../components/Card/Card";
 import Button from "../components/Button/Button";
 import CopyIcon from "../assets/icons/CopyIcon";
+import DownloadIcon from "../assets/icons/DownloadIcon";
 import LinkIcon from "../assets/icons/LinkIcon";
 import QrcodeIcon from "../assets/icons/QrcodeIcon";
 import Modal from "../components/Modal/Modal";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
 import LZString from "lz-string";
+import * as XLSX from "xlsx-js-style";
 
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
 import Snackbar from "../components/Snackbar/Snackbar";
@@ -150,6 +152,236 @@ function Summary({
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+
+  const downloadXlsx = async () => {
+    const summaryStartRow = 5;
+    const summaryEndRow = summaryStartRow + Math.max(people.length - 1, 0);
+    const allocationTitleRow = summaryEndRow + 2;
+    const allocationHeaderRow = allocationTitleRow + 1;
+    const allocationStartRow = allocationHeaderRow + 1;
+    const allocationEndRow = allocationStartRow + Math.max(items.length - 1, 0);
+    const totalsStartRow = allocationEndRow + 3;
+    const tipRow = totalsStartRow + 2;
+    const taxRate = effectiveTaxRate / 100;
+    const rows = [
+      ["Summary by TabbySplit.app"],
+      [],
+      ["SUMMARY"],
+      ["Person", "Subtotal", "Tax", "Tip", "Total Owed"],
+      ...people.map((person) => [person, "", "", "", ""]),
+      [],
+      ["ITEM ALLOCATIONS"],
+      [
+        "Item",
+        "Item Price",
+        "Split Count",
+        "Assigned Share",
+        ...people,
+      ],
+      ...items.map((item, itemIndex) => [
+        item.name,
+        parseFloat(item.price) || 0,
+        assignments[itemIndex]?.length || 0,
+        "",
+        ...people.map((_, personIndex) =>
+          assignments[itemIndex]?.includes(personIndex) ? "X" : ""
+        ),
+      ]),
+      [],
+      [],
+      ["Subtotal", ""],
+      ["Tax", ""],
+      ["Tip", totalTip],
+      ["Grand Total", ""],
+    ];
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const setFormula = (cell, formula) => {
+      worksheet[cell] = { t: "n", f: formula };
+    };
+    const setStyle = (cell, style) => {
+      worksheet[cell] = { ...worksheet[cell], s: style };
+    };
+    const bodyFont = { name: "DM Sans", color: { rgb: "FF434343" } };
+    const headingFont = {
+      name: "Sour Gummy",
+      bold: true,
+      color: { rgb: "FFFFFFFF" },
+    };
+    const headerStyle = {
+      fill: { fgColor: { rgb: "FFFCE5CD" } },
+      font: { name: "DM Sans" },
+      alignment: { horizontal: "center" },
+    };
+    const sectionStyle = {
+      fill: { fgColor: { rgb: "FFFF9900" } },
+      font: headingFont,
+      alignment: { horizontal: "center", vertical: "center" },
+    };
+    const allocationSectionStyle = {
+      fill: { fgColor: { rgb: "FF666666" } },
+      font: headingFont,
+      alignment: { horizontal: "center", vertical: "center" },
+    };
+    const allocationHeaderStyle = {
+      fill: { fgColor: { rgb: "FFD9D9D9" } },
+      font: { name: "DM Sans", color: { rgb: "FF000000" } },
+      alignment: { horizontal: "center" },
+    };
+    const titleStyle = {
+      font: { name: "DM Sans", color: { rgb: "FF0000FF" }, underline: true },
+      alignment: { horizontal: "left" },
+    };
+    const currencyStyle = {
+      font: bodyFont,
+      numFmt: '$#,##0.00',
+      alignment: { horizontal: "center" },
+    };
+    const totalOwedStyle = {
+      font: { name: "DM Sans", bold: true, color: { rgb: "FFFF9900" } },
+      numFmt: '$#,##0.00',
+      alignment: { horizontal: "center" },
+    };
+    const bodyStyle = { font: bodyFont };
+    const assignmentStyle = {
+      font: { name: "DM Sans", sz: 12, color: { rgb: "FF434343" } },
+      alignment: { horizontal: "center" },
+    };
+
+    items.forEach((_, index) => {
+      const sheetRow = allocationStartRow + index;
+      setFormula(`D${sheetRow}`, `IF(C${sheetRow}=0,0,B${sheetRow}/C${sheetRow})`);
+      setStyle(`A${sheetRow}`, bodyStyle);
+      setStyle(`B${sheetRow}`, currencyStyle);
+      setStyle(`C${sheetRow}`, {
+        ...bodyStyle,
+        alignment: { horizontal: "center" },
+      });
+      setStyle(`D${sheetRow}`, currencyStyle);
+      people.forEach((_, personIndex) =>
+        setStyle(
+          `${XLSX.utils.encode_col(personIndex + 4)}${sheetRow}`,
+          assignmentStyle
+        )
+      );
+    });
+    people.forEach((_, index) => {
+      const sheetRow = summaryStartRow + index;
+      const personColumn = XLSX.utils.encode_col(index + 4);
+      const tipFormula =
+        tipCalc === "even"
+          ? `$B$${tipRow}/${people.length || 1}`
+          : `IF(SUM($B$${summaryStartRow}:$B$${summaryEndRow})=0,0,B${sheetRow}/SUM($B$${summaryStartRow}:$B$${summaryEndRow})*$B$${tipRow})`;
+      setFormula(
+        `B${sheetRow}`,
+        `SUMIF(${personColumn}$${allocationStartRow}:${personColumn}$${allocationEndRow},"X",$D$${allocationStartRow}:$D$${allocationEndRow})`
+      );
+      setFormula(`C${sheetRow}`, `B${sheetRow}*${taxRate}`);
+      setFormula(`D${sheetRow}`, tipFormula);
+      setFormula(`E${sheetRow}`, `B${sheetRow}+C${sheetRow}+D${sheetRow}`);
+      ["B", "C", "D", "E"].forEach((column) =>
+        setStyle(`${column}${sheetRow}`, currencyStyle)
+      );
+      setStyle(`E${sheetRow}`, totalOwedStyle);
+      setStyle(`A${sheetRow}`, bodyStyle);
+    });
+    setFormula(
+      `B${totalsStartRow}`,
+      `SUM($B$${summaryStartRow}:$B$${summaryEndRow})`
+    );
+    setFormula(
+      `B${totalsStartRow + 1}`,
+      `SUM($C$${summaryStartRow}:$C$${summaryEndRow})`
+    );
+    setFormula(
+      `B${totalsStartRow + 3}`,
+      `SUM($E$${summaryStartRow}:$E$${summaryEndRow})`
+    );
+
+    const lastColumn = XLSX.utils.encode_col(Math.max(people.length + 3, 4));
+    worksheet["!merges"] = [
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
+      {
+        s: { r: allocationTitleRow - 1, c: 0 },
+        e: { r: allocationTitleRow - 1, c: lastColumn.charCodeAt(0) - 65 },
+      },
+    ];
+    setStyle("A1", titleStyle);
+    worksheet.A1.l = { Target: "https://tabbysplit.app" };
+    setStyle("A3", sectionStyle);
+    setStyle(`A${allocationTitleRow}`, allocationSectionStyle);
+    [4, allocationHeaderRow].forEach((rowNumber) => {
+      const endColumn =
+        rowNumber === 4 ? 4 : lastColumn.charCodeAt(0) - 65;
+      for (let column = 0; column <= endColumn; column += 1) {
+        setStyle(
+          `${XLSX.utils.encode_col(column)}${rowNumber}`,
+          rowNumber === allocationHeaderRow ? allocationHeaderStyle : headerStyle
+        );
+      }
+    });
+    setStyle("A1", titleStyle);
+    for (let rowNumber = totalsStartRow; rowNumber <= totalsStartRow + 3; rowNumber += 1) {
+      setStyle(`A${rowNumber}`, {
+        font: { name: "DM Sans", bold: true, color: { rgb: "FF666666" } },
+      });
+      setStyle(`B${rowNumber}`, currencyStyle);
+    }
+    worksheet["!cols"] = [
+      { wch: 16.25 },
+      { wch: 14 },
+      { wch: 13.88 },
+      { wch: 14.63 },
+      ...people.map(() => ({ wch: 14 })),
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Summary");
+    workbook.Workbook = {
+      CalcPr: { calcMode: "auto", fullCalcOnLoad: true, forceFullCalc: true },
+    };
+    const { default: ExcelJS } = await import("exceljs");
+    const exportWorkbook = new ExcelJS.Workbook();
+    await exportWorkbook.xlsx.load(
+      XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    );
+    exportWorkbook.calcProperties.fullCalcOnLoad = true;
+    const exportSheet = exportWorkbook.getWorksheet("Summary");
+    people.forEach((_, personIndex) => {
+      const column = XLSX.utils.encode_col(personIndex + 4);
+      const range = `${column}${allocationStartRow}:${column}${allocationEndRow}`;
+      exportSheet.dataValidations.add(range, {
+        type: "list",
+        allowBlank: true,
+        formulae: ['"X"'],
+      });
+      exportSheet.addConditionalFormatting({
+        ref: range,
+        rules: [
+          {
+            type: "expression",
+            formulae: [`${column}${allocationStartRow}="X"`],
+            style: { font: { color: { argb: "FF000000" } } },
+          },
+          {
+            type: "expression",
+            formulae: [`${column}${allocationStartRow}=""`],
+            style: { font: { color: { argb: "FF666666" } } },
+          },
+        ],
+      });
+    });
+    const blob = new Blob([await exportWorkbook.xlsx.writeBuffer()], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "tabbysplit-summary.xlsx";
+    link.click();
+    URL.revokeObjectURL(url);
+    setSnackbarMsg("Spreadsheet download started!");
+    setSnackbarOpen(true);
+  };
 
   return (
     <main>
@@ -336,8 +568,19 @@ function Summary({
         }}
       >
         <Button
+          label="Share Link"
+          icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+          onClick={() => {
+            const url = getShareUrl();
+            navigator.clipboard.writeText(url);
+            setSnackbarMsg("Shareable URL copied to clipboard!");
+            setSnackbarOpen(true);
+          }}
+        />
+        <Button
           label="Copy Summary"
           icon={<CopyIcon size={18} style={{ verticalAlign: "middle" }} />}
+          className="secondary"
           onClick={() => {
             let text = `TabbySplit.app Summary\n`;
             text += `People involved: ${people.length}\n`;
@@ -386,24 +629,15 @@ function Summary({
           }}
         />
         <Button
-          label="Share URL"
-          icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
-          onClick={() => {
-            const url = getShareUrl();
-            navigator.clipboard.writeText(url);
-            setSnackbarMsg("Shareable URL copied to clipboard!");
-            setSnackbarOpen(true);
-          }}
-        />
-        <Snackbar
-          open={snackbarOpen}
-          message={snackbarMsg}
-          type="success"
-          onClose={() => setSnackbarOpen(false)}
+          label="Download Spreadsheet"
+          icon={<DownloadIcon size={18} style={{ verticalAlign: "middle" }} />}
+          className="secondary"
+          onClick={downloadXlsx}
         />
         <Button
           label="Generate QR Code"
           icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
+          className="secondary"
           onClick={() => setQrModalOpen(true)}
         />
         <Button
@@ -415,6 +649,12 @@ function Summary({
               "_blank"
             );
           }}
+        />
+        <Snackbar
+          open={snackbarOpen}
+          message={snackbarMsg}
+          type="success"
+          onClose={() => setSnackbarOpen(false)}
         />
         <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
           <ShareUrlQRCode url={getShareUrl()} />

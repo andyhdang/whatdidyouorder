@@ -15,9 +15,21 @@ import "./App.css";
 
 const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
 
+const demoPeople = ["Alex", "Blair", "Casey"];
+const demoItems = [
+  { name: "Margherita Pizza", price: "18.00" },
+  { name: "Truffle Fries", price: "9.50" },
+  { name: "Pasta Carbonara", price: "22.00" },
+  { name: "Tiramisu", price: "8.50" },
+];
+const demoAssignments = [[0, 1], [0, 1, 2], [1], [0, 2]];
+
 function App() {
+  const hasDemoData = import.meta.env.DEV;
   // Tip input states for Assign/Summary
-  const [tipAmountInput, setTipAmountInput] = useState("");
+  const [tipAmountInput, setTipAmountInput] = useState(
+    hasDemoData ? "12.00" : ""
+  );
   const [customTipPercentInput, setCustomTipPercentInput] = useState("");
   // Load state from URL if present
   useEffect(() => {
@@ -66,16 +78,18 @@ function App() {
       }
     }
   }, []);
-  const [activeTab, setActiveTab] = useState(0);
-  const [people, setPeople] = useState([]);
+  const [activeTab, setActiveTab] = useState(hasDemoData ? 4 : 0);
+  const [people, setPeople] = useState(hasDemoData ? demoPeople : []);
   const [emojis, setEmojis] = useState([]);
-  const [items, setItems] = useState([]);
-  const [assignments, setAssignments] = useState(items.map(() => []));
-  const [taxRate, setTaxRate] = useState("");
-  const [tip, setTip] = useState("");
+  const [items, setItems] = useState(hasDemoData ? demoItems : []);
+  const [assignments, setAssignments] = useState(
+    hasDemoData ? demoAssignments : []
+  );
+  const [taxRate, setTaxRate] = useState(hasDemoData ? "8.25" : "");
+  const [tip, setTip] = useState(hasDemoData ? "12.00" : "");
   const [tipCalc, setTipCalc] = useState("proportional");
   // Tip choices state (persisted)
-  const [tipMode, setTipMode] = useState("percent");
+  const [tipMode, setTipMode] = useState(hasDemoData ? "amount" : "percent");
   const [tipPreset, setTipPreset] = useState(15);
   const [customTipPercent, setCustomTipPercent] = useState("");
 

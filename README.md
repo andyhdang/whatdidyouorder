@@ -15,6 +15,7 @@ TabbySplit is a web app for splitting restaurant bills among friends. Upload a r
 - 🧾 **Add items** — enter menu items with prices and assign them to one or more people
 - 🧮 **Tax & tip** — configure tax as a percentage or fixed amount; tip as a preset %, custom %, or fixed dollar amount; split proportionally or equally
 - 🔗 **Shareable summary** — generate a compressed URL and QR code to share the full breakdown with your group
+- 🐾 **Live shared splits** — create a join code so friends can select what they ordered together, with instant updates
 
 ---
 
@@ -33,6 +34,21 @@ npm run dev
 ```
 
 Open http://localhost:5173 in your browser.
+
+### Configure live shared splits (Supabase)
+
+1. Create a free [Supabase](https://supabase.com) project and enable **Anonymous Sign-Ins** under **Authentication → Providers**.
+2. Run [`supabase/shared-splits.sql`](./supabase/shared-splits.sql) in the Supabase SQL Editor.
+3. Create `.env.local` with your project URL and **publishable** key:
+
+   ```sh
+   VITE_SUPABASE_URL="https://your-project.supabase.co"
+   VITE_SUPABASE_PUBLISHABLE_KEY="your_publishable_key"
+   ```
+
+4. Add the same variables to your deployment environment.
+
+Friends do not need Supabase accounts. The app creates an anonymous session for each browser; the join code grants that session access only to its shared split.
 
 ### Configure receipt extraction API
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import LZString from "lz-string";
 
 import TabGroup from "./components/TabGroup/TabGroup";
@@ -9,8 +9,15 @@ import Summary from "./pages/Summary";
 import UploadReceipt from "./pages/UploadReceipt";
 import Card from "./components/Card/Card";
 import Footer from "./components/Footer/Footer";
+import SharedSplitModal from "./components/SharedSplitModal";
 import logo from "./assets/logos/logo.png";
 import logoBlurple from "./assets/logos/logo-blurple.png";
+import {
+  createSharedSplit,
+  isSupabaseConfigured,
+  joinSharedSplit,
+  supabase,
+} from "./lib/supabase";
 import "./App.css";
 
 const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
@@ -38,6 +45,12 @@ const SAMPLE_BILL = {
 };
 
 function App() {
+  const [sharedSplit, setSharedSplit] = useState(null);
+  const [sharedSplitModal, setSharedSplitModal] = useState(null);
+  const [sharedSplitError, setSharedSplitError] = useState("");
+  const [sharedSplitBusy, setSharedSplitBusy] = useState(false);
+  const remoteStateRef = useRef("");
+  const syncTimerRef = useRef(null);
   // Tip input states for Assign/Summary
   const [tipAmountInput, setTipAmountInput] = useState("");
   const [customTipPercentInput, setCustomTipPercentInput] = useState("");
@@ -45,6 +58,10 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const compressed = params.get("data");
+    const splitCode = params.get("split");
+    if (splitCode) {
+      setSharedSplitModal("join");
+    }
     if (compressed) {
       try {
         const raw = LZString.decompressFromEncodedURIComponent(compressed);
@@ -118,6 +135,134 @@ function App() {
     import.meta.env.DEV ? SAMPLE_BILL.tipPreset : 15
   );
   const [customTipPercent, setCustomTipPercent] = useState("");
+
+  const sharedState = {
+    people,
+    emojis,
+    items,
+    assignments,
+    taxRate,
+    tip,
+    tipCalc,
+    tipMode,
+    tipPreset,
+    tipAmountInput,
+    customTipPercentInput,
+  };
+
+  const applySharedState = useCallback((state) => {
+    if (Array.isArray(state.people)) setPeople(state.people);
+    if (Array.isArray(state.emojis)) setEmojis(state.emojis);
+    if (Array.isArray(state.items)) setItems(state.items);
+    if (Array.isArray(state.assignments)) setAssignments(state.assignments);
+    if (state.taxRate !== undefined) setTaxRate(state.taxRate);
+    if (state.tip !== undefined) setTip(state.tip);
+    if (state.tipCalc) setTipCalc(state.tipCalc);
+    if (state.tipMode) setTipMode(state.tipMode);
+    if (state.tipPreset !== undefined) setTipPreset(state.tipPreset);
+    if (state.tipAmountInput !== undefined) setTipAmountInput(state.tipAmountInput);
+    if (state.customTipPercentInput !== undefined) {
+      setCustomTipPercentInput(state.customTipPercentInput);
+      setCustomTipPercent(state.customTipPercentInput);
+    }
+  }, []);
+
+  const sharedStateJson = JSON.stringify(sharedState);
+
+  useEffect(() => {
+    if (!sharedSplit || remoteStateRef.current === sharedStateJson) return;
+
+    clearTimeout(syncTimerRef.current);
+    remoteStateRef.current = sharedStateJson;
+    syncTimerRef.current = setTimeout(async () => {
+      const { error } = await supabase
+        .from("shared_splits")
+        .update({
+          state: JSON.parse(sharedStateJson),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", sharedSplit.id);
+
+      if (error) {
+        remoteStateRef.current = "";
+        setSharedSplitError(`Couldn't sync changes: ${error.message}`);
+      }
+    }, 350);
+
+    return () => clearTimeout(syncTimerRef.current);
+  }, [sharedSplit, sharedStateJson]);
+
+  useEffect(() => {
+    if (!sharedSplit || !supabase) return undefined;
+
+    const channel = supabase
+      .channel(`shared-split-${sharedSplit.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "shared_splits",
+          filter: `id=eq.${sharedSplit.id}`,
+        },
+        (payload) => {
+          const state = payload.new.state;
+          if (!state) return;
+          remoteStateRef.current = JSON.stringify(state);
+          applySharedState(state);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [applySharedState, sharedSplit]);
+
+  const createLiveSplit = async () => {
+    setSharedSplitBusy(true);
+    setSharedSplitError("");
+    try {
+      const split = await createSharedSplit(sharedState);
+      remoteStateRef.current = JSON.stringify(split.state);
+      setSharedSplit(split);
+      setSharedSplitModal(null);
+    } catch (error) {
+      setSharedSplitError(error.message);
+    } finally {
+      setSharedSplitBusy(false);
+    }
+  };
+
+  const joinLiveSplit = async (code, name) => {
+    setSharedSplitBusy(true);
+    setSharedSplitError("");
+    try {
+      const split = await joinSharedSplit(code);
+      const state = split.state;
+      const normalizedName = name.trim();
+      const nextState = state.people?.includes(normalizedName)
+        ? state
+        : {
+            ...state,
+            people: [...(state.people || []), normalizedName],
+            emojis: [...(state.emojis || []), "🐱"],
+          };
+      remoteStateRef.current = JSON.stringify(state);
+      applySharedState(nextState);
+      setSharedSplit(split);
+      setSharedSplitModal(null);
+      setActiveTab(3);
+    } catch (error) {
+      setSharedSplitError(error.message);
+    } finally {
+      setSharedSplitBusy(false);
+    }
+  };
+
+  const sharedJoinUrl = sharedSplit
+    ? `${window.location.origin}${window.location.pathname}?split=${sharedSplit.join_code}`
+    : "";
 
   // Keep assignments array in sync with items
   if (assignments.length !== items.length) {
@@ -307,11 +452,31 @@ function App() {
               tipAmountInput={tipAmountInput}
               customTipPercentInput={customTipPercentInput}
               getShareUrl={getShareUrl}
+              isSupabaseConfigured={isSupabaseConfigured}
+              sharedJoinCode={sharedSplit?.join_code}
+              sharedJoinUrl={sharedJoinUrl}
+              onStartLiveShare={() => {
+                setSharedSplitError("");
+                setSharedSplitModal("create");
+              }}
             />
           )}
         </Card>
       </div>
       <Footer />
+      <SharedSplitModal
+        open={Boolean(sharedSplitModal)}
+        mode={sharedSplitModal}
+        joinCode={new URLSearchParams(window.location.search).get("split") || ""}
+        onClose={() => {
+          setSharedSplitError("");
+          setSharedSplitModal(null);
+        }}
+        onCreate={createLiveSplit}
+        onJoin={joinLiveSplit}
+        busy={sharedSplitBusy}
+        error={sharedSplitError}
+      />
     </main>
   );
 }

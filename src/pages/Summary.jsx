@@ -28,6 +28,10 @@ function Summary({
   tipAmountInput = "",
   customTipPercentInput = "",
   tipMode = "percent", // add tipMode prop
+  isSupabaseConfigured = false,
+  sharedJoinCode,
+  sharedJoinUrl,
+  onStartLiveShare,
 }) {
   // Detect if user is coming from a shared URL
   const [fromSharedUrl, setFromSharedUrl] = useState(false);
@@ -575,6 +579,21 @@ function Summary({
           alignItems: "center",
         }}
       >
+        {isSupabaseConfigured && (
+          <Button
+            label={sharedJoinCode ? `Live code: ${sharedJoinCode}` : "Share Live Split"}
+            icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+            onClick={() => {
+              if (sharedJoinUrl) {
+                navigator.clipboard.writeText(sharedJoinUrl);
+                setSnackbarMsg("Live split link copied to clipboard!");
+                setSnackbarOpen(true);
+              } else {
+                onStartLiveShare();
+              }
+            }}
+          />
+        )}
         <Button
           label="Share Link"
           icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}

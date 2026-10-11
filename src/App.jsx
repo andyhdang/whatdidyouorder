@@ -49,6 +49,7 @@ function App() {
           const state = JSON.parse(raw);
           if (state.people) setPeople(state.people);
           if (state.items) setItems(state.items);
+          if (Array.isArray(state.fees)) setFees(state.fees);
           if (state.assignments) setAssignments(state.assignments);
           if (state.taxMode === "amount") {
             setTaxRate({
@@ -91,11 +92,11 @@ function App() {
   const [items, setItems] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [taxRate, setTaxRate] = useState("");
+  const [fees, setFees] = useState([]);
   const [tip, setTip] = useState("");
   const [tipCalc, setTipCalc] = useState("proportional");
   const [tipMode, setTipMode] = useState("percent");
   const [tipPreset, setTipPreset] = useState(15);
-  const [customTipPercent, setCustomTipPercent] = useState("");
 
   const sharedState = {
     people,
@@ -103,6 +104,7 @@ function App() {
     items,
     assignments,
     taxRate,
+    fees,
     tip,
     tipCalc,
     tipMode,
@@ -117,6 +119,7 @@ function App() {
     if (Array.isArray(state.items)) setItems(state.items);
     if (Array.isArray(state.assignments)) setAssignments(state.assignments);
     if (state.taxRate !== undefined) setTaxRate(state.taxRate);
+    if (Array.isArray(state.fees)) setFees(state.fees);
     if (state.tip !== undefined) setTip(state.tip);
     if (state.tipCalc) setTipCalc(state.tipCalc);
     if (state.tipMode) setTipMode(state.tipMode);
@@ -124,7 +127,6 @@ function App() {
     if (state.tipAmountInput !== undefined) setTipAmountInput(state.tipAmountInput);
     if (state.customTipPercentInput !== undefined) {
       setCustomTipPercentInput(state.customTipPercentInput);
-      setCustomTipPercent(state.customTipPercentInput);
     }
   }, []);
 
@@ -298,6 +300,7 @@ function App() {
       taxMode: encodedTaxMode,
       taxAmount: encodedTaxAmount,
       taxRate: encodedTaxRate,
+      fees,
       tipMode: encodedTipMode,
       tipAmount: encodedTipAmount,
       tipPercent: encodedTipPercent,
@@ -367,6 +370,22 @@ function App() {
             <Items
               items={items}
               setItems={setItems}
+              taxRate={taxRate}
+              setTaxRate={setTaxRate}
+              fees={fees}
+              setFees={setFees}
+              tip={tip}
+              setTip={setTip}
+              tipCalc={tipCalc}
+              setTipCalc={setTipCalc}
+              tipMode={tipMode}
+              setTipMode={setTipMode}
+              tipPreset={tipPreset}
+              setTipPreset={setTipPreset}
+              tipAmountInput={tipAmountInput}
+              setTipAmountInput={setTipAmountInput}
+              customTipPercentInput={customTipPercentInput}
+              setCustomTipPercentInput={setCustomTipPercentInput}
               setActiveTab={setActiveTab}
             />
           )}
@@ -385,23 +404,7 @@ function App() {
               items={items}
               assignments={assignments}
               setAssignments={setAssignments}
-              taxRate={taxRate}
-              setTaxRate={setTaxRate}
-              tip={tip}
-              setTip={setTip}
-              tipCalc={tipCalc}
-              setTipCalc={setTipCalc}
-              tipMode={tipMode}
-              setTipMode={setTipMode}
-              tipPreset={tipPreset}
-              setTipPreset={setTipPreset}
-              customTipPercent={customTipPercent}
-              setCustomTipPercent={setCustomTipPercent}
               setActiveTab={setActiveTab}
-              tipAmountInput={tipAmountInput}
-              setTipAmountInput={setTipAmountInput}
-              customTipPercentInput={customTipPercentInput}
-              setCustomTipPercentInput={setCustomTipPercentInput}
               isSupabaseConfigured={isSupabaseConfigured}
               sharedJoinCode={sharedSplit?.join_code}
               onStartLiveShare={() => {
@@ -423,6 +426,7 @@ function App() {
               setActiveTab={setActiveTab}
               taxMode={taxMode}
               taxAmount={taxAmount}
+              fees={fees}
               tipAmountInput={tipAmountInput}
               customTipPercentInput={customTipPercentInput}
               getShareUrl={getShareUrl}

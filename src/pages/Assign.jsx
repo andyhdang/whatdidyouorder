@@ -1,34 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
-import InputField from "../components/InputField/InputField";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
 import Button from "../components/Button/Button";
-
-const TIP_PRESETS = [15, 18, 20];
 
 function Assign({
   items = [],
   people = [],
   assignments = [],
   setAssignments,
-  taxRate,
-  setTaxRate,
-  tip,
-  setTip,
-  tipCalc,
-  setTipCalc,
-  tipMode,
-  setTipMode,
-  tipPreset,
-  setTipPreset,
-  customTipPercent,
-  setCustomTipPercent,
-  setActiveTab, // <-- add this prop
-  tipAmountInput,
-  setTipAmountInput,
-  customTipPercentInput,
-  setCustomTipPercentInput,
+  setActiveTab,
   isSupabaseConfigured = false,
   sharedJoinCode,
   onStartLiveShare,
@@ -42,51 +23,6 @@ function Assign({
     }
   }, [items, assignments, setAssignments]);
 
-  // Set proportionally as default if not set
-  useEffect(() => {
-    if (!tipCalc || tipCalc === "") {
-      setTipCalc("proportional");
-    }
-  }, [tipCalc, setTipCalc]);
-
-  // Ensure tip is set to 15% by default if not selected
-  useEffect(() => {
-    const subtotal = items.reduce(
-      (sum, item) => sum + (parseFloat(item.price) || 0),
-      0
-    );
-    const defaultTipPercent = 15;
-    // Only set default tip if tip is empty, items exist, and tipMode is not 'amount'
-    if (tip === "" && items.length > 0 && tipMode !== "amount") {
-      setTip(((subtotal * defaultTipPercent) / 100).toFixed(2));
-      setTipPreset(defaultTipPercent);
-      setTipMode("percent");
-    } else if (tipMode === "amount" && tip !== "") {
-      // If switching to $Amount and tip is the default 15% value, clear it
-      const defaultTip = ((subtotal * defaultTipPercent) / 100).toFixed(2);
-      if (tip === defaultTip) {
-        setTip("");
-      }
-    }
-    // Make $Amount the default option for tax
-    if (!taxRate?.mode) {
-      if (typeof taxRate === "object") {
-        setTaxRate({ ...taxRate, mode: "amount" });
-      } else {
-        setTaxRate({ value: taxRate, mode: "amount" });
-      }
-    }
-  }, [
-    tip,
-    items,
-    setTip,
-    setTipPreset,
-    setTipMode,
-    tipMode,
-    taxRate,
-    setTaxRate,
-  ]);
-
   const handleTogglePerson = (itemIdx, personIdx) => {
     setAssignments((sel) =>
       sel.map((arr, idx) =>
@@ -98,73 +34,6 @@ function Assign({
       )
     );
   };
-
-  const handleTipChange = (mode, value) => {
-    setTipMode(mode);
-    if (mode === "percent") {
-      setTipPreset(value);
-      setCustomTipPercent("");
-      // Do NOT clear customTipPercentInput so it persists when switching back
-      // Calculate tip based on subtotal
-      const subtotal = items.reduce(
-        (sum, item) => sum + (parseFloat(item.price) || 0),
-        0
-      );
-      setTip(((subtotal * value) / 100).toFixed(2));
-    } else if (mode === "customPercent") {
-      setTipPreset("");
-      // If value is undefined, restore previous input
-      if (value === undefined) {
-        setCustomTipPercent(customTipPercentInput);
-        const subtotal = items.reduce(
-          (sum, item) => sum + (parseFloat(item.price) || 0),
-          0
-        );
-        setTip(
-          (
-            (subtotal *
-              (customTipPercentInput === "" ? 0 : customTipPercentInput)) /
-            100
-          ).toFixed(2)
-        );
-      } else {
-        setCustomTipPercent(value);
-        setCustomTipPercentInput(value);
-        const subtotal = items.reduce(
-          (sum, item) => sum + (parseFloat(item.price) || 0),
-          0
-        );
-        setTip(((subtotal * value) / 100).toFixed(2));
-      }
-    } else if (mode === "amount") {
-      // If switching to $Amount, restore previous input if available
-      if (value === undefined) {
-        setTip(tipAmountInput);
-      } else {
-        setTip(value);
-        setTipAmountInput(value);
-      }
-    }
-  };
-
-  // Calculate tip based on subtotal, default to 15%
-  const subtotal = items.reduce(
-    (sum, item) => sum + (parseFloat(item.price) || 0),
-    0
-  );
-  const defaultTipPercent = 15;
-  const calculatedTip =
-    tipMode === "percent"
-      ? ((subtotal * (tipPreset || defaultTipPercent)) / 100).toFixed(2)
-      : tipMode === "customPercent"
-      ? customTipPercentInput === ""
-        ? "0.00"
-        : ((subtotal * parseFloat(customTipPercentInput)) / 100).toFixed(2)
-      : tipMode === "amount"
-      ? tipAmountInput === ""
-        ? "0.00"
-        : tipAmountInput
-      : ((subtotal * defaultTipPercent) / 100).toFixed(2);
 
   return (
     <main>
@@ -303,242 +172,15 @@ function Assign({
           );
         })
       )}
-      {/* Add extra spacing below the last item card */}
-      <div style={{ height: "2.5em" }}></div>
-      {/* Tax Rate section with mode toggle */}
-      <div style={{ margin: "1.5em 0 1em 0", textAlign: "left" }}>
-        <label
-          style={{
-            fontWeight: 500,
-            marginRight: "0.5em",
-            display: "inline-block",
-            verticalAlign: "middle",
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "2em" }}>
+        <Button
+          label="Final Step: See Summary"
+          className="custom-btn tertiary"
+          onClick={() => {
+            if (typeof setActiveTab === "function") setActiveTab(4);
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-        >
-          Tax:
-        </label>
-        <span
-          style={{
-            display: "inline-flex",
-            gap: "0.25em",
-            verticalAlign: "middle",
-          }}
-        >
-          <Pill
-            label="$ Amount"
-            selected={taxRate?.mode === "amount"}
-            onClick={() => {
-              if (typeof taxRate === "object") {
-                setTaxRate({ ...taxRate, mode: "amount" });
-              } else {
-                setTaxRate({ value: taxRate, mode: "amount" });
-              }
-            }}
-          />
-          <Pill
-            label="%"
-            selected={!taxRate?.mode || taxRate.mode === "percent"}
-            onClick={() => {
-              if (typeof taxRate === "object") {
-                setTaxRate({ ...taxRate, mode: "percent" });
-              } else {
-                setTaxRate({ value: taxRate, mode: "percent" });
-              }
-            }}
-          />
-        </span>
-        <div style={{ marginTop: "0.5em" }}>
-          {!taxRate?.mode || taxRate.mode === "percent" ? (
-            <InputField
-              label={undefined}
-              placeholder="Enter tax rate"
-              name="taxRate"
-              type="number"
-              value={
-                typeof taxRate === "object" ? taxRate.value || "" : taxRate
-              }
-              onChange={(e) => {
-                if (typeof taxRate === "object") {
-                  setTaxRate({ ...taxRate, value: e.target.value });
-                } else {
-                  setTaxRate(e.target.value);
-                }
-              }}
-              onEnter={() => {
-                document.getElementById("tip")?.focus();
-              }}
-              style={{ maxWidth: 120 }}
-            />
-          ) : (
-            <InputField
-              label={undefined}
-              placeholder="Enter tax amount"
-              name="taxAmount"
-              type="number"
-              value={taxRate.amount || ""}
-              onChange={(e) =>
-                setTaxRate({ ...taxRate, amount: e.target.value })
-              }
-              style={{ maxWidth: 120 }}
-            />
-          )}
-        </div>
-      </div>
-      <div style={{ height: "2em" }}></div>
-      <div style={{ marginBottom: "0.5em", textAlign: "left" }}>
-        <label
-          style={{
-            fontWeight: 500,
-            marginRight: "0.5em",
-            display: "inline-block",
-            verticalAlign: "middle",
-          }}
-        >
-          Tip:
-        </label>
-        <span
-          style={{
-            display: "inline-flex",
-            flexWrap: "wrap",
-            gap: "0.25em",
-            verticalAlign: "middle",
-            alignItems: "center",
-          }}
-        >
-          {TIP_PRESETS.map((preset) => (
-            <Pill
-              key={preset}
-              label={`${preset}%`}
-              selected={tipMode === "percent" && tipPreset === preset}
-              onClick={() => handleTipChange("percent", preset)}
-            />
-          ))}
-          <Pill
-            label="Custom %"
-            selected={tipMode === "customPercent"}
-            onClick={() => handleTipChange("customPercent", undefined)}
-          />
-          <Pill
-            label="$ Amount"
-            selected={tipMode === "amount"}
-            onClick={() => setTipMode("amount")}
-          />
-        </span>
-        <div style={{ height: "0.5em" }}></div>
-        {tipMode === "customPercent" && (
-          <InputField
-            label={undefined}
-            placeholder="Enter tip %"
-            name="customTipPercent"
-            type="number"
-            value={customTipPercentInput}
-            onChange={(e) => {
-              setCustomTipPercentInput(e.target.value);
-              handleTipChange("customPercent", e.target.value);
-            }}
-            style={{ marginTop: "0.5em", maxWidth: 120 }}
-          />
-        )}
-        {tipMode === "amount" && (
-          <InputField
-            label={undefined}
-            placeholder="Enter tip amount"
-            name="tip"
-            type="number"
-            value={tipAmountInput}
-            onChange={(e) => {
-              setTipAmountInput(e.target.value);
-              handleTipChange("amount", e.target.value);
-            }}
-            style={{ marginTop: "0.5em", maxWidth: 120 }}
-          />
-        )}
-      </div>
-      <div style={{ marginBottom: "2.5em" }}></div>
-
-      <div style={{ margin: "1em 0", textAlign: "left" }}>
-        <label
-          style={{
-            fontWeight: 500,
-            marginRight: "0.5em",
-            display: "inline-block",
-            verticalAlign: "middle",
-          }}
-        >
-          Tip Calculation:
-        </label>
-        <span
-          style={{
-            display: "inline-flex", // ensure pills stay in a row
-            gap: "0.25em",
-            verticalAlign: "middle",
-            flexWrap: "nowrap", // prevent wrapping
-            alignItems: "center",
-          }}
-        >
-          <Pill
-            label="Proportionally"
-            selected={tipCalc === "proportional"}
-            onClick={() => setTipCalc("proportional")}
-          />
-          <Pill
-            label="Evenly"
-            selected={tipCalc === "even"}
-            onClick={() => setTipCalc("even")}
-          />
-        </span>
-        <div style={{ marginTop: "0.5em" }}>
-          {tipCalc === "proportional" && (
-            <span className="input-description">
-              Tip is split proportionally based on each person's subtotal.
-            </span>
-          )}
-          {tipCalc === "even" && (
-            <span className="input-description">
-              Tip is split evenly: total tip divided by total number of people.
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div
-        style={{
-          marginTop: "2em",
-          fontWeight: 600,
-          fontSize: "1.1em",
-          paddingTop: "2em",
-        }}
-      >
-        Total Tax: $
-        {!taxRate?.mode || taxRate.mode === "percent"
-          ? (
-              (subtotal *
-                ((typeof taxRate === "object"
-                  ? parseFloat(taxRate.value)
-                  : parseFloat(taxRate)) || 0)) /
-              100
-            ).toFixed(2)
-          : (parseFloat(taxRate.amount) || 0).toFixed(2)}
-        <br />
-        Total Tip: ${parseFloat(calculatedTip || 0).toFixed(2)}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "1.5em",
-          }}
-        >
-          <Button
-            label="Final Step: See Summary"
-            className="custom-btn tertiary"
-            onClick={() => {
-              if (typeof setActiveTab === "function") {
-                setActiveTab(4);
-              }
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          />
-        </div>
+        />
       </div>
     </main>
   );

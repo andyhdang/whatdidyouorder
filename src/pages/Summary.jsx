@@ -13,7 +13,7 @@ import * as XLSX from "xlsx-js-style";
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
 import Snackbar from "../components/Snackbar/Snackbar";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 function Summary({
   people = [],
@@ -25,6 +25,7 @@ function Summary({
   setActiveTab,
   taxMode = "percent", // new prop
   taxAmount = null, // new prop
+  fees = [],
   tipAmountInput = "",
   customTipPercentInput = "",
   tipMode = "percent", // add tipMode prop
@@ -34,7 +35,7 @@ function Summary({
   onStartLiveShare,
 }) {
   // Detect if user is coming from a shared URL
-  const [fromSharedUrl, setFromSharedUrl] = useState(false);
+  const [, setFromSharedUrl] = useState(false);
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -59,6 +60,7 @@ function Summary({
       taxRate: effectiveTaxRate,
       taxMode,
       taxAmount: effectiveTaxAmount,
+      fees,
       tip,
       tipCalc,
       tipMode,
@@ -85,6 +87,23 @@ function Summary({
     effectiveTaxAmount = (subtotal * effectiveTaxRate) / 100;
   }
 
+  const totalFees = fees.reduce(
+    (sum, fee) => sum + (parseFloat(fee.amount) || 0),
+    0
+  );
+  const personSubtotals = people.map((_, pIdx) =>
+    items.reduce((sum, item, iIdx) => {
+      if (assignments[iIdx]?.includes(pIdx)) {
+        return sum + (parseFloat(item.price) || 0) / assignments[iIdx].length;
+      }
+      return sum;
+    }, 0)
+  );
+  const totalAssigned = personSubtotals.reduce((sum, value) => sum + value, 0);
+  const feePerPerson = personSubtotals.map((value) =>
+    totalAssigned ? (value / totalAssigned) * totalFees : 0
+  );
+
   // Calculate tip per person
   let tipPerPerson = Array(people.length).fill(0);
   let totalTip = 0;
@@ -103,15 +122,6 @@ function Summary({
     tipPerPerson = tipPerPerson.map(() => totalTip / people.length);
   } else if (tipCalc === "proportional" && people.length > 0) {
     // Proportional to subtotal assigned (not per item)
-    const personSubtotals = people.map((_, pIdx) => {
-      return items.reduce((sum, item, iIdx) => {
-        if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
-          return sum + (parseFloat(item.price) || 0) / assignments[iIdx].length;
-        }
-        return sum;
-      }, 0);
-    });
-    const totalAssigned = personSubtotals.reduce((a, b) => a + b, 0);
     tipPerPerson = personSubtotals.map((val) =>
       totalAssigned ? (val / totalAssigned) * totalTip : 0
     );
@@ -121,11 +131,9 @@ function Summary({
   const personTotals = people.map((person, pIdx) => {
     let itemsOwed = [];
     let total = 0;
-    let subtotal = 0;
     items.forEach((item, iIdx) => {
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
-        subtotal += base;
         // Use effectiveTaxRate for per-person tax calculation
         const tax = base * (effectiveTaxRate / 100);
         itemsOwed.push({
@@ -148,7 +156,9 @@ function Summary({
       personTip = tipPerPerson[pIdx] || 0;
       total += personTip;
     }
-    return { person, itemsOwed, total, tip: personTip };
+    const personFee = feePerPerson[pIdx] || 0;
+    total += personFee;
+    return { person, itemsOwed, total, tip: personTip, fee: personFee };
   });
 
   const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
@@ -166,6 +176,7 @@ function Summary({
     const allocationEndRow = allocationStartRow + Math.max(items.length - 1, 0);
     const totalsStartRow = allocationEndRow + 3;
     const tipRow = totalsStartRow + 2;
+    const feeRow = totalsStartRow + 3;
     const taxRate = effectiveTaxRate / 100;
     const assignmentStartColumn = XLSX.utils.encode_col(4);
     const assignmentEndColumn = XLSX.utils.encode_col(
@@ -175,8 +186,8 @@ function Summary({
       ["Summary by TabbySplit.app"],
       [],
       ["SUMMARY"],
-      ["Person", "Subtotal", "Tax", "Tip", "Total Owed"],
-      ...people.map((person) => [person, "", "", "", ""]),
+      ["Person", "Subtotal", "Tax", "Tip", "Fees", "Total Owed"],
+      ...people.map((person) => [person, "", "", "", "", ""]),
       [],
       ["ITEM ALLOCATIONS"],
       [
@@ -200,6 +211,7 @@ function Summary({
       ["Subtotal", ""],
       ["Tax", ""],
       ["Tip", totalTip],
+      ["Fees", totalFees],
       ["Grand Total", ""],
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(rows);
@@ -289,11 +301,15 @@ function Summary({
       );
       setFormula(`C${sheetRow}`, `B${sheetRow}*${taxRate}`);
       setFormula(`D${sheetRow}`, tipFormula);
-      setFormula(`E${sheetRow}`, `B${sheetRow}+C${sheetRow}+D${sheetRow}`);
-      ["B", "C", "D", "E"].forEach((column) =>
+      setFormula(
+        `E${sheetRow}`,
+        `IF(SUM($B$${summaryStartRow}:$B$${summaryEndRow})=0,0,B${sheetRow}/SUM($B$${summaryStartRow}:$B$${summaryEndRow})*$B$${feeRow})`
+      );
+      setFormula(`F${sheetRow}`, `B${sheetRow}+C${sheetRow}+D${sheetRow}+E${sheetRow}`);
+      ["B", "C", "D", "E", "F"].forEach((column) =>
         setStyle(`${column}${sheetRow}`, currencyStyle)
       );
-      setStyle(`E${sheetRow}`, totalOwedStyle);
+      setStyle(`F${sheetRow}`, totalOwedStyle);
       setStyle(`A${sheetRow}`, bodyStyle);
     });
     setFormula(
@@ -305,13 +321,13 @@ function Summary({
       `SUM($C$${summaryStartRow}:$C$${summaryEndRow})`
     );
     setFormula(
-      `B${totalsStartRow + 3}`,
-      `SUM($E$${summaryStartRow}:$E$${summaryEndRow})`
+      `B${totalsStartRow + 4}`,
+      `SUM($F$${summaryStartRow}:$F$${summaryEndRow})`
     );
 
     const lastColumn = assignmentEndColumn;
     worksheet["!merges"] = [
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } },
       {
         s: { r: allocationTitleRow - 1, c: 0 },
         e: { r: allocationTitleRow - 1, c: lastColumn.charCodeAt(0) - 65 },
@@ -323,7 +339,7 @@ function Summary({
     setStyle(`A${allocationTitleRow}`, allocationSectionStyle);
     [4, allocationHeaderRow].forEach((rowNumber) => {
       const endColumn =
-        rowNumber === 4 ? 4 : lastColumn.charCodeAt(0) - 65;
+        rowNumber === 4 ? 5 : lastColumn.charCodeAt(0) - 65;
       for (let column = 0; column <= endColumn; column += 1) {
         setStyle(
           `${XLSX.utils.encode_col(column)}${rowNumber}`,
@@ -332,7 +348,7 @@ function Summary({
       }
     });
     setStyle("A1", titleStyle);
-    for (let rowNumber = totalsStartRow; rowNumber <= totalsStartRow + 3; rowNumber += 1) {
+    for (let rowNumber = totalsStartRow; rowNumber <= totalsStartRow + 4; rowNumber += 1) {
       setStyle(`A${rowNumber}`, {
         font: { name: "DM Sans", bold: true, color: { rgb: "FF666666" } },
       });
@@ -427,15 +443,13 @@ function Summary({
             Not all items have been assigned to a person
           </Callout>
         )}
-      {personTotals.map(({ person, itemsOwed, total, tip }, idx) => {
+      {personTotals.map(({ person, itemsOwed, tip, fee }, idx) => {
         const personSubtotal = itemsOwed.reduce(
           (sum, item) => sum + item.base,
           0
         );
         const personTax = personSubtotal * (effectiveTaxRate / 100);
-        // For even tip, use tip from personTotals, not sum of item tips
-        const personTip = tip;
-        const personTotalOwed = personSubtotal + personTax + tip;
+        const personTotalOwed = personSubtotal + personTax + tip + fee;
         return (
           <Card
             key={idx}
@@ -461,6 +475,8 @@ function Summary({
               {tipCalc === "even"
                 ? (totalTip / people.length).toFixed(2)
                 : tip.toFixed(2)}
+              <br />
+              Fees: ${fee.toFixed(2)}
               <br />
               <span
                 className="text-highlight"
@@ -500,7 +516,9 @@ function Summary({
         <br />
         Total Tip: ${totalTip.toFixed(2)}
         <br />
-        Grand Total: ${(subtotal + effectiveTaxAmount + totalTip).toFixed(2)}
+        Total Fees: ${totalFees.toFixed(2)}
+        <br />
+        Grand Total: ${(subtotal + effectiveTaxAmount + totalTip + totalFees).toFixed(2)}
       </div>
       {(() => {
         // Remove rounding for validation calculations
@@ -516,6 +534,7 @@ function Summary({
           0
         );
         const sumTip = personTotals.reduce((sum, p) => sum + p.tip, 0);
+        const sumFees = personTotals.reduce((sum, p) => sum + p.fee, 0);
         const sumTotalOwed = personTotals.reduce((sum, p) => sum + p.total, 0);
         const errors = [];
         const allAssigned =
@@ -530,6 +549,9 @@ function Summary({
         }
         if (Math.abs(sumTip - totalTip) >= 0.01) {
           errors.push("Individual tips do not add up to the total tip.");
+        }
+        if (Math.abs(sumFees - totalFees) >= 0.01) {
+          errors.push("Individual fees do not add up to the total fees.");
         }
         if (Math.abs(sumTotalOwed - grandTotal) >= 0.01) {
           errors.push(
@@ -611,7 +633,7 @@ function Summary({
           onClick={() => {
             let text = `TabbySplit.app Summary\n`;
             text += `People involved: ${people.length}\n`;
-            personTotals.forEach(({ person, itemsOwed, total, tip }, idx) => {
+            personTotals.forEach(({ person, itemsOwed, tip, fee }) => {
               const personSubtotal = itemsOwed.reduce(
                 (sum, item) => sum + item.base,
                 0
@@ -620,8 +642,7 @@ function Summary({
                 (sum, item) => sum + item.tax,
                 0
               );
-              const personTip = tip;
-              const personTotalOwed = personSubtotal + personTax + personTip;
+              const personTotalOwed = personSubtotal + personTax + tip + fee;
               text += `\n${person}:\n`;
               itemsOwed.forEach((item) => {
                 if (item.splitWith && item.splitWith > 1) {
@@ -633,10 +654,9 @@ function Summary({
                 }
               });
               text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-              text += `  Tax (${effectiveTaxRate.toFixed(
-                2
-              )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
+              text += `  Tax (${effectiveTaxRate.toFixed(2)}%): $${personTax.toFixed(2)}\n`;
               text += `  Tip: $${tip.toFixed(2)}\n`;
+              text += `  Fees: $${fee.toFixed(2)}\n`;
               text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
             });
             text += `\n---\n`;
@@ -645,10 +665,12 @@ function Summary({
               2
             )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
             text += `Total Tip: $${tip.toFixed(2)}\n`;
+            text += `Total Fees: $${totalFees.toFixed(2)}\n`;
             text += `Grand Total: $${(
               subtotal +
               effectiveTaxAmount +
-              totalTip
+              totalTip +
+              totalFees
             ).toFixed(2)}\n`;
             navigator.clipboard.writeText(text);
             setSnackbarMsg("Summary copied to clipboard!");

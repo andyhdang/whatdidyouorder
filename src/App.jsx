@@ -22,31 +22,10 @@ import "./App.css";
 
 const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
 
-const SAMPLE_BILL = {
-  people: ["Alex", "Bailey", "Casey", "Devon"],
-  emojis: ["🐱", "😺", "😸", "😹"],
-  items: [
-    { name: "Pizza", price: "24.00" },
-    { name: "Pasta", price: "18.00" },
-    { name: "Garlic Bread", price: "8.00" },
-    { name: "Tiramisu", price: "12.00" },
-  ],
-  assignments: [
-    [0, 1],
-    [1],
-    [0, 2, 3],
-    [0, 1, 2, 3],
-  ],
-  taxRate: { value: "8.5", mode: "percent" },
-  tip: "9.30",
-  tipCalc: "proportional",
-  tipMode: "percent",
-  tipPreset: 15,
-};
-
 function App() {
   const [sharedSplit, setSharedSplit] = useState(null);
   const [sharedSplitModal, setSharedSplitModal] = useState(null);
+  const [sharedSplitJoinCode, setSharedSplitJoinCode] = useState("");
   const [sharedSplitError, setSharedSplitError] = useState("");
   const [sharedSplitBusy, setSharedSplitBusy] = useState(false);
   const remoteStateRef = useRef("");
@@ -60,6 +39,7 @@ function App() {
     const compressed = params.get("data");
     const splitCode = params.get("split");
     if (splitCode) {
+      setSharedSplitJoinCode(splitCode.toUpperCase());
       setSharedSplitModal("join");
     }
     if (compressed) {
@@ -105,35 +85,16 @@ function App() {
       }
     }
   }, []);
-  const [activeTab, setActiveTab] = useState(() =>
-    import.meta.env.DEV ? 4 : 0
-  );
-  const [people, setPeople] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.people : []
-  );
-  const [emojis, setEmojis] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.emojis : []
-  );
-  const [items, setItems] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.items : []
-  );
-  const [assignments, setAssignments] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.assignments : []
-  );
-  const [taxRate, setTaxRate] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.taxRate : ""
-  );
-  const [tip, setTip] = useState(() => (import.meta.env.DEV ? SAMPLE_BILL.tip : ""));
-  const [tipCalc, setTipCalc] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.tipCalc : "proportional"
-  );
-  // Tip choices state (persisted)
-  const [tipMode, setTipMode] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.tipMode : "percent"
-  );
-  const [tipPreset, setTipPreset] = useState(() =>
-    import.meta.env.DEV ? SAMPLE_BILL.tipPreset : 15
-  );
+  const [activeTab, setActiveTab] = useState(0);
+  const [people, setPeople] = useState([]);
+  const [emojis, setEmojis] = useState([]);
+  const [items, setItems] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [taxRate, setTaxRate] = useState("");
+  const [tip, setTip] = useState("");
+  const [tipCalc, setTipCalc] = useState("proportional");
+  const [tipMode, setTipMode] = useState("percent");
+  const [tipPreset, setTipPreset] = useState(15);
   const [customTipPercent, setCustomTipPercent] = useState("");
 
   const sharedState = {
@@ -381,6 +342,12 @@ function App() {
         <Card>
           {activeTab === 0 && (
             <UploadReceipt
+              isSupabaseConfigured={isSupabaseConfigured}
+              onJoinSharedSplit={(code) => {
+                setSharedSplitJoinCode(code);
+                setSharedSplitError("");
+                setSharedSplitModal("join");
+              }}
               onNext={({ extractedItems, extractedTaxAmount }) => {
                 if (Array.isArray(extractedItems) && extractedItems.length > 0) {
                   setItems(extractedItems);
@@ -435,6 +402,13 @@ function App() {
               setTipAmountInput={setTipAmountInput}
               customTipPercentInput={customTipPercentInput}
               setCustomTipPercentInput={setCustomTipPercentInput}
+              isSupabaseConfigured={isSupabaseConfigured}
+              sharedJoinCode={sharedSplit?.join_code}
+              onStartLiveShare={() => {
+                setSharedSplitError("");
+                setSharedSplitModal("create");
+              }}
+              onCopyLiveShare={() => navigator.clipboard.writeText(sharedJoinUrl)}
             />
           )}
           {activeTab === 4 && (
@@ -467,7 +441,7 @@ function App() {
       <SharedSplitModal
         open={Boolean(sharedSplitModal)}
         mode={sharedSplitModal}
-        joinCode={new URLSearchParams(window.location.search).get("split") || ""}
+        joinCode={sharedSplitJoinCode}
         onClose={() => {
           setSharedSplitError("");
           setSharedSplitModal(null);

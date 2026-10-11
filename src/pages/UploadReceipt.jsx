@@ -11,7 +11,7 @@ const SCALE_RETRY_MULTIPLIER = 0.85;
 const QUALITY_STEPS = [0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42];
 const SHOW_JSON_INPUT = false;
 
-const UploadReceipt = ({ onNext }) => {
+const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
   const cameraInputRef = useRef(null);
   const uploadInputRef = useRef(null);
   const [jsonInput, setJsonInput] = useState("");
@@ -24,6 +24,7 @@ const UploadReceipt = ({ onNext }) => {
   const [extractedTaxAmount, setExtractedTaxAmount] = useState(null);
   const [showExtractionSuccessModal, setShowExtractionSuccessModal] =
     useState(false);
+  const [showReceiptOptions, setShowReceiptOptions] = useState(false);
 
   const parseErrorMessage = async (response) => {
     if (response.status === 413) {
@@ -341,31 +342,23 @@ const UploadReceipt = ({ onNext }) => {
 
   return (
     <div>
-      <h2>Upload Receipt</h2>
+      <h2>Start a TabbySplit</h2>
       <p className='description'>
-        Take a receipt photo or upload one to extract ordered items.
+        Create a new split or join one your friend has already started.
       </p>
 
-      <div className='image-actions'>
+      <div className='starting-actions'>
         <Button
-          label='Use Camera'
-          className='secondary'
-          onClick={() => cameraInputRef.current?.click()}
-          disabled={isExtracting}
+          label='Upload receipt'
+          onClick={() => setShowReceiptOptions(true)}
         />
         <Button
-          label='Upload Image'
+          label='Join via code'
           className='secondary'
-          onClick={() => uploadInputRef.current?.click()}
-          disabled={isExtracting}
+          onClick={() => onJoinSharedSplit("")}
+          disabled={!isSupabaseConfigured}
         />
       </div>
-
-      <Button
-        label='Add Items Manually'
-        className='tertiary'
-        onClick={handleAddItemsManually}
-      />
 
       <input
         ref={cameraInputRef}
@@ -432,6 +425,42 @@ const UploadReceipt = ({ onNext }) => {
           </div>
         </>
       )}
+
+      <Modal open={showReceiptOptions} onClose={() => setShowReceiptOptions(false)}>
+        <div style={{ padding: "0.5em", textAlign: "center", minWidth: 280 }}>
+          <h3 style={{ marginTop: 0 }}>Add your receipt</h3>
+          <p className='description'>
+            Choose how you want to add the items for this split.
+          </p>
+          <div className='receipt-option-actions'>
+            <Button
+              label='Use Camera'
+              onClick={() => {
+                setShowReceiptOptions(false);
+                cameraInputRef.current?.click();
+              }}
+              fullWidth
+            />
+            <Button
+              label='Upload Image'
+              className='secondary'
+              onClick={() => {
+                setShowReceiptOptions(false);
+                uploadInputRef.current?.click();
+              }}
+              fullWidth
+            />
+            <Button
+              label='Add Items Manually'
+              className='tertiary'
+              onClick={() => {
+                setShowReceiptOptions(false);
+                handleAddItemsManually();
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={showExtractionSuccessModal && extractedItems.length > 0}

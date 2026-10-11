@@ -102,13 +102,20 @@ function Items({
   };
 
   const saveItem = () => {
-    if (!itemName.trim() || !itemPrice.trim()) return;
+    const normalizedPrice = itemPrice.replace(/[$,\s]/g, "");
+    if (
+      !itemName.trim() ||
+      !normalizedPrice ||
+      Number.isNaN(Number(normalizedPrice))
+    ) {
+      return;
+    }
 
     if (editingItemIndex !== null) {
       setItems(
         items.map((item, index) =>
           index === editingItemIndex
-            ? { ...item, name: itemName.trim(), price: itemPrice.trim() }
+            ? { ...item, name: itemName.trim(), price: normalizedPrice }
             : item
         )
       );
@@ -117,7 +124,7 @@ function Items({
         ...items,
         ...Array.from({ length: itemQuantity }, () => ({
           name: itemName.trim(),
-          price: itemPrice.trim(),
+          price: normalizedPrice,
         })),
       ]);
     }
@@ -250,7 +257,7 @@ function Items({
         <div style={{ padding: "1em", minWidth: 260 }}>
           <h3>{editingItemIndex === null ? "Add items" : "Edit item"}</h3>
           <InputField label="Item name" placeholder="e.g. Cat Nip" name="itemName" value={itemName} onChange={(event) => setItemName(event.target.value)} />
-          <InputField label="Price" placeholder="e.g. 12.99" name="itemPrice" type="number" value={itemPrice} onChange={(event) => setItemPrice(event.target.value)} onEnter={saveItem} />
+          <InputField label="Price" placeholder="e.g. 12.99" name="itemPrice" inputMode="decimal" value={itemPrice} onChange={(event) => setItemPrice(event.target.value)} onEnter={saveItem} />
           {editingItemIndex === null && (
             <div style={{ display: "flex", alignItems: "center", marginTop: "1em" }}>
               <label htmlFor="itemQuantity-stepper" style={{ fontWeight: 500, marginRight: "0.5em" }}>Quantity:</label>

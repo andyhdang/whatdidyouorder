@@ -7,6 +7,7 @@ function InputField({
   value,
   onChange,
   type = "text",
+  inputMode,
   name,
   onEnter,
   error,
@@ -25,6 +26,7 @@ function InputField({
         id={name}
         name={name}
         type={type}
+        inputMode={inputMode}
         className={`input-box${error ? " input-error" : ""}`}
         placeholder={placeholder}
         value={value}

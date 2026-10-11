@@ -29,6 +29,10 @@ function Assign({
   setTipAmountInput,
   customTipPercentInput,
   setCustomTipPercentInput,
+  isSupabaseConfigured = false,
+  sharedJoinCode,
+  onStartLiveShare,
+  onCopyLiveShare,
 }) {
   // Keep assignments array in sync with items
 
@@ -166,6 +170,24 @@ function Assign({
     <main>
       <h2>Assign</h2>
       <p className="description">Who ordered what?</p>
+      {isSupabaseConfigured && (
+        <div style={{ marginBottom: "1.5em" }}>
+          <Button
+            label={
+              sharedJoinCode
+                ? `Copy share code: ${sharedJoinCode}`
+                : "Generate share code"
+            }
+            className="secondary"
+            onClick={sharedJoinCode ? onCopyLiveShare : onStartLiveShare}
+          />
+          <div className="input-description" style={{ marginTop: "0.5em" }}>
+            {sharedJoinCode
+              ? "Share this code with friends so they can choose their items."
+              : "Create a code to invite friends to this split."}
+          </div>
+        </div>
+      )}
       {items.length === 0 ? (
         <EmptyArea
           text="Add items to assign."

@@ -7,6 +7,7 @@ import EditIcon from "../assets/icons/EditIcon";
 import Modal from "../components/Modal/Modal";
 import PersonAddIcon from "../assets/icons/PersonAddIcon";
 import QrcodeIcon from "../assets/icons/QrcodeIcon";
+import LinkIcon from "../assets/icons/LinkIcon";
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
 import Snackbar from "../components/Snackbar/Snackbar";
 
@@ -129,6 +130,7 @@ function People({
               />
               <Button
                 label={`Share Code: ${sharedJoinCode}`}
+                icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
                 className="secondary"
                 onClick={handleCopyInviteLink}
               />

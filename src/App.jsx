@@ -396,6 +396,14 @@ function App() {
               emojis={emojis}
               setEmojis={setEmojis}
               setActiveTab={setActiveTab}
+              isSupabaseConfigured={isSupabaseConfigured}
+              sharedJoinCode={sharedSplit?.join_code}
+              sharedJoinUrl={sharedJoinUrl}
+              onStartLiveShare={() => {
+                setSharedSplitError("");
+                setSharedSplitModal("create");
+              }}
+              onCopyLiveShare={() => navigator.clipboard.writeText(sharedJoinUrl)}
             />
           )}
           {activeTab === 3 && (
@@ -405,13 +413,6 @@ function App() {
               assignments={assignments}
               setAssignments={setAssignments}
               setActiveTab={setActiveTab}
-              isSupabaseConfigured={isSupabaseConfigured}
-              sharedJoinCode={sharedSplit?.join_code}
-              onStartLiveShare={() => {
-                setSharedSplitError("");
-                setSharedSplitModal("create");
-              }}
-              onCopyLiveShare={() => navigator.clipboard.writeText(sharedJoinUrl)}
             />
           )}
           {activeTab === 4 && (

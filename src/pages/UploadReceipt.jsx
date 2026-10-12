@@ -344,19 +344,27 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
     <div>
       <h2>Start a TabbySplit</h2>
       <p className='description'>
-        Create a new split or join one your friend has already started.
+        Upload a receipt to start a new split or join one your friend has
+        already started.
       </p>
 
       <div className='starting-actions'>
         <Button
-          label='Upload receipt'
+          label='Upload Receipt'
           onClick={() => setShowReceiptOptions(true)}
         />
         <Button
-          label='Join via code'
+          label='Join via Code'
           className='secondary'
           onClick={() => onJoinSharedSplit("")}
           disabled={!isSupabaseConfigured}
+        />
+      </div>
+      <div className='manual-entry-action'>
+        <Button
+          label='Add Items Manually'
+          className='tertiary'
+          onClick={handleAddItemsManually}
         />
       </div>
 
@@ -430,7 +438,7 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
         <div style={{ padding: "0.5em", textAlign: "center", minWidth: 280 }}>
           <h3 style={{ marginTop: 0 }}>Add your receipt</h3>
           <p className='description'>
-            Choose how you want to add the items for this split.
+            Add your receipt to extract items for this split
           </p>
           <div className='receipt-option-actions'>
             <Button
@@ -449,14 +457,6 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
                 uploadInputRef.current?.click();
               }}
               fullWidth
-            />
-            <Button
-              label='Add Items Manually'
-              className='tertiary'
-              onClick={() => {
-                setShowReceiptOptions(false);
-                handleAddItemsManually();
-              }}
             />
           </div>
         </div>

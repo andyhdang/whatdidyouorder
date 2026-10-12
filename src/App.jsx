@@ -39,7 +39,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const compressed = params.get("data");
     const splitCode = params.get("split");
-    if (splitCode) {
+    if (splitCode && params.get("tab") !== "summary") {
       setSharedSplitJoinCode(splitCode.toUpperCase());
       setSharedSplitModal("join");
     }
@@ -131,6 +131,30 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const splitCode = params.get("split");
+    if (!splitCode || params.get("tab") !== "summary") return;
+
+    const loadSharedSummary = async () => {
+      setSharedSplitBusy(true);
+      setSharedSplitError("");
+      try {
+        const split = await joinSharedSplit(splitCode);
+        remoteStateRef.current = JSON.stringify(split.state);
+        applySharedState(split.state);
+        setSharedSplit(split);
+        setActiveTab(4);
+      } catch (error) {
+        setSharedSplitError(error.message);
+      } finally {
+        setSharedSplitBusy(false);
+      }
+    };
+
+    loadSharedSummary();
+  }, [applySharedState]);
+
   const sharedStateJson = JSON.stringify(sharedState);
 
   useEffect(() => {
@@ -183,7 +207,7 @@ function App() {
     };
   }, [applySharedState, sharedSplit]);
 
-  const createLiveSplit = async () => {
+  const createLiveSplit = async ({ rethrow = false } = {}) => {
     setSharedSplitBusy(true);
     setSharedSplitError("");
     try {
@@ -193,6 +217,7 @@ function App() {
       setSharedSplitModal(null);
     } catch (error) {
       setSharedSplitError(error.message);
+      if (rethrow) throw error;
     } finally {
       setSharedSplitBusy(false);
     }
@@ -216,7 +241,8 @@ function App() {
       applySharedState(nextState);
       setSharedSplit(split);
       setSharedSplitModal(null);
-      setActiveTab(3);
+      const destination = new URLSearchParams(window.location.search).get("tab");
+      setActiveTab(destination === "summary" ? 4 : 3);
     } catch (error) {
       setSharedSplitError(error.message);
     } finally {
@@ -226,6 +252,9 @@ function App() {
 
   const sharedJoinUrl = sharedSplit
     ? `${window.location.origin}${window.location.pathname}?split=${sharedSplit.join_code}`
+    : "";
+  const summaryShareUrl = sharedJoinUrl
+    ? `${sharedJoinUrl}&tab=summary`
     : "";
 
   // Keep assignments array in sync with items
@@ -384,10 +413,8 @@ function App() {
               customTipPercentInput={customTipPercentInput}
               isSupabaseConfigured={isSupabaseConfigured}
               sharedJoinUrl={sharedJoinUrl}
-              onStartLiveShare={() => {
-                setSharedSplitError("");
-                setSharedSplitModal("create");
-              }}
+              summaryShareUrl={summaryShareUrl}
+              onCreateLiveShare={() => createLiveSplit({ rethrow: true })}
             />
           )}
         </Card>

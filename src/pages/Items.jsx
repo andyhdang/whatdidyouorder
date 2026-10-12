@@ -190,7 +190,7 @@ function Items({
       <h2>Items</h2>
       <p className="description">What was ordered?</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", justifyContent: "center" }}>
-        <Button label="Add item(s)" className="primary" onClick={() => openItemModal()} />
+        <Button label="Add Item(s)" className="primary" onClick={() => openItemModal()} />
         <Button label="Tax & Tip" className="secondary" onClick={() => setActiveModal("tax-tip")} />
         <Button label="Fees" className="secondary" onClick={() => setActiveModal("fees")} />
       </div>
@@ -267,7 +267,7 @@ function Items({
           )}
           <div style={{ display: "flex", gap: "1em", marginTop: "1.5em", justifyContent: "flex-end" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />
-            <Button label={editingItemIndex === null ? "Add item(s)" : "Save"} onClick={saveItem} />
+            <Button label={editingItemIndex === null ? "Add Item(s)" : "Save"} onClick={saveItem} />
           </div>
         </div>
       </Modal>
@@ -309,7 +309,7 @@ function Items({
           <InputField label="Fee amount" placeholder="e.g. 4.99" name="feeAmount" type="number" value={feeAmount} onChange={(event) => setFeeAmount(event.target.value)} onEnter={addFee} />
           <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "1.5em" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />
-            <Button label="Add fee" onClick={addFee} />
+            <Button label="Add Fee" onClick={addFee} />
           </div>
         </div>
       </Modal>

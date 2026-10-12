@@ -266,55 +266,6 @@ function App() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Shareable URL logic (now includes taxMode and taxAmount)
-  const getShareUrl = () => {
-    // Tax encoding
-    let encodedTaxMode =
-      taxRate && typeof taxRate === "object" && taxRate.mode
-        ? taxRate.mode
-        : "percent";
-    let encodedTaxAmount = null;
-    let encodedTaxRate = "";
-    if (encodedTaxMode === "amount") {
-      encodedTaxAmount =
-        taxRate && typeof taxRate === "object" ? taxRate.amount : null;
-    } else {
-      encodedTaxRate =
-        taxRate && typeof taxRate === "object" ? taxRate.value : taxRate;
-    }
-
-    // Tip encoding
-    let encodedTipMode = tipMode;
-    let encodedTipAmount = null;
-    let encodedTipPercent = null;
-    if (encodedTipMode === "amount") {
-      encodedTipAmount = tipAmountInput;
-    } else if (encodedTipMode === "customPercent") {
-      encodedTipPercent = customTipPercentInput;
-    }
-
-    const state = {
-      people,
-      items,
-      assignments,
-      taxMode: encodedTaxMode,
-      taxAmount: encodedTaxAmount,
-      taxRate: encodedTaxRate,
-      fees,
-      tipMode: encodedTipMode,
-      tipAmount: encodedTipAmount,
-      tipPercent: encodedTipPercent,
-      tipCalc,
-      tip,
-      tipAmountInput,
-      customTipPercentInput,
-    };
-    const compressed = LZString.compressToEncodedURIComponent(
-      JSON.stringify(state)
-    );
-    return `${window.location.origin}${window.location.pathname}?data=${compressed}`;
-  };
-
   return (
     <main>
       <a
@@ -397,7 +348,6 @@ function App() {
               setEmojis={setEmojis}
               setActiveTab={setActiveTab}
               isSupabaseConfigured={isSupabaseConfigured}
-              sharedJoinCode={sharedSplit?.join_code}
               sharedJoinUrl={sharedJoinUrl}
               onStartLiveShare={() => {
                 setSharedSplitError("");
@@ -430,7 +380,6 @@ function App() {
               fees={fees}
               tipAmountInput={tipAmountInput}
               customTipPercentInput={customTipPercentInput}
-              getShareUrl={getShareUrl}
               isSupabaseConfigured={isSupabaseConfigured}
               sharedJoinCode={sharedSplit?.join_code}
               sharedJoinUrl={sharedJoinUrl}

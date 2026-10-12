@@ -122,27 +122,27 @@ function People({
           sharedJoinCode ? (
             <>
               <Button
-                label="Show QR code"
+                label="Show QR Code"
                 icon={<QrcodeIcon size={20} color="currentColor" />}
                 className="primary"
                 onClick={() => setIsQrModalOpen(true)}
               />
               <Button
-                label={`Share code: ${sharedJoinCode}`}
+                label={`Share Code: ${sharedJoinCode}`}
                 className="secondary"
                 onClick={handleCopyInviteLink}
               />
             </>
           ) : (
             <Button
-              label="Generate share code"
+              label="Generate Share Code"
               className="primary"
               onClick={onStartLiveShare}
             />
           )
         )}
         <Button
-          label="Add person(s)"
+          label="Add Person(s)"
           className={isSupabaseConfigured ? "secondary" : "primary"}
           onClick={() => setIsAddModalOpen(true)}
         />
@@ -282,7 +282,7 @@ function People({
               }}
             />
             <Button
-              label="Add person(s)"
+              label="Add Person(s)"
               icon={
                 <PersonAddIcon
                   width={20}

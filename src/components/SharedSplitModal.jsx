@@ -79,7 +79,7 @@ function SharedSplitModal({
             disabled={busy}
           />
           <Button
-            label={busy ? "Working..." : isJoin ? "Join split" : "Create code"}
+            label={busy ? "Working..." : isJoin ? "Join Split" : "Create Code"}
             onClick={() => (isJoin ? onJoin(code, name) : onCreate())}
             disabled={busy || !valid}
           />

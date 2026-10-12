@@ -18,7 +18,7 @@ function Footer() {
         <span>© {new Date().getFullYear()} TabbySplit</span>
         <span style={{ marginLeft: "1em" }}>
           <Button
-            label="Help us improve"
+            label="Help Us Improve"
             className="custom-btn tertiary"
             onClick={handleOpen}
           ></Button>

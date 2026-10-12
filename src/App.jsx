@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import LZString from "lz-string";
+import { Analytics } from "@vercel/analytics/react";
 
 import TabGroup from "./components/TabGroup/TabGroup";
 import People from "./pages/People";
@@ -405,6 +406,7 @@ function App() {
         busy={sharedSplitBusy}
         error={sharedSplitError}
       />
+      <Analytics />
     </main>
   );
 }

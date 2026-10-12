@@ -90,6 +90,8 @@ function Items({
     setItemName("");
     setItemPrice("");
     setItemQuantity(1);
+    setFeeName("");
+    setFeeAmount("");
   };
 
   const openItemModal = (index = null) => {
@@ -151,8 +153,7 @@ function Items({
   const addFee = () => {
     if (!feeName.trim() || !feeAmount.trim()) return;
     setFees([...fees, { name: feeName.trim(), amount: feeAmount.trim() }]);
-    setFeeName("");
-    setFeeAmount("");
+    closeModal();
   };
 
   const adjustmentRow = (label, amount, onEdit, onDelete) => (
@@ -189,7 +190,7 @@ function Items({
       <h2>Items</h2>
       <p className="description">What was ordered?</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", justifyContent: "center" }}>
-        <Button label="Add items" className="primary" onClick={() => openItemModal()} />
+        <Button label="Add item(s)" className="primary" onClick={() => openItemModal()} />
         <Button label="Tax & Tip" className="secondary" onClick={() => setActiveModal("tax-tip")} />
         <Button label="Fees" className="secondary" onClick={() => setActiveModal("fees")} />
       </div>
@@ -255,7 +256,7 @@ function Items({
 
       <Modal open={activeModal === "item"} onClose={closeModal}>
         <div style={{ padding: "1em", minWidth: 260 }}>
-          <h3>{editingItemIndex === null ? "Add items" : "Edit item"}</h3>
+          <h3>{editingItemIndex === null ? "Add item(s)" : "Edit item"}</h3>
           <InputField label="Item name" placeholder="e.g. Cat Nip" name="itemName" value={itemName} onChange={(event) => setItemName(event.target.value)} />
           <InputField label="Price" placeholder="e.g. 12.99" name="itemPrice" inputMode="decimal" value={itemPrice} onChange={(event) => setItemPrice(event.target.value)} onEnter={saveItem} />
           {editingItemIndex === null && (
@@ -265,8 +266,8 @@ function Items({
             </div>
           )}
           <div style={{ display: "flex", gap: "1em", marginTop: "1.5em", justifyContent: "flex-end" }}>
-            <Button label="Cancel" onClick={closeModal} className="tertiary" />
-            <Button label={editingItemIndex === null ? "Add items" : "Save"} onClick={saveItem} />
+            <Button label="Cancel" onClick={closeModal} className="secondary" />
+            <Button label={editingItemIndex === null ? "Add item(s)" : "Save"} onClick={saveItem} />
           </div>
         </div>
       </Modal>
@@ -274,13 +275,13 @@ function Items({
       <Modal open={activeModal === "tax-tip"} onClose={closeModal}>
         <div style={{ padding: "1em", minWidth: 260 }}>
           <h3>Tax & Tip</h3>
-          <label style={{ fontWeight: 500 }}>Tax:</label>
+          <label style={{ display: "block", fontWeight: 500, textAlign: "left" }}>Tax:</label>
           <div style={{ display: "flex", gap: "0.25em", margin: "0.5em 0" }}>
             <Pill label="$ Amount" selected={taxRate?.mode === "amount"} onClick={() => setTaxRate(typeof taxRate === "object" ? { ...taxRate, mode: "amount" } : { value: taxRate, mode: "amount" })} />
             <Pill label="%" selected={!taxRate?.mode || taxRate.mode === "percent"} onClick={() => setTaxRate(typeof taxRate === "object" ? { ...taxRate, mode: "percent" } : { value: taxRate, mode: "percent" })} />
           </div>
           <InputField label={undefined} placeholder={taxRate?.mode === "amount" ? "Enter tax amount" : "Enter tax rate"} name="taxRate" type="number" value={typeof taxRate === "object" ? (taxRate.mode === "amount" ? taxRate.amount || "" : taxRate.value || "") : taxRate} onChange={(event) => setTaxRate(typeof taxRate === "object" ? { ...taxRate, [taxRate.mode === "amount" ? "amount" : "value"]: event.target.value } : event.target.value)} />
-          <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em" }}>Tip:</label>
+          <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em", textAlign: "left" }}>Tip:</label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25em", margin: "0.5em 0" }}>
             {TIP_PRESETS.map((preset) => <Pill key={preset} label={`${preset}%`} selected={tipMode === "percent" && tipPreset === preset} onClick={() => handleTipChange("percent", preset)} />)}
             <Pill label="Custom %" selected={tipMode === "customPercent"} onClick={() => handleTipChange("customPercent")} />
@@ -288,13 +289,14 @@ function Items({
           </div>
           {tipMode === "customPercent" && <InputField label={undefined} placeholder="Enter tip %" name="customTipPercent" type="number" value={customTipPercentInput} onChange={(event) => handleTipChange("customPercent", event.target.value)} />}
           {tipMode === "amount" && <InputField label={undefined} placeholder="Enter tip amount" name="tipAmount" type="number" value={tipAmountInput} onChange={(event) => handleTipChange("amount", event.target.value)} />}
-          <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em" }}>Tip calculation:</label>
+          <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em", textAlign: "left" }}>Tip calculation:</label>
           <div style={{ display: "flex", gap: "0.25em", marginTop: "0.5em" }}>
             <Pill label="Proportionally" selected={tipCalc === "proportional"} onClick={() => setTipCalc("proportional")} />
             <Pill label="Evenly" selected={tipCalc === "even"} onClick={() => setTipCalc("even")} />
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5em" }}>
-            <Button label="Done" onClick={closeModal} />
+          <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "2em" }}>
+            <Button label="Cancel" onClick={closeModal} className="secondary" />
+            <Button label="Add Tax & Tip" onClick={closeModal} />
           </div>
         </div>
       </Modal>
@@ -305,15 +307,9 @@ function Items({
           <p className="description">Add service, delivery, or other fixed fees.</p>
           <InputField label="Fee name" placeholder="e.g. Delivery fee" name="feeName" value={feeName} onChange={(event) => setFeeName(event.target.value)} />
           <InputField label="Fee amount" placeholder="e.g. 4.99" name="feeAmount" type="number" value={feeAmount} onChange={(event) => setFeeAmount(event.target.value)} onEnter={addFee} />
-          <Button label="Add fee" onClick={addFee} className="secondary" />
-          {fees.map((fee, index) => (
-            <div key={`${fee.name}-${index}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.75em" }}>
-              <span>{fee.name}: ${(parseFloat(fee.amount) || 0).toFixed(2)}</span>
-              <Button icon={<DeleteIcon width={20} height={20} style={{ color: "inherit" }} />} onClick={() => setFees(fees.filter((_, feeIndex) => feeIndex !== index))} aria-label={`Delete ${fee.name}`} className="icon-btn custom-btn secondary" title="Delete fee" />
-            </div>
-          ))}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5em" }}>
-            <Button label="Done" onClick={closeModal} />
+          <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "1.5em" }}>
+            <Button label="Cancel" onClick={closeModal} className="secondary" />
+            <Button label="Add fee" onClick={addFee} />
           </div>
         </div>
       </Modal>

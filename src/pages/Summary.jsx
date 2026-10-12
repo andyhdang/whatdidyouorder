@@ -7,7 +7,6 @@ import QrcodeIcon from "../assets/icons/QrcodeIcon";
 import Modal from "../components/Modal/Modal";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
-import LZString from "lz-string";
 import * as XLSX from "xlsx-js-style";
 
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
@@ -30,7 +29,6 @@ function Summary({
   customTipPercentInput = "",
   tipMode = "percent", // add tipMode prop
   isSupabaseConfigured = false,
-  sharedJoinCode,
   sharedJoinUrl,
   onStartLiveShare,
 }) {
@@ -50,28 +48,6 @@ function Summary({
     }
   }, []);
 
-  // Shareable URL logic
-  const getShareUrl = () => {
-    const state = {
-      people,
-      items,
-      assignments,
-      // Use effective values for tax
-      taxRate: effectiveTaxRate,
-      taxMode,
-      taxAmount: effectiveTaxAmount,
-      fees,
-      tip,
-      tipCalc,
-      tipMode,
-      tipAmountInput,
-      customTipPercentInput,
-    };
-    const compressed = LZString.compressToEncodedURIComponent(
-      JSON.stringify(state)
-    );
-    return `${window.location.origin}${window.location.pathname}?data=${compressed}`;
-  };
   // Calculate subtotal
   const subtotal = items.reduce(
     (sum, item) => sum + (parseFloat(item.price) || 0),
@@ -166,6 +142,28 @@ function Summary({
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success");
+  const [copyLiveLinkAfterCreation, setCopyLiveLinkAfterCreation] =
+    useState(false);
+
+  useEffect(() => {
+    if (!copyLiveLinkAfterCreation || !sharedJoinUrl) return;
+
+    setCopyLiveLinkAfterCreation(false);
+    navigator.clipboard.writeText(sharedJoinUrl).then(
+      () => {
+        setSnackbarType("success");
+        setSnackbarMsg("Live split link copied to clipboard!");
+        setSnackbarOpen(true);
+      },
+      (error) => {
+        console.error("Failed to copy live split link", error);
+        setSnackbarType("error");
+        setSnackbarMsg("Couldn't copy the live split link. Please try again.");
+        setSnackbarOpen(true);
+      }
+    );
+  }, [copyLiveLinkAfterCreation, sharedJoinUrl]);
 
   const downloadXlsx = async () => {
     const summaryStartRow = 5;
@@ -602,92 +600,48 @@ function Summary({
         }}
       >
         {isSupabaseConfigured && (
-          <Button
-            label={sharedJoinCode ? `Live code: ${sharedJoinCode}` : "Share Live Split"}
-            icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
-            onClick={() => {
-              if (sharedJoinUrl) {
-                navigator.clipboard.writeText(sharedJoinUrl);
-                setSnackbarMsg("Live split link copied to clipboard!");
-                setSnackbarOpen(true);
-              } else {
-                onStartLiveShare();
-              }
-            }}
-          />
-        )}
-        <Button
-          label="Share Link"
-          icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
-          onClick={() => {
-            const url = getShareUrl();
-            navigator.clipboard.writeText(url);
-            setSnackbarMsg("Shareable URL copied to clipboard!");
-            setSnackbarOpen(true);
-          }}
-        />
-        <Button
-          label="Copy Summary"
-          icon={<CopyIcon size={18} style={{ verticalAlign: "middle" }} />}
-          className="secondary"
-          onClick={() => {
-            let text = `TabbySplit.app Summary\n`;
-            text += `People involved: ${people.length}\n`;
-            personTotals.forEach(({ person, itemsOwed, tip, fee }) => {
-              const personSubtotal = itemsOwed.reduce(
-                (sum, item) => sum + item.base,
-                0
-              );
-              const personTax = itemsOwed.reduce(
-                (sum, item) => sum + item.tax,
-                0
-              );
-              const personTotalOwed = personSubtotal + personTax + tip + fee;
-              text += `\n${person}:\n`;
-              itemsOwed.forEach((item) => {
-                if (item.splitWith && item.splitWith > 1) {
-                  text += `  - ${item.name}: $${item.base.toFixed(
-                    2
-                  )} (split with ${item.splitWith} people)\n`;
+          <>
+            <Button
+              label="Share Link"
+              icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+              onClick={() => {
+                if (sharedJoinUrl) {
+                  navigator.clipboard.writeText(sharedJoinUrl).then(
+                    () => {
+                      setSnackbarType("success");
+                      setSnackbarMsg("Live split link copied to clipboard!");
+                      setSnackbarOpen(true);
+                    },
+                    (error) => {
+                      console.error("Failed to copy live split link", error);
+                      setSnackbarType("error");
+                      setSnackbarMsg(
+                        "Couldn't copy the live split link. Please try again."
+                      );
+                      setSnackbarOpen(true);
+                    }
+                  );
                 } else {
-                  text += `  - ${item.name}: $${item.base.toFixed(2)}\n`;
+                  setCopyLiveLinkAfterCreation(true);
+                  onStartLiveShare();
                 }
-              });
-              text += `  Subtotal: $${personSubtotal.toFixed(2)}\n`;
-              text += `  Tax (${effectiveTaxRate.toFixed(2)}%): $${personTax.toFixed(2)}\n`;
-              text += `  Tip: $${tip.toFixed(2)}\n`;
-              text += `  Fees: $${fee.toFixed(2)}\n`;
-              text += `  Total Owed: $${personTotalOwed.toFixed(2)}\n`;
-            });
-            text += `\n---\n`;
-            text += `Subtotal: $${subtotal.toFixed(2)}\n`;
-            text += `Total Tax (${effectiveTaxRate.toFixed(
-              2
-            )}%): $${effectiveTaxAmount.toFixed(2)}\n`;
-            text += `Total Tip: $${tip.toFixed(2)}\n`;
-            text += `Total Fees: $${totalFees.toFixed(2)}\n`;
-            text += `Grand Total: $${(
-              subtotal +
-              effectiveTaxAmount +
-              totalTip +
-              totalFees
-            ).toFixed(2)}\n`;
-            navigator.clipboard.writeText(text);
-            setSnackbarMsg("Summary copied to clipboard!");
-            setSnackbarOpen(true);
-          }}
-        />
+              }}
+            />
+            {sharedJoinUrl && (
+              <Button
+                label="Show QR Code"
+                icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
+                className="secondary"
+                onClick={() => setQrModalOpen(true)}
+              />
+            )}
+          </>
+        )}
         <Button
           label="Download Spreadsheet"
           icon={<DownloadIcon size={18} style={{ verticalAlign: "middle" }} />}
           className="secondary"
           onClick={downloadXlsx}
-        />
-        <Button
-          label="Generate QR Code"
-          icon={<QrcodeIcon size={18} style={{ verticalAlign: "middle" }} />}
-          className="secondary"
-          onClick={() => setQrModalOpen(true)}
         />
         <Button
           label="Split Another Bill"
@@ -702,11 +656,11 @@ function Summary({
         <Snackbar
           open={snackbarOpen}
           message={snackbarMsg}
-          type="success"
+          type={snackbarType}
           onClose={() => setSnackbarOpen(false)}
         />
         <Modal open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
-          <ShareUrlQRCode url={getShareUrl()} />
+          <ShareUrlQRCode url={sharedJoinUrl} />
         </Modal>
       </div>
     </main>

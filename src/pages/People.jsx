@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
@@ -6,6 +6,9 @@ import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import Modal from "../components/Modal/Modal";
 import PersonAddIcon from "../assets/icons/PersonAddIcon";
+import QrcodeIcon from "../assets/icons/QrcodeIcon";
+import ShareUrlQRCode from "../components/ShareUrlQRCode";
+import Snackbar from "../components/Snackbar/Snackbar";
 
 const EMOJIS = [
   "🐱",
@@ -24,10 +27,24 @@ const EMOJIS = [
   "🐾",
 ];
 
-function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
+function People({
+  people,
+  setPeople,
+  emojis,
+  setEmojis,
+  setActiveTab,
+  isSupabaseConfigured = false,
+  sharedJoinCode,
+  sharedJoinUrl,
+  onStartLiveShare,
+  onCopyLiveShare,
+}) {
   const [name, setName] = useState("");
   const [editIdx, setEditIdx] = useState(null);
   const [editName, setEditName] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", type: "info" });
 
   const handleAdd = () => {
     if (name.trim()) {
@@ -41,6 +58,7 @@ function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
       setPeople([...people, ...names]);
       setEmojis([...emojis, ...newEmojis]);
       setName("");
+      setIsAddModalOpen(false);
     }
   };
 
@@ -70,50 +88,77 @@ function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
     setEditName("");
   };
 
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.detail?.tab === "Items") {
-        // Find tab index for Items and trigger tab change if possible
-        const tabGroup = document.querySelector(".tab-group");
-        if (tabGroup) {
-          const itemsTab = Array.from(tabGroup.querySelectorAll(".tab")).find(
-            (tab) => tab.textContent.trim() === "Items"
-          );
-          if (itemsTab) itemsTab.click();
-        }
-      }
-    };
-    window.addEventListener("changeTab", handler);
-    return () => window.removeEventListener("changeTab", handler);
-  }, []);
+  const handleCopyInviteLink = async () => {
+    try {
+      await onCopyLiveShare();
+      setSnackbar({
+        open: true,
+        message: "Share code link copied to clipboard.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to copy share code link", error);
+      setSnackbar({
+        open: true,
+        message: "Couldn't copy the share code link. Please try again.",
+        type: "error",
+      });
+    }
+  };
 
   return (
     <main>
       <h2>People</h2>
       <div className="description">Who are you splitting the bill with?</div>
-      <InputField
-        label="Name"
-        placeholder="e.g. Garfield, Tom, Marie"
-        name="personName"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onEnter={handleAdd}
-        description="You can add multiple people at once by separating names with commas."
-      />
-      <Button
-        label="Add Person(s)"
-        icon={
-          <PersonAddIcon
-            width={20}
-            height={20}
-            style={{ color: "inherit", verticalAlign: "middle" }}
-          />
-        }
-        onClick={handleAdd}
-        fullWidth
-      />
-      <div style={{ height: "2em" }}></div>
-      <div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.5em",
+          justifyContent: "center",
+        }}
+      >
+        {isSupabaseConfigured && (
+          sharedJoinCode ? (
+            <>
+              <Button
+                label="Show QR code"
+                icon={<QrcodeIcon size={20} color="currentColor" />}
+                className="primary"
+                onClick={() => setIsQrModalOpen(true)}
+              />
+              <Button
+                label={`Share code: ${sharedJoinCode}`}
+                className="secondary"
+                onClick={handleCopyInviteLink}
+              />
+            </>
+          ) : (
+            <Button
+              label="Generate share code"
+              className="primary"
+              onClick={onStartLiveShare}
+            />
+          )
+        )}
+        <Button
+          label="Add person(s)"
+          className={isSupabaseConfigured ? "secondary" : "primary"}
+          onClick={() => setIsAddModalOpen(true)}
+        />
+      </div>
+      {sharedJoinCode && (
+        <div
+          className="input-description"
+          style={{ marginTop: "1em", textAlign: "center" }}
+        >
+          Share this code with friends so they can choose their items.
+        </div>
+      )}
+      <Modal open={isQrModalOpen} onClose={() => setIsQrModalOpen(false)}>
+        <ShareUrlQRCode url={sharedJoinUrl} />
+      </Modal>
+      <div style={{ marginTop: "1.5em" }}>
         {people.map((person, idx) => (
           <Card
             key={idx}
@@ -201,25 +246,83 @@ function People({ people, setPeople, emojis, setEmojis, setActiveTab }) {
           </Card>
         ))}
       </div>
-      <div style={{ marginTop: "2em", fontWeight: 600, fontSize: "1.1em" }}>
+      <Modal
+        open={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setName("");
+        }}
+      >
+        <div style={{ padding: "1em", minWidth: 260 }}>
+          <h3>Add people</h3>
+          <InputField
+            label="Names"
+            placeholder="e.g. Garfield, Tom, Marie"
+            name="personName"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            onEnter={handleAdd}
+            description="Separate names with commas to add multiple people."
+            autoFocus
+          />
+          <div
+            style={{
+              display: "flex",
+              gap: "1em",
+              marginTop: "1.5em",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              label="Cancel"
+              className="secondary"
+              onClick={() => {
+                setIsAddModalOpen(false);
+                setName("");
+              }}
+            />
+            <Button
+              label="Add person(s)"
+              icon={
+                <PersonAddIcon
+                  width={20}
+                  height={20}
+                  style={{ color: "inherit" }}
+                />
+              }
+              onClick={handleAdd}
+            />
+          </div>
+        </div>
+      </Modal>
+      <div
+        style={{
+          marginTop: "2em",
+          marginBottom: "1.5em",
+          fontWeight: 600,
+          fontSize: "1.1em",
+        }}
+      >
         Total people: {people.length}
       </div>
       {people.length > 0 && (
         <Button
           label="Next: Assign People to Items"
-          className="custom-btn tertiary"
+          className="primary"
           onClick={() => {
             if (typeof setActiveTab === "function") {
               setActiveTab(3);
-            } else {
-              window.dispatchEvent(
-                new CustomEvent("changeTab", { detail: { tab: "Assign" } })
-              );
             }
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
       )}
+      <Snackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
+      />
     </main>
   );
 }

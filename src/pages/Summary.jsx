@@ -30,7 +30,8 @@ function Summary({
   tipMode = "percent", // add tipMode prop
   isSupabaseConfigured = false,
   sharedJoinUrl,
-  onStartLiveShare,
+  summaryShareUrl,
+  onCreateLiveShare,
 }) {
   // Detect if user is coming from a shared URL
   const [, setFromSharedUrl] = useState(false);
@@ -143,27 +144,27 @@ function Summary({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [snackbarType, setSnackbarType] = useState("success");
-  const [copyLiveLinkAfterCreation, setCopyLiveLinkAfterCreation] =
+  const [copySummaryLinkAfterCreation, setCopySummaryLinkAfterCreation] =
     useState(false);
 
   useEffect(() => {
-    if (!copyLiveLinkAfterCreation || !sharedJoinUrl) return;
+    if (!copySummaryLinkAfterCreation || !summaryShareUrl) return;
 
-    setCopyLiveLinkAfterCreation(false);
-    navigator.clipboard.writeText(sharedJoinUrl).then(
+    setCopySummaryLinkAfterCreation(false);
+    navigator.clipboard.writeText(summaryShareUrl).then(
       () => {
         setSnackbarType("success");
-        setSnackbarMsg("Live split link copied to clipboard!");
+        setSnackbarMsg("Summary link copied to clipboard!");
         setSnackbarOpen(true);
       },
       (error) => {
-        console.error("Failed to copy live split link", error);
+        console.error("Failed to copy summary link", error);
         setSnackbarType("error");
-        setSnackbarMsg("Couldn't copy the live split link. Please try again.");
+        setSnackbarMsg("Couldn't copy the summary link. Please try again.");
         setSnackbarOpen(true);
       }
     );
-  }, [copyLiveLinkAfterCreation, sharedJoinUrl]);
+  }, [copySummaryLinkAfterCreation, summaryShareUrl]);
 
   const downloadXlsx = async () => {
     const summaryStartRow = 5;
@@ -600,33 +601,42 @@ function Summary({
         }}
       >
         {isSupabaseConfigured && (
-          <>
-            <Button
-              label="Share Link"
-              icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
-              onClick={() => {
-                if (sharedJoinUrl) {
-                  navigator.clipboard.writeText(sharedJoinUrl).then(
-                    () => {
-                      setSnackbarType("success");
-                      setSnackbarMsg("Live split link copied to clipboard!");
-                      setSnackbarOpen(true);
-                    },
-                    (error) => {
-                      console.error("Failed to copy live split link", error);
-                      setSnackbarType("error");
-                      setSnackbarMsg(
-                        "Couldn't copy the live split link. Please try again."
-                      );
-                      setSnackbarOpen(true);
-                    }
+          <Button
+            label="Share Summary"
+            icon={<LinkIcon size={18} style={{ verticalAlign: "middle" }} />}
+            onClick={() => {
+              if (summaryShareUrl) {
+                navigator.clipboard.writeText(summaryShareUrl).then(
+                  () => {
+                    setSnackbarType("success");
+                    setSnackbarMsg("Summary link copied to clipboard!");
+                    setSnackbarOpen(true);
+                  },
+                  (error) => {
+                    console.error("Failed to copy summary link", error);
+                    setSnackbarType("error");
+                    setSnackbarMsg(
+                      "Couldn't copy the summary link. Please try again."
+                    );
+                    setSnackbarOpen(true);
+                  }
+                );
+              } else {
+                setCopySummaryLinkAfterCreation(true);
+                onCreateLiveShare().catch((error) => {
+                  setCopySummaryLinkAfterCreation(false);
+                  setSnackbarType("error");
+                  setSnackbarMsg(
+                    `Couldn't create the summary link: ${error.message}`
                   );
-                } else {
-                  setCopyLiveLinkAfterCreation(true);
-                  onStartLiveShare();
-                }
-              }}
-            />
+                  setSnackbarOpen(true);
+                });
+              }
+            }}
+          />
+        )}
+        {isSupabaseConfigured && (
+          <>
             {sharedJoinUrl && (
               <Button
                 label="Show QR Code"

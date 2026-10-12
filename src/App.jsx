@@ -348,6 +348,7 @@ function App() {
               setEmojis={setEmojis}
               setActiveTab={setActiveTab}
               isSupabaseConfigured={isSupabaseConfigured}
+              sharedJoinCode={sharedSplit?.join_code}
               sharedJoinUrl={sharedJoinUrl}
               onStartLiveShare={() => {
                 setSharedSplitError("");
@@ -381,7 +382,6 @@ function App() {
               tipAmountInput={tipAmountInput}
               customTipPercentInput={customTipPercentInput}
               isSupabaseConfigured={isSupabaseConfigured}
-              sharedJoinCode={sharedSplit?.join_code}
               sharedJoinUrl={sharedJoinUrl}
               onStartLiveShare={() => {
                 setSharedSplitError("");

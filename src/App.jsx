@@ -21,7 +21,7 @@ import {
 } from "./lib/supabase";
 import "./App.css";
 
-const tabs = ["Upload Receipt", "Items", "People", "Assign", "Summary"];
+const tabs = ["Receipt", "Items", "People", "Assign", "Summary"];
 
 function App() {
   const [sharedSplit, setSharedSplit] = useState(null);

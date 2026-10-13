@@ -344,13 +344,13 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
     <div>
       <h2>Start a TabbySplit</h2>
       <p className='description'>
-        Upload a receipt to start a new split or join one your friend has
+        Add a receipt to start a new split or join one your friend has
         already started.
       </p>
 
       <div className='starting-actions'>
         <Button
-          label='Upload Receipt'
+          label='Add Receipt'
           onClick={() => setShowReceiptOptions(true)}
         />
         <Button
@@ -442,7 +442,7 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
           </p>
           <div className='receipt-option-actions'>
             <Button
-              label='Use Camera'
+              label='Take a Photo'
               onClick={() => {
                 setShowReceiptOptions(false);
                 cameraInputRef.current?.click();

@@ -92,10 +92,14 @@ function App() {
   const [emojis, setEmojis] = useState([]);
   const [items, setItems] = useState([]);
   const [assignments, setAssignments] = useState([]);
-  const [taxRate, setTaxRate] = useState("");
+  const [taxRate, setTaxRate] = useState({
+    value: "",
+    amount: "",
+    mode: "amount",
+  });
   const [fees, setFees] = useState([]);
   const [tip, setTip] = useState("");
-  const [tipCalc, setTipCalc] = useState("proportional");
+  const [tipCalc, setTipCalc] = useState("even");
   const [tipMode, setTipMode] = useState("percent");
   const [tipPreset, setTipPreset] = useState(15);
 

@@ -3,7 +3,7 @@ import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
-import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
+import AddIcon from "../assets/icons/AddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
@@ -77,12 +77,10 @@ function Items({
       : tip !== "";
 
   useEffect(() => {
-    if (items.length > 0 && tip === "" && tipMode !== "amount") {
-      setTip(((subtotal * 15) / 100).toFixed(2));
-      setTipPreset(15);
-      setTipMode("percent");
+    if (items.length > 0 && tipMode === "percent") {
+      setTip(((subtotal * tipPreset) / 100).toFixed(2));
     }
-  }, [items.length, setTip, setTipMode, setTipPreset, subtotal, tip, tipMode]);
+  }, [items.length, setTip, subtotal, tipMode, tipPreset]);
 
   const closeModal = () => {
     setActiveModal(null);
@@ -190,7 +188,12 @@ function Items({
       <h2>Items</h2>
       <p className="description">What was ordered?</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", justifyContent: "center" }}>
-        <Button label="Add Item(s)" className="primary" onClick={() => openItemModal()} />
+        <Button
+          label="Add Item(s)"
+          icon={<AddIcon width={20} height={20} style={{ color: "inherit" }} />}
+          className="primary"
+          onClick={() => openItemModal()}
+        />
         <Button label="Tax & Tip" className="secondary" onClick={() => setActiveModal("tax-tip")} />
         <Button label="Fees" className="secondary" onClick={() => setActiveModal("fees")} />
       </div>
@@ -291,8 +294,8 @@ function Items({
           {tipMode === "amount" && <InputField label={undefined} placeholder="Enter tip amount" name="tipAmount" type="number" value={tipAmountInput} onChange={(event) => handleTipChange("amount", event.target.value)} />}
           <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em", textAlign: "left" }}>Tip calculation:</label>
           <div style={{ display: "flex", gap: "0.25em", marginTop: "0.5em" }}>
-            <Pill label="Proportionally" selected={tipCalc === "proportional"} onClick={() => setTipCalc("proportional")} />
             <Pill label="Evenly" selected={tipCalc === "even"} onClick={() => setTipCalc("even")} />
+            <Pill label="Proportionally" selected={tipCalc === "proportional"} onClick={() => setTipCalc("proportional")} />
           </div>
           <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "2em" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />
@@ -305,7 +308,7 @@ function Items({
         <div style={{ padding: "1em", minWidth: 260 }}>
           <h3>Fees</h3>
           <p className="description">Add service, delivery, or other fixed fees.</p>
-          <InputField label="Fee name" placeholder="e.g. Delivery fee" name="feeName" value={feeName} onChange={(event) => setFeeName(event.target.value)} />
+          <InputField label="Fee name" placeholder="e.g. Biscuit making service fee" name="feeName" value={feeName} onChange={(event) => setFeeName(event.target.value)} />
           <InputField label="Fee amount" placeholder="e.g. 4.99" name="feeAmount" type="number" value={feeAmount} onChange={(event) => setFeeAmount(event.target.value)} onEnter={addFee} />
           <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "1.5em" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />

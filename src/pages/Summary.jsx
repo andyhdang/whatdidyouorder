@@ -583,7 +583,7 @@ function Summary({
             {(taxMode === "percent" && effectiveTaxRate === 0) ||
             (taxMode === "amount" && effectiveTaxAmount === 0) ? (
               <Callout type="warning">
-                Tax rate is at 0%. Add tax rate in Assign tab
+                Tax rate is at 0%. Add tax rate in Items tab
               </Callout>
             ) : null}
           </>

@@ -5,7 +5,7 @@ import Card from "../components/Card/Card";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import Modal from "../components/Modal/Modal";
-import PersonAddIcon from "../assets/icons/PersonAddIcon";
+import AddIcon from "../assets/icons/AddIcon";
 import QrcodeIcon from "../assets/icons/QrcodeIcon";
 import LinkIcon from "../assets/icons/LinkIcon";
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
@@ -145,6 +145,7 @@ function People({
         )}
         <Button
           label="Add Person(s)"
+          icon={<AddIcon width={20} height={20} style={{ color: "inherit" }} />}
           className={isSupabaseConfigured ? "secondary" : "primary"}
           onClick={() => setIsAddModalOpen(true)}
         />
@@ -285,13 +286,6 @@ function People({
             />
             <Button
               label="Add Person(s)"
-              icon={
-                <PersonAddIcon
-                  width={20}
-                  height={20}
-                  style={{ color: "inherit" }}
-                />
-              }
               onClick={handleAdd}
             />
           </div>

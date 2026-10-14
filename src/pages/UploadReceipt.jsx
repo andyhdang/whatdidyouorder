@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import "./UploadReceipt.css";
 import Button from "../components/Button/Button";
 import Modal from "../components/Modal/Modal";
+import AddIcon from "../assets/icons/AddIcon";
 
 const MAX_SOURCE_IMAGE_BYTES = 20 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
@@ -351,6 +352,7 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
       <div className='starting-actions'>
         <Button
           label='Add Receipt'
+          icon={<AddIcon width={20} height={20} style={{ color: "inherit" }} />}
           onClick={() => setShowReceiptOptions(true)}
         />
         <Button

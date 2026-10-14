@@ -3,7 +3,7 @@ import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
 import Pill from "../components/Pill/Pill";
-import ShoppingCartAddIcon from "../assets/icons/ShoppingCartAddIcon";
+import AddIcon from "../assets/icons/AddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
@@ -188,7 +188,12 @@ function Items({
       <h2>Items</h2>
       <p className="description">What was ordered?</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", justifyContent: "center" }}>
-        <Button label="Add Item(s)" className="primary" onClick={() => openItemModal()} />
+        <Button
+          label="Add Item(s)"
+          icon={<AddIcon width={20} height={20} style={{ color: "inherit" }} />}
+          className="primary"
+          onClick={() => openItemModal()}
+        />
         <Button label="Tax & Tip" className="secondary" onClick={() => setActiveModal("tax-tip")} />
         <Button label="Fees" className="secondary" onClick={() => setActiveModal("fees")} />
       </div>

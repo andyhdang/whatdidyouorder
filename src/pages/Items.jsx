@@ -303,7 +303,7 @@ function Items({
         <div style={{ padding: "1em", minWidth: 260 }}>
           <h3>Fees</h3>
           <p className="description">Add service, delivery, or other fixed fees.</p>
-          <InputField label="Fee name" placeholder="e.g. Delivery fee" name="feeName" value={feeName} onChange={(event) => setFeeName(event.target.value)} />
+          <InputField label="Fee name" placeholder="e.g. Biscuit making service fee" name="feeName" value={feeName} onChange={(event) => setFeeName(event.target.value)} />
           <InputField label="Fee amount" placeholder="e.g. 4.99" name="feeAmount" type="number" value={feeAmount} onChange={(event) => setFeeAmount(event.target.value)} onEnter={addFee} />
           <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "1.5em" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />

@@ -102,11 +102,7 @@ function Assign({
                     }}
                   >
                     <Pill
-                      label={
-                        assigned.length === people.length
-                          ? "Unassign All"
-                          : "All"
-                      }
+                      label="All"
                       selected={assigned.length === people.length}
                       onClick={() => {
                         setAssignments((sel) =>

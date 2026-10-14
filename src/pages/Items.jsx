@@ -77,12 +77,10 @@ function Items({
       : tip !== "";
 
   useEffect(() => {
-    if (items.length > 0 && tip === "" && tipMode !== "amount") {
-      setTip(((subtotal * 15) / 100).toFixed(2));
-      setTipPreset(15);
-      setTipMode("percent");
+    if (items.length > 0 && tipMode === "percent") {
+      setTip(((subtotal * tipPreset) / 100).toFixed(2));
     }
-  }, [items.length, setTip, setTipMode, setTipPreset, subtotal, tip, tipMode]);
+  }, [items.length, setTip, subtotal, tipMode, tipPreset]);
 
   const closeModal = () => {
     setActiveModal(null);
@@ -291,8 +289,8 @@ function Items({
           {tipMode === "amount" && <InputField label={undefined} placeholder="Enter tip amount" name="tipAmount" type="number" value={tipAmountInput} onChange={(event) => handleTipChange("amount", event.target.value)} />}
           <label style={{ fontWeight: 500, display: "block", marginTop: "1.5em", textAlign: "left" }}>Tip calculation:</label>
           <div style={{ display: "flex", gap: "0.25em", marginTop: "0.5em" }}>
-            <Pill label="Proportionally" selected={tipCalc === "proportional"} onClick={() => setTipCalc("proportional")} />
             <Pill label="Evenly" selected={tipCalc === "even"} onClick={() => setTipCalc("even")} />
+            <Pill label="Proportionally" selected={tipCalc === "proportional"} onClick={() => setTipCalc("proportional")} />
           </div>
           <div style={{ display: "flex", gap: "1em", justifyContent: "flex-end", marginTop: "2em" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />

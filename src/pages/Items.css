@@ -1,0 +1,41 @@
+.tax-exempt-checkbox {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  margin-bottom: 1.25rem;
+  margin-top: -1rem;
+}
+
+.tax-exempt-checkbox input {
+  block-size: 1px;
+  clip: rect(0 0 0 0);
+  inline-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+.tax-exempt-checkbox__control {
+  align-items: center;
+  background: var(--neutral-weakest);
+  border: 1.5px solid var(--neutral-weak);
+  border-radius: 0.25rem;
+  color: var(--neutral-weakest);
+  display: inline-flex;
+  height: 1.25rem;
+  justify-content: center;
+  width: 1.25rem;
+}
+
+.tax-exempt-checkbox input:checked + .tax-exempt-checkbox__control {
+  background: var(--brand-default);
+  border-color: var(--brand-default);
+}
+
+.tax-exempt-checkbox input:focus-visible + .tax-exempt-checkbox__control {
+  outline: 2px solid var(--brand-default);
+  outline-offset: 2px;
+}

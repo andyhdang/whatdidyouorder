@@ -101,7 +101,7 @@ function App() {
   const [tip, setTip] = useState("");
   const [tipCalc, setTipCalc] = useState("even");
   const [tipMode, setTipMode] = useState("percent");
-  const [tipPreset, setTipPreset] = useState(15);
+  const [tipPreset, setTipPreset] = useState(0);
 
   const sharedState = {
     people,

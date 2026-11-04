@@ -74,10 +74,18 @@ Response format:
 ```json
 {
   "items": [
-    { "name": "Spicy Tuna Roll", "quantity": 2, "unitPrice": 8.5 }
+    {
+      "name": "Spicy Tuna Roll",
+      "quantity": 2,
+      "unitPrice": 8.5,
+      "taxable": true
+    }
   ]
 }
 ```
+
+Items that the receipt explicitly identifies as tax-exempt are returned with
+`"taxable": false`. TabbySplit excludes those items when allocating tax.
 
 ### Other scripts
 

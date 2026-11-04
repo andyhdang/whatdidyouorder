@@ -7,6 +7,7 @@ import QrcodeIcon from "../assets/icons/QrcodeIcon";
 import Modal from "../components/Modal/Modal";
 import Callout from "../components/Callout/Callout";
 import EmptyArea from "../components/EmptyArea/EmptyArea";
+import Label from "../components/Label/Label";
 import * as XLSX from "xlsx-js-style";
 
 import ShareUrlQRCode from "../components/ShareUrlQRCode";
@@ -54,14 +55,20 @@ function Summary({
     (sum, item) => sum + (parseFloat(item.price) || 0),
     0
   );
+  const taxableSubtotal = items.reduce(
+    (sum, item) =>
+      item.taxable === false ? sum : sum + (parseFloat(item.price) || 0),
+    0
+  );
   // Use passed-in taxAmount if in $ mode, else calculate from taxRate
   let effectiveTaxAmount, effectiveTaxRate;
   if (taxMode === "amount") {
     effectiveTaxAmount = parseFloat(taxAmount) || 0;
-    effectiveTaxRate = subtotal > 0 ? (effectiveTaxAmount / subtotal) * 100 : 0;
+    effectiveTaxRate =
+      taxableSubtotal > 0 ? (effectiveTaxAmount / taxableSubtotal) * 100 : 0;
   } else {
     effectiveTaxRate = parseFloat(taxRate) || 0;
-    effectiveTaxAmount = (subtotal * effectiveTaxRate) / 100;
+    effectiveTaxAmount = (taxableSubtotal * effectiveTaxRate) / 100;
   }
 
   const totalFees = fees.reduce(
@@ -112,7 +119,8 @@ function Summary({
       if (assignments[iIdx] && assignments[iIdx].includes(pIdx)) {
         const base = (parseFloat(item.price) || 0) / assignments[iIdx].length;
         // Use effectiveTaxRate for per-person tax calculation
-        const tax = base * (effectiveTaxRate / 100);
+        const tax =
+          item.taxable === false ? 0 : base * (effectiveTaxRate / 100);
         itemsOwed.push({
           name: item.name,
           base,
@@ -120,6 +128,7 @@ function Summary({
           tip: 0, // tip is not per item, handled below
           total: base + tax,
           splitWith: assignments[iIdx].length,
+          taxable: item.taxable !== false,
         });
         total += base + tax;
       }
@@ -177,9 +186,9 @@ function Summary({
     const tipRow = totalsStartRow + 2;
     const feeRow = totalsStartRow + 3;
     const taxRate = effectiveTaxRate / 100;
-    const assignmentStartColumn = XLSX.utils.encode_col(4);
+    const assignmentStartColumn = XLSX.utils.encode_col(5);
     const assignmentEndColumn = XLSX.utils.encode_col(
-      Math.max(people.length + 3, 4)
+      Math.max(people.length + 4, 5)
     );
     const rows = [
       ["Summary by TabbySplit.app"],
@@ -192,6 +201,7 @@ function Summary({
       [
         "Item",
         "Item Price",
+        "Taxable",
         "Split Count",
         "Assigned Share",
         ...people,
@@ -199,6 +209,7 @@ function Summary({
       ...items.map((item, itemIndex) => [
         item.name,
         parseFloat(item.price) || 0,
+        item.taxable === false ? "No" : "Yes",
         assignments[itemIndex]?.length || 0,
         "",
         ...people.map((_, personIndex) =>
@@ -269,36 +280,43 @@ function Summary({
     items.forEach((_, index) => {
       const sheetRow = allocationStartRow + index;
       setFormula(
-        `C${sheetRow}`,
+        `D${sheetRow}`,
         `COUNTIF(${assignmentStartColumn}${sheetRow}:${assignmentEndColumn}${sheetRow},"X")`
       );
-      setFormula(`D${sheetRow}`, `IF(C${sheetRow}=0,0,B${sheetRow}/C${sheetRow})`);
+      setFormula(`E${sheetRow}`, `IF(D${sheetRow}=0,0,B${sheetRow}/D${sheetRow})`);
       setStyle(`A${sheetRow}`, bodyStyle);
       setStyle(`B${sheetRow}`, currencyStyle);
       setStyle(`C${sheetRow}`, {
         ...bodyStyle,
         alignment: { horizontal: "center" },
       });
-      setStyle(`D${sheetRow}`, currencyStyle);
+      setStyle(`D${sheetRow}`, {
+        ...bodyStyle,
+        alignment: { horizontal: "center" },
+      });
+      setStyle(`E${sheetRow}`, currencyStyle);
       people.forEach((_, personIndex) =>
         setStyle(
-          `${XLSX.utils.encode_col(personIndex + 4)}${sheetRow}`,
+          `${XLSX.utils.encode_col(personIndex + 5)}${sheetRow}`,
           assignmentStyle
         )
       );
     });
     people.forEach((_, index) => {
       const sheetRow = summaryStartRow + index;
-      const personColumn = XLSX.utils.encode_col(index + 4);
+      const personColumn = XLSX.utils.encode_col(index + 5);
       const tipFormula =
         tipCalc === "even"
           ? `$B$${tipRow}/${people.length || 1}`
           : `IF(SUM($B$${summaryStartRow}:$B$${summaryEndRow})=0,0,B${sheetRow}/SUM($B$${summaryStartRow}:$B$${summaryEndRow})*$B$${tipRow})`;
       setFormula(
         `B${sheetRow}`,
-        `SUMIF(${personColumn}$${allocationStartRow}:${personColumn}$${allocationEndRow},"X",$D$${allocationStartRow}:$D$${allocationEndRow})`
+        `SUMIF(${personColumn}$${allocationStartRow}:${personColumn}$${allocationEndRow},"X",$E$${allocationStartRow}:$E$${allocationEndRow})`
       );
-      setFormula(`C${sheetRow}`, `B${sheetRow}*${taxRate}`);
+      setFormula(
+        `C${sheetRow}`,
+        `SUMPRODUCT((${personColumn}$${allocationStartRow}:${personColumn}$${allocationEndRow}="X")*($C$${allocationStartRow}:$C$${allocationEndRow}="Yes")*$E$${allocationStartRow}:$E$${allocationEndRow})*${taxRate}`
+      );
       setFormula(`D${sheetRow}`, tipFormula);
       setFormula(
         `E${sheetRow}`,
@@ -447,7 +465,7 @@ function Summary({
           (sum, item) => sum + item.base,
           0
         );
-        const personTax = personSubtotal * (effectiveTaxRate / 100);
+        const personTax = itemsOwed.reduce((sum, item) => sum + item.tax, 0);
         const personTotalOwed = personSubtotal + personTax + tip + fee;
         return (
           <Card
@@ -459,6 +477,7 @@ function Summary({
               {itemsOwed.map((item, i) => (
                 <li key={i} style={{ marginBottom: "0.5em" }}>
                   {item.name}: ${item.base.toFixed(2)}
+                  {!item.taxable && <Label>Tax-exempt</Label>}
                   {item.splitWith > 1
                     ? ` (split with ${item.splitWith} people)`
                     : ""}
@@ -528,8 +547,7 @@ function Summary({
         const sumTax = personTotals.reduce(
           (sum, p) =>
             sum +
-            p.itemsOwed.reduce((s, i) => s + i.base, 0) *
-              (effectiveTaxRate / 100),
+            p.itemsOwed.reduce((s, i) => s + i.tax, 0),
           0
         );
         const sumTip = personTotals.reduce((sum, p) => sum + p.tip, 0);

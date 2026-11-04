@@ -1,0 +1,13 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--neutral-weak);
+  border-radius: 999px;
+  color: var(--neutral-weak);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  vertical-align: middle;
+}

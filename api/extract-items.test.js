@@ -13,9 +13,10 @@ test("returns extracted receipt tax as a dollar amount", async () => {
     const schema = request.response_format.json_schema.schema;
 
     assert.deepEqual(schema.properties.taxAmount.type, ["number", "null"]);
+    assert.equal(schema.properties.items.items.properties.taxable.type, "boolean");
     assert.match(
       request.messages[0].content,
-      /taxAmount when it is explicitly shown/,
+      /set taxable to false only when the receipt explicitly identifies it/,
     );
 
     return {
@@ -26,7 +27,14 @@ test("returns extracted receipt tax as a dollar amount", async () => {
             {
               message: {
                 content: JSON.stringify({
-                  items: [{ name: "Burger", quantity: 2, unitPrice: 12.5 }],
+                  items: [
+                    {
+                      name: "Burger",
+                      quantity: 2,
+                      unitPrice: 12.5,
+                      taxable: false,
+                    },
+                  ],
                   taxAmount: 2.437,
                 }),
               },
@@ -70,7 +78,14 @@ test("returns extracted receipt tax as a dollar amount", async () => {
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(response.payload, {
-    items: [{ name: "Burger", quantity: 2, unitPrice: 12.5 }],
+    items: [
+      {
+        name: "Burger",
+        quantity: 2,
+        unitPrice: 12.5,
+        taxable: false,
+      },
+    ],
     taxAmount: 2.44,
   });
 });

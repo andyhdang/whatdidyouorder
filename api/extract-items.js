@@ -40,7 +40,7 @@ function normalizeExtractedItems(payload) {
       );
       const unitPrice = safePrice(item.unitPrice);
       if (!name || unitPrice === null) return null;
-      return { name, quantity, unitPrice };
+      return { name, quantity, unitPrice, taxable: item.taxable !== false };
     })
     .filter(Boolean);
 }
@@ -120,8 +120,9 @@ function extractionSchema() {
                 name: { type: "string" },
                 quantity: { type: "integer", minimum: 1 },
                 unitPrice: { type: "number", minimum: 0 },
+                taxable: { type: "boolean" },
               },
-              required: ["name", "quantity", "unitPrice"],
+              required: ["name", "quantity", "unitPrice", "taxable"],
             },
           },
           taxAmount: {
@@ -152,6 +153,8 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
           content:
             "You extract ordered food/drink items from a restaurant receipt. " +
             "Return only billable menu items. Exclude tax, tip, fees, discounts, and totals from items. " +
+            "For each item, set taxable to false only when the receipt explicitly identifies it as tax-exempt " +
+            "or excluded from sales tax; otherwise set it to true. " +
             "Also extract the receipt tax as taxAmount when it is explicitly shown; otherwise return null.",
         },
         {
@@ -161,7 +164,7 @@ async function extractItemsFromImage({ imageReference, model, apiKey }) {
               type: "text",
               text:
                 "Extract receipt line items and the explicitly listed tax into JSON. " +
-                "If an item appears multiple times, combine with quantity. Do not infer tax.",
+                "If an item appears multiple times, combine with quantity. Do not infer tax status from the item type.",
             },
             {
               type: "image_url",

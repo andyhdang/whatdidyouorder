@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import InputField from "../components/InputField/InputField";
 import Button from "../components/Button/Button";
 import Card from "../components/Card/Card";
+import Label from "../components/Label/Label";
 import Pill from "../components/Pill/Pill";
 import AddIcon from "../assets/icons/AddIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import Stepper from "../components/Stepper/Stepper";
 import Modal from "../components/Modal/Modal";
+import "./Items.css";
 
-const TIP_PRESETS = [15, 18, 20];
+const TIP_PRESETS = [0, 15, 18, 20];
 
 function Items({
   items,
@@ -37,6 +40,7 @@ function Items({
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemQuantity, setItemQuantity] = useState(1);
+  const [itemTaxable, setItemTaxable] = useState(true);
   const [feeName, setFeeName] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
 
@@ -88,6 +92,7 @@ function Items({
     setItemName("");
     setItemPrice("");
     setItemQuantity(1);
+    setItemTaxable(true);
     setFeeName("");
     setFeeAmount("");
   };
@@ -97,6 +102,7 @@ function Items({
     if (index !== null) {
       setItemName(items[index].name);
       setItemPrice(items[index].price);
+      setItemTaxable(items[index].taxable !== false);
     }
     setActiveModal("item");
   };
@@ -115,7 +121,12 @@ function Items({
       setItems(
         items.map((item, index) =>
           index === editingItemIndex
-            ? { ...item, name: itemName.trim(), price: normalizedPrice }
+            ? {
+                ...item,
+                name: itemName.trim(),
+                price: normalizedPrice,
+                taxable: itemTaxable,
+              }
             : item
         )
       );
@@ -125,6 +136,7 @@ function Items({
         ...Array.from({ length: itemQuantity }, () => ({
           name: itemName.trim(),
           price: normalizedPrice,
+          taxable: itemTaxable,
         })),
       ]);
     }
@@ -206,6 +218,7 @@ function Items({
                 <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>{item.name}</span>
                 <span style={{ fontSize: "0.95rem", color: "var(--neutral-weak)" }}>
                   ${parseFloat(item.price).toFixed(2)}
+                  {item.taxable === false && <Label>Tax-exempt</Label>}
                 </span>
               </div>
               <div style={{ display: "flex", gap: "0.5em" }}>
@@ -262,13 +275,28 @@ function Items({
           <h3>{editingItemIndex === null ? "Add item(s)" : "Edit item"}</h3>
           <InputField label="Item name" placeholder="e.g. Cat Nip" name="itemName" value={itemName} onChange={(event) => setItemName(event.target.value)} />
           <InputField label="Price" placeholder="e.g. 12.99" name="itemPrice" inputMode="decimal" value={itemPrice} onChange={(event) => setItemPrice(event.target.value)} onEnter={saveItem} />
+          <label
+            htmlFor="item-tax-exempt"
+            className="tax-exempt-checkbox"
+          >
+            <input
+              id="item-tax-exempt"
+              type="checkbox"
+              checked={!itemTaxable}
+              onChange={(event) => setItemTaxable(!event.target.checked)}
+            />
+            <span className="tax-exempt-checkbox__control">
+              {!itemTaxable && <CheckIcon aria-hidden="true" width={16} />}
+            </span>
+            Tax-exempt
+          </label>
           {editingItemIndex === null && (
-            <div style={{ display: "flex", alignItems: "center", marginTop: "1em" }}>
+            <div style={{ display: "flex", alignItems: "center", marginTop: "2em" }}>
               <label htmlFor="itemQuantity-stepper" style={{ fontWeight: 500, marginRight: "0.5em" }}>Quantity:</label>
               <Stepper id="itemQuantity-stepper" value={itemQuantity} min={1} onChange={setItemQuantity} />
             </div>
           )}
-          <div style={{ display: "flex", gap: "1em", marginTop: "1.5em", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", gap: "1em", marginTop: "2.5em", justifyContent: "flex-end" }}>
             <Button label="Cancel" onClick={closeModal} className="secondary" />
             <Button label={editingItemIndex === null ? "Add Item(s)" : "Save"} onClick={saveItem} />
           </div>

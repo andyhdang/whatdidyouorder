@@ -133,6 +133,7 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
       return Array.from({ length: quantity }, () => ({
         name,
         price: unitPrice.toFixed(2),
+        taxable: item.taxable !== false,
       }));
     });
   };
@@ -473,6 +474,8 @@ const UploadReceipt = ({ onNext, isSupabaseConfigured, onJoinSharedSplit }) => {
           <p>
             Found {extractedItems.length} item
             {extractedItems.length === 1 ? "" : "s"}.
+            {extractedItems.some((item) => item.taxable === false) &&
+              ` ${extractedItems.filter((item) => item.taxable === false).length} item${extractedItems.filter((item) => item.taxable === false).length === 1 ? "" : "s"} excluded from tax.`}
             {extractedTaxAmount !== null &&
               ` Tax of $${extractedTaxAmount} will be added.`}
           </p>
